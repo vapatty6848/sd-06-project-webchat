@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,8 +8,25 @@
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <h1>Socket IO</h1>
+  <div>
+    <ul id="list-users">
+      <li id="online-user" data-testid="online-user">Visitante</li>
+        <li id="" data-testid="online-user"></li>
+      </ul>
+    </div>
+    <div>
+    <input data-testid="nickname-box" id="nickname-box" />
+    <button data-testid="nickname-button" id="nickname-button">Salvar</button>
+    <input data-testid="message-box" id="message-box" />
+    <button data-testid="send-button" id="send-button">Enviar</button>
+  </div>
+  <ul id="chat-box">
+    <li data-testid="message">
+  </ul>
+  
   <script>
+    const messageBox = document.querySelector('#message-box');
+    const messageSendButton = document.querySelector('#message-send-button');
     const socket = io();
   </script>
   
