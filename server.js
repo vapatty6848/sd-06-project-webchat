@@ -5,6 +5,8 @@ const httpServer = require('http').createServer(app);
 
 const PORT = 3000;
 
+app.set('view engine', 'ejs');
+app.set('views', './views');
 // Roda o socket io
 const io = require('socket.io')(httpServer);
 
@@ -16,11 +18,10 @@ io.on('connection', (socket) => {
   });
 });
 
-app.set('view engine', 'ejs');
-app.set('views', './views');
-
 app.get('/', (_req, res) => {
   res.render('home');
 });
 
-httpServer.listen(PORT);
+httpServer.listen(PORT, () => {
+  console.log(`servidor rodando na porta ${PORT}`);
+});
