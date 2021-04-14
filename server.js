@@ -23,4 +23,4 @@ app.get('/', (_req, res) => {
   res.render('home');
 });
 
-httpServer.listen(`Servidor rodando na porta ${PORT}`);
+httpServer.listen(PORT);
