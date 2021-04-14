@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebChat project - bloco 32</title>
+    <link rel="stylesheet" href="/styles/index.css">
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <section>
+      <h4>Usuário: <span id="current-user"></span></h4>
+      <form id="user-form" action="">
+        <input id="user-login" autocomplete="off" /><button type="submit">Entrar</button>
+      </form>
+    </section>
+    <section>
+      <form id="chat-form" action="">
+        <input id="msgInput" autocomplete="off" /><button type="submit">Send</button>
+      </form>
+      <section>
+        <ul id="chat-messages"></ul>
+      </section>
+    <script>
+      const socket = io();
+      const userForm = document.querySelector('#user-form');
+      const userInput = document.querySelector('#user-login');
+      const user = document.querySelector('#current-user');
+      userForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        user.innerText = userInput.value;
+        userInput.value = '';
+        return false;
+      });
+
+
+      const chatForm = document.querySelector('#chat-form');
+      const inputMessage = document.querySelector('#msgInput');
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nickname = user.innerText;
+        const messageObject = { nickname, chatMessage: inputMessage.value };
+        socket.emit('clientMessage', messageObject);
+        inputMessage.value = '';
+        return false;
+      });
+
+      const chatUl = document.querySelector('#chat-messages');
+      const printMessage = (message) => {
+        const li = document.createElement('li');
+        li.innerText = message.chatMessage;
+        chatUl.appendChild(li);
+      }
+
+      socket.on('message', (msg) => printMessage(msg));
+    </script>
+  </body>
+</html>
