@@ -13,12 +13,13 @@ app.use(cors());
 
 app.set('view engine', 'ejs');
 
-io.on('connection', (socket) => {
-  console.log('usuário conectado')
-})
-
 app.get('/', (req, res) => {
   res.render(path.join(__dirname, '/views/index'));
 });
+
+io.on('connection', () => {
+  console.log('usuário conectado');
+});
+
 
 http.listen(3000, () => console.log('Ouvindo na porta 3000'));
