@@ -2,31 +2,55 @@
 <html>
   <head>
     <title>WebChat project - bloco 32</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/styles/index.css">
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
     <section>
-      <h4>Usuário: <span id="current-user"></span></h4>
+      <h4>Usuário: <span id="current-user" data-testid="online-user">
+          Anonymous
+      </span></h4>
       <form id="user-form" action="">
-        <input id="user-login" autocomplete="off" /><button type="submit">Entrar</button>
+        <input id="user-login" data-testid="nickname-box" autocomplete="off" />
+        <button type="submit" data-testid="nickname-button">Entrar</button>
       </form>
     </section>
     <section>
+      <ul id="users-online"></ul>
+    </section>
+    <section>
       <form id="chat-form" action="">
-        <input id="msgInput" autocomplete="off" /><button type="submit">Send</button>
+        <input id="msgInput" data-testid="message-box" autocomplete="off" />
+        <button type="submit" data-testid="send-button">Send</button>
       </form>
       <section>
         <ul id="chat-messages"></ul>
       </section>
     <script>
       const socket = io();
+      const usersOnlineList = new Set();
+
+      const generateUser = () => {
+        // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+        return Math.random().toString(21).substring(2, 10)
+        + Math.random().toString(21).substring(2, 10);
+      };
+
+      let currentUser = localStorage.getItem('webchat-user') || generateUser();
+      socket.emit('userLogin', { user: currentUser });
+      const userElement = document.querySelector('#current-user');
+      userElement.innerText = currentUser;
+
       const userForm = document.querySelector('#user-form');
       const userInput = document.querySelector('#user-login');
-      const user = document.querySelector('#current-user');
       userForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        user.innerText = userInput.value;
+        const prevUser = currentUser.slice();
+        currentUser = userInput.value;
+        localStorage.setItem('webchat-user', currentUser);
+        userElement.innerText = currentUser;
+        socket.emit('userLogin', { user: currentUser, prevUser });
         userInput.value = '';
         return false;
       });
@@ -36,8 +60,7 @@
       const inputMessage = document.querySelector('#msgInput');
       chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const nickname = user.innerText;
-        const messageObject = { nickname, chatMessage: inputMessage.value };
+        const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
         socket.emit('clientMessage', messageObject);
         inputMessage.value = '';
         return false;
@@ -46,11 +69,23 @@
       const chatUl = document.querySelector('#chat-messages');
       const printMessage = (message) => {
         const li = document.createElement('li');
+        li.dataset.testid = 'message';
         li.innerText = message.chatMessage;
         chatUl.appendChild(li);
       }
 
+      const usersUl = document.querySelector('#users-online');
       socket.on('message', (msg) => printMessage(msg));
+      socket.on('usersOnline', (users) => {
+        usersUl.innerHTML = '';
+        const usersOnline = users.filter((user) => user !== currentUser);
+        usersOnline.forEach((user) => {
+            const li = document.createElement('li');
+            li.dataset.testid = 'online-user';
+            li.innerText = user;
+            usersUl.appendChild(li);
+          });
+      });
     </script>
   </body>
 </html>
