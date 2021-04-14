@@ -5,16 +5,101 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
-  <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script>  -->
   <title>WebChat</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font: 13px Helvetica, Arial;
+      }
+      .input-message-div {
+        background: #000;
+        padding: 3px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+      }
+      .input-message-div #message-box {
+        border: 0;
+        padding: 10px;
+        width: 90%;
+        margin-right: 0.5%;
+      }
+      .users {
+        display: flex;
+        border: 1px solid black;
+        width: 200px;
+      }
+      .messages {
+        display: flex;
+        border: 1px solid black;
+        width: 200px;
+      }
+  </style>
 </head>
 <body>
   <h1>Projeto WebChat</h1>
+  <div class="username-div">
+    <form>
+      <input data-testid="nickname-box" id="nickname-input" placeholder="username" />
+      <button type="submit" id="button-nickname" data-testid="nickname-button">Salvar</button>
+    </form>
+  </div>
+  <div class="users">
+    <ul></ul>
+  </div>
+  <div class="messages">
+    <ul id="message-list"></ul>
+  </div>
+  <div class="input-message-div">
+    <form id="formTag" action="">
+      <input data-testid="message-box" id="message-input" placeholder="Digite sua mensagem" />
+      <button type="submit" id="button-message" data-testid="send-button">Enviar</button>
+    </form>
+  </div>
   <script>
     const socket = io('http://localhost:3000');
-    socket.on('connect', () => {
-      console.log('teste')
+
+    const sendMessage = document.querySelector('#button-message');
+    const saveNickname = document.querySelector('#button-nickname');
+    const inputMessage = document.querySelector('#message-input');
+    const inputNickname = document.querySelector('#nickname-input');
+    const messageUl = document.querySelector('#message-list')
+
+    function addZero(number) {
+      return (number <= 9) ? `0${number}` : number;
+    }
+
+    saveNickname.addEventListener('click', (e) => {
+      e.preventDefault();
+      let userNickname = inputNickname.value;
+      localStorage.setItem('currentUser', userNickname);
+      inputNickname.value = "";
+      return;
     })
+
+    sendMessage.addEventListener('click', (e) => {
+      e.preventDefault();
+      let chatMessage = inputMessage.value;
+      const nickname = localStorage.getItem('currentUser');
+      let messageDate = new Date();
+      let formattedDate = `${addZero(messageDate.getDate().toString())}-${addZero((messageDate.getMonth()+1).toString())}-${messageDate.getFullYear()} ${addZero(messageDate.getHours())}:${addZero(messageDate.getMinutes())}:${addZero(messageDate.getSeconds())}`
+      // console.log('nickname localstorage', nickname);
+      // console.log(formattedDate);
+      socket.emit('message', { chatMessage, nickname, formattedDate });
+      inputMessage.value = '';
+      return;
+    });
+
+    const createMessage = (message) => {
+      const li = document.createElement('li');
+      li.innerText = `${message.formattedDate} ${message.nickname}: ${message.chatMessage}`;
+      messageUl.appendChild(li);
+    }
+    socket.on('message', (objUser) => createMessage(objUser));
   </script>
 </body>
 </html>
