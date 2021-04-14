@@ -23,7 +23,8 @@ const users = [];
 
 io.on('connection', (socket) => {
   const id = users.length;
-  const nickname = `12345678910111d${users.length}`;
+  let nickname = `12345678910111d${users.length}`;
+  if (nickname.length > 16) nickname = `2345678910111d${users.length}`;
   users.push(nickname);
   console.log(users);
 
