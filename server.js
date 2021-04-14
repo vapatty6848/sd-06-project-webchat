@@ -14,8 +14,7 @@ const io = require('socket.io')(httpServer, {
 const users = [];
 
 io.on('connection', (socket) => {
-  console.log(`usuário novo conectado ${socket.id}`);
-
+  // console.log(`usuário novo conectado ${socket.id}`);
   socket.on('newUser', (user) => {
     users.push({ socketId: socket.id, name: user });
     
@@ -31,7 +30,7 @@ io.on('connection', (socket) => {
 
   // deconcção do usuário
   socket.on('disconnect', () => {
-    console.log(`Usuário ${socket.id} desconectou`);
+    // console.log(`Usuário ${socket.id} desconectou`);
     io.emit('newMessage', `Usuário ${socket.id} desconectou`);
 
     const userIndex = users.findIndex((u) => u.socketId === socket.id);
