@@ -21,5 +21,4 @@ io.on('connection', () => {
   console.log('usuário conectado');
 });
 
-
 http.listen(3000, () => console.log('Ouvindo na porta 3000'));
