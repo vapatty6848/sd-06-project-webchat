@@ -25,6 +25,14 @@
 
       socket.emit('message', { chatMessage, nickname: 'user'});
     });
+
+    socket.on('message', (message) => {
+      const messageLi = document.createElement('li');
+      const newMessage = message.chatMessage;
+
+      messageLi.innerHTML = newMessage;
+      document.getElementById('chatMessages').appendChild(messageLi);
+    });
   </script>
 </body>
 </html>
