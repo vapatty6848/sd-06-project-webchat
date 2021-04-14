@@ -62,7 +62,24 @@
 
     document.querySelector('#send-button').addEventListener('click', (e) => {
       const message = document.querySelector('#message-box').value;
-      socket.emit('sentMessage', message);
+      socket.emit('sentMessage', message); // 1.aqui o cliente está enviando a msg para o backend através do cananl sentMessage
+    });
+
+    // recebendo mensagem!
+    // 4. para o front end escutar o canal newMessage criado no back, fazemos outro .on, e aí todos tem acesso a mesg escrita por 1 usuário.
+    socket.on('newMessage', (message) => {
+      const messageLi = document.createElement('li');
+      messageLi.innerHTML = `${Date.now()} ${message}`;
+      document.querySelector('#message').appendChild(messageLi);
+    });
+
+    // listarr todos os usuários
+    socket.on('updateUsers', (users) => {
+      users.forEach(user => {
+        const userLi = document.createElement('li');
+        userLi.innerHTML = user.socketId;
+        document.querySelector('#online-user').appendChild(userLi);
+      });
     });
 
   </script>
