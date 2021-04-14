@@ -11,23 +11,34 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
-app.get('/', (req, res) => {
-  res.sendFile(`${__dirname}/index.html`);
+app.set('view engine', 'ejs');
+
+app.set('views', './views');
+
+app.get('/', (_req, res) => {
+  res.render('../view/');
 });
 
 const users = [];
 
 io.on('connection', (socket) => {
-  const nickname = `Pessoa ${users.length}`;
-  socket.nickname = nickname;
-  users.push(socket.nickname);
+  const id = users.length;
+  const nickname = `12345678910111d${users.length}`;
+  users.push(nickname);
+  console.log(users);
+
+  socket.emit(nickname);
 
   socket.on('mensagem', (msg) => {
-    console.log(socket.nickname);
     const date = new Date();
     const formatedDate = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-    const formatedTime = `${date.getHours()}:${date.getMinutes()}`
-    io.emit('mensagemServer', `${formatedDate} ${formatedTime} ${socket.nickname}: ${msg}`);
+    const formatedTime = `${date.getHours()}:${date.getMinutes()}`;
+    io.emit('mensagemServer', `${formatedDate} ${formatedTime} ${users[id]}: ${msg}`);
+  });
+
+  socket.on('user', (user) => {
+    users[id] = user || nickname;
+    io.emit('userServer', users[id]);
   });
 });
 

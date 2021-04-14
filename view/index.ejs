@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+  </head>
+  <body>
+    <span data-testid="online-user" id="online-user"></span>
+    <ul id="mensagens"></ul>
+    <form action="" class="form">
+      <input id="mensagemInput" autocomplete="off" data-testid="message-box"/><button data-testid="send-button">Send</button>
+    </form>
+    <form action="" class="form2">
+      <input id="nickname-box" data-testid="nickname-box" /><button data-testid="nickname-button">Save</button>
+    </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const form = document.querySelector('.form')
+      const form2 = document.querySelector('.form2')
+      const inputMessage = document.querySelector('#mensagemInput')
+      const inputName = document.querySelector('#nickname-box')
+      form.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        socket.emit('mensagem', inputMessage.value);
+        inputMessage.value = ''
+        return false;
+      });
+        const createMessage = (message) => {
+        const messagesUl = document.querySelector('#mensagens');
+        console.log(message)
+        const li = document.createElement('li');
+        li.innerText = message;
+        let att = document.createAttribute('data-testid')
+        att.value = 'message';
+        li.setAttributeNode(att)
+        messagesUl.appendChild(li);
+      }
+      socket.on('mensagemServer', (mensagem) => createMessage(mensagem));
+
+
+      form2.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        socket.emit('user', inputName.value);
+        return false;
+      });
+        const setUser = (user) => {
+        const userSpan = document.querySelector('#online-user');
+        userSpan.innerText = user;
+      }
+      window.onload = () => socket.emit('user');
+      socket.on('userServer', (user) => setUser(user));
+
+    </script>
+  </body>
+</html>
