@@ -164,7 +164,7 @@ O MVC será usado para renderizar as mensagens do histórico e usuários online,
 
   3. `git commit` _(para criar um commit com os arquivos que estão no stage do Git)_;
 
-  4. `git push -u nome-da-branch` _(para enviar o commit para o repositório remoto na primeira vez que fizer o `push` de uma nova branch)_;
+  4. `git push -u origin nome-da-branch` _(para enviar o commit para o repositório remoto na primeira vez que fizer o `push` de uma nova branch)_;
 
   5. `git push` _(para enviar o commit para o repositório remoto após o passo anterior)_.
 
