@@ -13,6 +13,8 @@ const PORT = 3000;
 
 const http = require('http').createServer(app);
 
+const dateFormat = require('dateformat');
+
 const io = require('socket.io')(http, {
   cors: {
     origin: 'http://localhost:3000', // url aceita pelo cors
@@ -20,13 +22,25 @@ const io = require('socket.io')(http, {
   },
 });
 
-app.get('/', (request, response) => {
+let users = [];
+
+app.get('/', async (_request, response) => {
   response.render('../views/');
 });
 
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} has connected.`);
+
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
+    const message = `${dateTimeStamp} - ${nickname}: ${chatMessage}`;
+    console.log(message);
+    io.emit('message', message);
+  });
+
   socket.on('disconnect', () => {
+    users = users.filter((user) => user.id !== socket.id);
+    io.emit('updateUsers', { users });
     console.log(`User ${socket.id} has disconnected.`);
   });
 });

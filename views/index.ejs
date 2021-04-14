@@ -5,15 +5,48 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebChat</title>
+  <style>
+    .messageInput {
+      width: 300px;
+      height: 100px;
+    }
+
+    .containerNickName, .messageContainer {
+      margin: 50px;
+    };
+  </style>
 </head>
 <body>
   <h1>Welcome to The WebChat Project!</h1>
+  <div class="containerNickName">
+    <label alt='nickNameInput'>
+      Nickname:
+      <input type='text' id='nickNameInput' placeholder="Alan Turing"> 
+    </label>
+  </div>
+  <div class="messageContainer">
+    <label alt='messageInput'>
+      Message:
+      <textarea id="messageInput" class="messageInput" placeholder="Type your message here"></textarea>
+    </label>
+    <button id="sendButton">Send</button>
+  </div>
 </body>
 
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
+  let nickname;
   const socket = io('http://localhost:3000');
+  const messageInput = document.getElementById('messageInput');
+  const sendButton = document.getElementById('sendButton');
+
+  sendButton.addEventListener('click', () => {
+    nickname = document.getElementById('nickNameInput').value;
+    let chatMessage = document.getElementById('messageInput').value;
+    socket.emit('message', { nickname, chatMessage });
+  });
+
 </script>
 
 </html>
