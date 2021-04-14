@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/socket.io/socket.io.js"></script>
+  <title>WebChat</title>
+</head>
+<body>
+  <div>
+    <div>
+      <h1>WebChat</h1>
+    </div>
+    
+    <div>
+      <div>
+        <div>
+          <input
+            type="text"
+            data-testid="nickname-box"
+            id="nickname-box"
+            placeholder="Informe seu nickname"
+          >
+          <button
+            type="button"
+            data-testid="nickname-button"
+            id="nickname-button"
+          >
+            Salvar
+          </button>
+        </div>
+        <div>
+          <h3>Usuários</h3>
+          <ul data-testid="online-user" id="online-user"></ul>
+        </div>
+      </div>
+      <div>
+        <h3>Mensagens</h3>
+        <ul data-testid="message" id="message"></ul>
+      </div>
+    </div>
+    <div>
+      <input
+        type="text"
+        data-testid="message-box"
+        id="message-box"
+        placeholder="Digite sua mensagem aqui"
+      >
+      <button
+        ype="button"
+        data-testid="send-button"
+        id="send-button"
+      >
+        Enviar
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const socket = io('http://localhost:3000');
+
+    document.querySelector('#send-button').addEventListener('click', (e) => {
+      const message = document.querySelector('#message-box').value;
+      socket.emit('sentMessage', message);
+    });
+
+  </script>
+</body>
+</html>
