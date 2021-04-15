@@ -13,37 +13,75 @@ const io = require('socket.io')(http, {
   },
 });
 
-// const { addMessages } = require('./models/messages');
-
 app.use(cors());
+
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', async (_req, res) => {
-  res.render('../views/');
+app.get('/', (req, res) => {
+  res.render('index');
 });
 
 const users = [];
 
+const addNewUser = (socket) => {
+  const newUser = {
+    id: socket.id,
+  };
+  users.push(newUser);
+};
+
+const addNickname = (nickname, socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  users[index].nickname = nickname;
+};
+
+const getTime = () => {
+  const time = new Date();
+  const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
+    .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+  return timeFormated;
+};
+
+const changeNickname = (newNickname, socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  users[index].nickname = newNickname;
+};
+
+const getNickname = (socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  return users[index].nickname;
+};
+
+const getRandomString = () => {
+  const length = 16;
+  const randomChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+  }
+  return result;
+};
+
 io.on('connection', (socket) => {
-  const id = users.length;
-  let nickname = `98765432110111d${users.length}`;
-  if (nickname.length > 16) nickname = `2345678910111d${users.length}`;
-  users.push(nickname);
-  console.log(users);
+  console.log(`${socket.id} connected`);
+  addNewUser(socket);
+  // console.log(users);
+  io.emit('connected', getRandomString());
 
-  socket.emit(nickname);
-
-  socket.on('mensagem', (msg) => {
-    const date = new Date();
-    const formatedDate = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-    const formatedTime = `${date.getHours()}:${date.getMinutes()}`;
-    io.emit('mensagemServer', `${formatedDate} ${formatedTime} ${users[id]}: ${msg}`);
+  socket.on('message', ({ chatMessage, nickname }) => {
+    addNickname(nickname, socket);
+    const response = `${getTime()} ${getNickname(socket)} ${chatMessage}`;
+    io.emit('message', response);
   });
 
-  socket.on('user', (user) => {
-    users[id] = user || nickname;
-    io.emit('userServer', users[id]);
+  socket.on('changeNickname', ({ newNickname }) => {
+    changeNickname(newNickname, socket);
+    io.emit('changeNickname', users);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('disconnect');
   });
 });
 
