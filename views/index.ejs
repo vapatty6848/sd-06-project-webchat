@@ -1,19 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebChat by Thales Rangel</title>
 </head>
+
 <body>
   <h1>ZAPZAP!</h1>
+  <ul id="online-users"></ul>
+  <div>
+    <input type="text" data-testid="nickname-box" id="nickname-input" name="username">
+    <button type="button" data-testid="nickname-save" id="save-nick-btn">Salvar</button>
+  </div>
+
+  <div>
+    <input type="text" data-testid="message-box" id="message-input" name="message">
+    <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
+  </div>
+  <ul id="messages"></ul>
 </body>
 
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
   const socket = io('http://localhost:3000');
+  const onlineUsers = document.querySelector('#online-users');
+  const userOnline = document.querySelector('#"online-user"');
+  const messages = document.querySelector('#messages');
+  const messageInput = document.querySelector('#message-input');
+  const sendBtn = document.querySelector('#send-btn');
+  const nickInput = document.querySelector('#nickname-input');
+  const nickButton = document.querySelector('#save-nick-btn');
+
+  let id = '';
+  let nick = '';
+
+  sendBtn.addEventListener('click', () => {
+    if (messageInput.value.length > 0) {
+      const chatMessage = messageInput.value;
+      socket.emit('message', { chatMessage, nickname: nick });
+      messageInput.value = '';
+    }
+  });
+
+  nickButton.addEventListener('click', () => {
+      nick = nickInput.value;
+      socket.emit('changeNickname', nick);
+      nickInput.value = '';
+    });
+
+  socket.on('connected', ({ socketId, nickname }) => {
+    id = socketId;
+    nick = nickname;
+    const li = document.createElement('li');
+    li.setAttribute('data-testid', 'online-user');
+    li.setAttribute('id', `${id}`);
+    li.innerHTML = nick;
+    onlineUsersList.appendChild(li);
+  });
+
+  client.on('message', (message) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.textContent = message;
+      messages.appendChild(li);
+    });
+
+    socket.on('changeNickname', ({ nickname, socketId }) => {
+      const newNick = document.getElementById(socketId);
+      userNickname.innerHTML = newNick;
+    });
 </script>
 
 </html>

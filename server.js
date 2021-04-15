@@ -20,12 +20,19 @@ app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+let onlineUsers = [];
+
 app.get('/', async (_req, res) => {
   res.render('../views/');
 });
 
 io.on('connection', (socket) => {
-  console.log(`User ${socket.id} connected.`);
+  const socketId = socket.id;
+  const random = `random${socket.id}`;
+  console.log(`User ${socketId} connected.`);
+  onlineUsers.unshift({ socketId, nickname: random });
+  io.emit('connected', { socketId, nickname: random });
+  
   socket.on('disconnect', () => console.log(`User ${socket.id} disconnected.`));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
@@ -33,6 +40,12 @@ io.on('connection', (socket) => {
     await createMessage({ chatMessage, nickname, timestamp });
     const message = `${timestamp} - ${nickname}: ${chatMessage}`;
     io.emit('message', message);
+  });
+
+  socket.on('changeNickname', (nickname) => {
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+    onlineUsers.push({ socketId, nickname });
+    io.emit('changeNickname', { socketId, nickname });
   });
 });
 
