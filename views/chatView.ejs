@@ -9,15 +9,26 @@
 </head>
 <body>
   <div class="container">
-    <div class="profile"></div>
-    <div class="users"></div>
+    <div class="profile">
+      <div class="profile-pic"></div>
+      <div class="username-container">
+        <span data-testid="online-user" id="username"></span>
+        <form id="user-form">
+          <input data-testid="nickname-box" id="name-input" />
+          <button data-testid="nickname-button">Set</button>
+        </form>
+      </div>
+    </div>
+    <div class="users">
+      <ul id="usersUl"></ul>
+    </div>
     <div class="chat-container">
       <div class="chat-box">
         <ul id="messagesUl"></ul>
       </div>
-      <form action="">
-        <input id="messageInput" autocomplete="off" autofocus />
-        <button>Send</button>
+      <form id="message-form"  action="">
+        <input data-testid="message-box" id="messageInput" autocomplete="off" autofocus />
+        <button data-testid="send-button">Send</button>
       </form>
     </div>
   </div>
@@ -25,15 +36,52 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
   <script>
-    const socket = io();
+    let socket = io();
     
-    const form = document.querySelector('form');
-    const messageInput = document.querySelector('#messageInput');
-
-    form.addEventListener('submit', (e) => {
+    // profile
+    let nick = '';
+    const userSpan = document.querySelector('#username');
+    const userForm = document.querySelector('#user-form');
+    const userInput = document.querySelector('#name-input');
+    const usersUl = document.querySelector('#usersUl');
+    
+    const createUserInList = (username) => {
+      const li = document.createElement('li');
+      li.innerText = username;
+      // li.setAttribute('data-testid', 'message');
+      usersUl.appendChild(li)
+    };
+    
+    socket.on('connect', () => {
+      nick = socket.id;
+      userSpan.innerText = nick;
+      
+      socket.emit('userConnected');
+    })
+    
+    socket.on('reloadUsersList', (userList) => {
+      usersUl.innerHTML = '';
+      userList.forEach(user => createUserInList(user));
+    })
+    
+    userForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
-      socket.emit('userMessage', { chatMessage: messageInput.value, nickname: socket.id });
+      nick = userInput.value;
+      userSpan.innerText = nick;
+      userInput.value = '';
+      socket.emit('userChangedName', nick);
+      return false;
+    })
+    
+    // messages
+    const messageForm = document.querySelector('#message-form');
+    const messageInput = document.querySelector('#messageInput');
+
+    messageForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      socket.emit('userMessage', { chatMessage: messageInput.value, nickname: nick });
       messageInput.value = '';
       return false;
     });
@@ -42,6 +90,7 @@
       const messagesUl = document.querySelector('#messagesUl');
       const li = document.createElement('li');
       li.innerText = message;
+      li.setAttribute('data-testid', 'message');
       messagesUl.appendChild(li)
     };
     

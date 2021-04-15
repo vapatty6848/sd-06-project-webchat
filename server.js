@@ -15,18 +15,33 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
+const userList = [];
+
 io.on('connection', (socket) => {
   console.log('Conectado');
   
+  userList.push(socket.id);
+  
+  socket.on('userConnected', () => {
+    io.emit('reloadUsersList', userList);
+  });
+  
   socket.on('disconnect', () => {
+    const indexOfUser = userList.indexOf(socket.id);
+    userList.splice(indexOfUser, 1);
+    io.emit('reloadUsersList', userList);
     console.log('Desconectado');
   });
   
+  socket.on('userChangedName', (nick) => {
+    const indexOfUser = userList.indexOf(socket.id);
+    userList[indexOfUser] = nick;
+    io.emit('reloadUsersList', userList);
+  })
+  
   socket.on('userMessage', ({ nickname, chatMessage }) => {
-    let date = new Date().toLocaleDateString('pt-BR');
-    date = date.replace(/\//g, '-'); // o replaceAll() dava erro de replaceAll is not a function
+    let date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
     const time = new Date().toLocaleTimeString();
-    
     const userMessage = `${date} ${time} - ${nickname}: ${chatMessage}`;
     io.emit('message', userMessage);
   });
