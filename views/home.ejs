@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title>Webchat Project</title>
+</head>
+<body>
+  <h1>Webchat</h1>
+  <ul id="chat-messages">
+
+  </ul>
+  <form class="input-group mb-3 fixed-bottom">
+    <input id="message" type= "text" class="form-control" placeholder="Digite a sua mensagem"></input>
+    <div class="input-group-append">
+      <button id="send-button" class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+    </div>
+  </form>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<!-- <script type="text/javascript" src="script.js"></script> -->
+<script>
+  const socket = io();
+  let username;
+  
+  localStorage.setItem('username', username);
+
+  document.querySelector('form').addEventListener('submit', (e) => e.preventDefault());
+  
+  document.querySelector('#send-button').addEventListener('click', () => {
+    const chatMessage = document.querySelector('#message').value;
+
+    if (!username) username = 'user_' + Math.random().toString().substr(2, 11);
+    
+    socket.emit('message', { nickname: username, chatMessage });
+
+    document.querySelector('#message').value = '';
+  });
+
+  socket.on('message', (message) => {
+    const messageToRender = document.createElement('li');
+    messageToRender.innerHTML = message;
+
+    document.querySelector('#chat-messages').appendChild(messageToRender);
+  })
+  
+</script>
+</html>
