@@ -10,10 +10,33 @@
 
   <body>
     <h1>webchat</h1>
+    <input type="text" id='message'>
+
+    <button id='sendMessage'>Enviar</button>
+
+    <h3>Mensagens</h3>
+
+    <ul id='messages'></ul>
+
+    <h3>Usuários</h3>
+
+    <ul id='users'></ul>
 
     <script>
       const socket = io();
-    </script>
+      socket.emit('NewUser', `User_${socket.id}`)
+
+      document.querySelector('#sendMessage').addEventListener('click', (e) => {
+        const message = document.querySelector('#message').value;
+        socket.emit('message', { chatMessage: message, nickname: 'Paulo_123' });
+      });
+
+      socket.on('message', (message) => {       
+        const messageLI = document.createElement('li');
+        messageLI.innerHTML = message.chatMessage;
+        document.querySelector('#messages').appendChild(messageLI);
+      });
+    </script>  
   </body>
 
 </html>
