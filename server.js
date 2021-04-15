@@ -17,9 +17,21 @@ app.use(cors());
 
 const userList = [];
 
+function generateUserMessage(nickname, chatMessage) {
+  const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  const time = new Date().toLocaleTimeString();
+  const userMessage = `${date} ${time} - ${nickname}: ${chatMessage}`;
+  io.emit('message', userMessage);
+}
+
+function removeUserFromList(id) {
+  const indexOfUser = userList.indexOf(id);
+    userList.splice(indexOfUser, 1);
+    io.emit('reloadUsersList', userList);
+}
+
 io.on('connection', (socket) => {
   console.log('Conectado');
-  
   userList.push(socket.id);
   
   socket.on('userConnected', () => {
@@ -27,9 +39,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => {
-    const indexOfUser = userList.indexOf(socket.id);
-    userList.splice(indexOfUser, 1);
-    io.emit('reloadUsersList', userList);
+    removeUserFromList(socket.id);
     console.log('Desconectado');
   });
   
@@ -37,13 +47,10 @@ io.on('connection', (socket) => {
     const indexOfUser = userList.indexOf(socket.id);
     userList[indexOfUser] = nick;
     io.emit('reloadUsersList', userList);
-  })
+  });
   
   socket.on('userMessage', ({ nickname, chatMessage }) => {
-    let date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-    const time = new Date().toLocaleTimeString();
-    const userMessage = `${date} ${time} - ${nickname}: ${chatMessage}`;
-    io.emit('message', userMessage);
+    generateUserMessage(nickname, chatMessage);
   });
 });
 
