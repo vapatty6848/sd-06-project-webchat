@@ -78,7 +78,7 @@
         chatUl.appendChild(li);
       };
 
-      const printMessage = ({ timestamp, nickname, chatMessage }) => {
+      const printMessage = ({ nickname, chatMessage }) => {
         const li = document.createElement('li');
         li.dataset.testid = 'message';
         li.innerText = chatMessage;
@@ -97,15 +97,16 @@
         li.dataset.testid = 'online-user';
         li.innerText = thisUser.user;
         usersUl.appendChild(li);
+
         users
-        .sort((a, b) => a.timestamp < b.timestamp)
-        .forEach((curr) => {
-          console.log(curr);
-            const li = document.createElement('li');
-            li.dataset.testid = 'online-user';
-            li.innerText = curr.user;
-            usersUl.appendChild(li);
-          });
+          .sort((a, b) => a.timestamp < b.timestamp)
+          .forEach((curr) => {
+            console.log(curr);
+              const li = document.createElement('li');
+              li.dataset.testid = 'online-user';
+              li.innerText = curr.user;
+              usersUl.appendChild(li);
+            });
       });
     </script>
   </body>
