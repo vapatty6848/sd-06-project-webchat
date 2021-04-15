@@ -5,7 +5,7 @@ const create = async (nickname, message) => {
     .then((db) => db.collection('messages').insertOne({
       nickname,
       message,
-      timestamp: Date.now(),
+      timestamp: new Date().toLocaleString(),
     }));
 
   return newMessage;
