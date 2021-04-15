@@ -57,6 +57,7 @@
     buttonNickname.addEventListener('click', () => {
       const newNickname = document.querySelector('#nicknameInput');
       socket.emit('changeNickname', { newNickname: newNickname.value });
+      nickname = newNickname.value;
       newNickname.value = '';
     });
 

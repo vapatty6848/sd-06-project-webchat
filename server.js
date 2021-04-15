@@ -45,7 +45,6 @@ const changeNickname = (newNickname, socket) => {
 
 const getNickname = (socket) => {
   const index = users.findIndex((user) => user.id === socket.id);
-  console.log(users[index].nickname)
   return users[index].nickname;
 };
 
