@@ -30,6 +30,7 @@
     <script>
       const socket = io();
       const usersOnlineList = new Set();
+      const messages = JSON.parse('<%- messages %>');
 
       const generateUser = () => {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
@@ -46,11 +47,10 @@
       const userInput = document.querySelector('#user-login');
       userForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const prevUser = currentUser.slice();
         currentUser = userInput.value;
         localStorage.setItem('webchat-user', currentUser);
         userElement.innerText = currentUser;
-        socket.emit('userLogin', { user: currentUser, prevUser });
+        socket.emit('userLogin', { user: currentUser });
         userInput.value = '';
         return false;
       });
@@ -61,26 +61,27 @@
       chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
-        // await socket.post('/', { message: { nickname: msg.nickname, chatMessage } });
         socket.emit('clientMessage', messageObject);
         inputMessage.value = '';
         return false;
       });
 
       const chatUl = document.querySelector('#chat-messages');
-      const printMessage = (message) => {
+      const printMessage = ({ timestamp, nickname, message }) => {
         const li = document.createElement('li');
         li.dataset.testid = 'message';
-        li.innerText = message.chatMessage;
+        li.innerText = `${timestamp} - ${nickname}: ${message}`;
         chatUl.appendChild(li);
-      }
+      };
+
+      messages.forEach((message) => printMessage(message));
+      socket.on('message', (msg) => printMessage(msg));
 
       const usersUl = document.querySelector('#users-online');
-      socket.on('message', (msg) => printMessage(msg));
       socket.on('usersOnline', (users) => {
         usersUl.innerHTML = '';
-        const usersOnline = users.filter((user) => user !== currentUser);
-        usersOnline.forEach((user) => {
+        const usersOnline = users.filter(({ user }) => user !== currentUser);
+        usersOnline.forEach(({ user }) => {
             const li = document.createElement('li');
             li.dataset.testid = 'online-user';
             li.innerText = user;

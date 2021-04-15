@@ -1,13 +1,11 @@
 const { StatusCodes } = require('http-status-codes');
-const chat = require('../models');
 
-const create = async (req, res) => {
+const { chat } = require('../models');
+
+const create = async (message) => {
   try {
-    const { body } = req;
-    console.log('post req body: ', body);
-    // const newMessage = await chat.create(body.message);
-    // res.status(StatusCodes.CREATED).json(newMessage);
-    res.status(StatusCodes.CREATED).json('OK');
+    await chat.create(message);
+    return true;
   } catch (err) {
     throw new Error(err);
   }
@@ -16,8 +14,8 @@ const create = async (req, res) => {
 const getMessages = async (req, res, next) => {
   try {
     const messages = await chat.getAll();
-    console.log('get /:', messages);
-    res.status(StatusCodes.OK).render('index', messages);
+
+    res.status(StatusCodes.OK).render('index', { messages: JSON.stringify(messages) });
   } catch (err) {
     return next({ err });
   }

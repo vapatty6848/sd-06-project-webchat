@@ -14,7 +14,8 @@ const io = require('socket.io')(http, {
 
 const utils = require('./utils');
 const chatRouter = require('./routes/chat.routes');
-const controllers = require('./controllers/chat.controllers');
+const { users, chat } = require('./controllers');
+const errorHandler = require('./middlewares/errorHandler');
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -23,33 +24,27 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 
 app.use(chatRouter);
-
-const usersOnline = [];
+app.use(errorHandler);
 
 io.on('connection', (socket) => {
-  console.log('Usuário conectado ao chat.');
-  socket.on('userLogin', async ({ user, prevUser = '' }) => {
-    // console.log('prevUser: ', prevUser);
-    const prevUserIndex = usersOnline.indexOf(prevUser);
-    if (prevUserIndex >= 0) usersOnline.splice(prevUserIndex, 1);
-
-    usersOnline.push(user);
-    const messages = await controllers.getMessages();
-
-    io.emit('usersOnline', usersOnline);
-    io.emit('chatHistory', messages);
+  socket.on('userLogin', async ({ user }) => {
+    await users.createOrUpdate(user, socket.id);
+    const onlineList = await users.getAll();
+    io.emit('usersOnline', onlineList);
+    console.log('usuário logado.');
   });
 
   socket.on('clientMessage', async (msg) => {
     const timestamp = `${utils.setTimestamp()}`;
-
-    const message = { timestamp, nickname: msg.nickname, chatMessage: msg.chatMessage };
-    await controllers.create(message);
-
+    const message = { timestamp, nickname: msg.nickname, message: msg.chatMessage };
+    await chat.create(message);
     io.emit('message', message);
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
+    await users.remove(socket.id);
+    const onlineList = await users.getAll();
+    io.emit('usersOnline', onlineList);
     console.log('Usuário saiu do chat.');
   });
 });
