@@ -1,38 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="/socket.io/socket.io.js"></script>
-  <title>Webchat</title>
-</head>
-<body>
-  <h1>Talk y Talk</h1>
-  <input type="text" id="message">
-  <button type="button" id="sendMessage">
-    Enviar
-  </button>
-  <div>
-    <ul id="chatMessages"></ul>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="/socket.io/socket.io.js"></script>
+    <title>Webchat</title>
+  </head>
+  <body>
+    <h1>Talk y Talk</h1>
+    <section>
+      <input type="text" id="nickname-box" data-testid="nickname-box" />
+      <button type="button" id="nickname-button" data-testid="nickname-button">
+        Salvar
+      </button>
+    </section>
+    <section>
+      <ul id="onlineUsers"></ul>
+    </section>
+    <section>
+      <input type="text" id="message" data-testid="message-box" />
+      <button type="button" id="sendMessage" data-testid="send-button">
+        Enviar
+      </button>
+    </section>
+    <section>
+      <ul id="chatMessages"></ul>
+    </section>
 
-  <script>
-    const socket = io();
+    <script>
+      const numRange = Math.floor(
+        Math.random() * (99999999999 - 9999999999) + 9999999999
+      );
+      const socket = io();
 
-    document.getElementById('sendMessage').addEventListener('click', (e)=> {
-      const chatMessage = document.getElementById('message').value;
+      socket.emit("newUser", `user_${numRange}`);
 
-      socket.emit('message', { chatMessage, nickname: 'user'});
-    });
+      document.getElementById("sendMessage").addEventListener("click", (e) => {
+        const chatMessage = document.getElementById("message").value;
+        const user = document.getElementById(`${socket.id}`);
+        console.log(user);
 
-    socket.on('message', (message) => {
-      const messageLi = document.createElement('li');
-      const newMessage = message.chatMessage;
+        socket.emit("message", {
+          chatMessage,
+          nickname: user ? user.innerText : "user",
+        });
 
-      messageLi.innerHTML = newMessage;
-      document.getElementById('chatMessages').appendChild(messageLi);
-    });
-  </script>
-</body>
+        document.getElementById("message").value = "";
+        document.getElementById("message").focus();
+      });
+
+      socket.on("message", (message) => {
+        const messageLi = document.createElement("li");
+        const newMessage = message.chatMessage;
+
+        messageLi.innerHTML = newMessage;
+        messageLi.setAttribute("data-testid", "message");
+        document.getElementById("chatMessages").appendChild(messageLi);
+      });
+
+      socket.on("updateUsers", (users) => {
+        document.getElementById("onlineUsers").innerHTML = `
+        ${users.map((user) => `
+          <li id=${user.socketId} data-testid="online-user">${user.userName}</li>`).join('')}`;
+      });
+
+      document.getElementById("nickname-button").addEventListener("click", (e) => {
+        const newUserName = document.getElementById("nickname-box").value;
+
+        socket.emit("changeUser", newUserName);
+
+        document.getElementById("nickname-box").value = "";
+      });
+    </script>
+  </body>
 </html>
