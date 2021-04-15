@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/socket.io/socket.io.js"></script>
+  <title>Document</title>
+</head>
+<body>
+  <h1>El chat del Magic</h1>
+  <form>
+    <input type="text" id="input-msg"/>
+    <button type="button" id="send-msg">Enviar</button>
+  </form>
+  <script>
+    const socket = io();
+
+    const msgInput = document.querySelector('#input-msg');
+
+    document.querySelector('send-msg').addEventListener('click', (e) => {
+      e.preventDefault();
+      const message = msgInput.value;
+      socket.emit('message', message);
+    });
+
+  </script>
+</body>
+</html>
