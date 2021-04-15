@@ -39,7 +39,7 @@
       };
 
       let currentUser = localStorage.getItem('webchat-user') || generateUser();
-      socket.emit('userLogin', { user: currentUser, lastUpdate: new Date() });
+      socket.emit('userLogin', { user: currentUser });
       const userElement = document.querySelector('#current-user');
       userElement.innerText = currentUser;
 
@@ -47,10 +47,11 @@
       const userInput = document.querySelector('#user-login');
       userForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        const prevUser = currentUser.slice();
         currentUser = userInput.value;
         localStorage.setItem('webchat-user', currentUser);
         userElement.innerText = currentUser;
-        socket.emit('userLogin', { user: currentUser, lastUpdate: new Date() });
+        socket.emit('userLogin', { user: currentUser, prevUser });
         userInput.value = '';
         return false;
       });
@@ -78,7 +79,7 @@
         chatUl.appendChild(li);
       };
 
-      const printMessage = ({ nickname, chatMessage }) => {
+      const printMessage = (chatMessage) => {
         const li = document.createElement('li');
         li.dataset.testid = 'message';
         li.innerText = chatMessage;
@@ -90,21 +91,19 @@
 
       const usersUl = document.querySelector('#users-online');
       socket.on('usersOnline', (users) => {
+        console.log(users);
         usersUl.innerHTML = '';
-        const userIndex = users.findIndex((curr) => curr.user === currentUser);
-        const [thisUser] = users.splice(userIndex, 1);
+        const userIndex = users.indexOf(currentUser);
+        const thisUser = users.splice(userIndex, 1);
         const li = document.createElement('li');
         li.dataset.testid = 'online-user';
-        li.innerText = thisUser.user;
+        li.innerText = currentUser;
         usersUl.appendChild(li);
 
-        users
-          .sort((a, b) => a.timestamp < b.timestamp)
-          .forEach((curr) => {
-            console.log(curr);
+        users.forEach((user) => {
               const li = document.createElement('li');
               li.dataset.testid = 'online-user';
-              li.innerText = curr.user;
+              li.innerText = user;
               usersUl.appendChild(li);
             });
       });

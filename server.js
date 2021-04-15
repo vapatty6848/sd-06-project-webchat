@@ -3,7 +3,6 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   cors: {
@@ -12,11 +11,9 @@ const io = require('socket.io')(http, {
   },
 });
 
-const utils = require('./utils');
 const chatRouter = require('./routes/chat.routes');
-// const { users, chat, clearDB } = require('./controllers');
-const { users, chat } = require('./controllers');
 const errorHandler = require('./middlewares/errorHandler');
+const { loginHandler, chatHandler } = require('./sockets');
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -27,29 +24,12 @@ app.set('views', './views');
 app.use(chatRouter);
 app.use(errorHandler);
 
-// clearDB.clear();
+const onConnection = (socket) => {
+  loginHandler(io, socket);
+  chatHandler(io, socket);
+};
 
-io.on('connection', (socket) => {
-  socket.on('userLogin', async ({ user, lastUpdate }) => {
-    await users.createOrUpdate(user, lastUpdate, socket.id);
-    const onlineList = await users.getAll();
-    io.emit('usersOnline', onlineList);
-    console.log('usuário logado.');
-  });
-
-  socket.on('message', async (msg) => {
-    const { messageFrontend, messageBackend } = utils.setupMessages(msg);
-    await chat.create(messageBackend);
-    io.emit('message', messageFrontend);
-  });
-
-  socket.on('disconnect', async () => {
-    await users.remove(socket.id);
-    const onlineList = await users.getAll();
-    io.emit('usersOnline', onlineList);
-    console.log('Usuário saiu do chat.');
-  });
-});
+io.on('connection', onConnection);
 
 http.listen(3000, () => {
   console.log('Servidor ouvindo na porta 3000');

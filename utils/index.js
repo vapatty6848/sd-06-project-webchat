@@ -33,10 +33,11 @@ function setTimestamp(order = '') {
 }
 
 const setupMessages = (msg) => {
-  const messageFrontend = {
-    nickname: msg.nickname,
-    chatMessage: `${setTimestamp()} - ${msg.nickname}: ${msg.chatMessage}`,
-  };
+  // const messageFrontend = {
+  //   nickname: msg.nickname,
+  //   chatMessage: `${setTimestamp()} - ${msg.nickname}: ${msg.chatMessage}`,
+  // };
+  const messageFrontend = `${setTimestamp()} - ${msg.nickname}: ${msg.chatMessage}`;
   const messageBackend = {
     timestamp: setTimestamp('year-first'),
     nickname: msg.nickname,
