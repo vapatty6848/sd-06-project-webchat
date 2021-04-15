@@ -1,4 +1,5 @@
 const express = require('express');
+const dateFormat = require('dateformat');
 
 const app = express();
 const httpServer = require('http').createServer(app);
@@ -20,6 +21,9 @@ app.get('/', (_req, res) => {
 });
 
 let users = [];
+const date = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
+
+// DD-MM-yyyy HH:mm:ss
 
 //  const teste = (socket) => () => {
 //   users.push({ socketId: socket.id, name: `Guest_${socket.id}` });
@@ -30,14 +34,14 @@ let users = [];
 
 io.on('connection', (socket) => {
   socket.on('newUser', () => {
-    users.push({ socketId: socket.id, name: `Guest_${socket.id}` });
+    users.push({ socketId: socket.id, name: `Guest - ${socket.id}` });
 
   io.emit('updateUsers', users);
   io.emit('logStatus', `Usuário ${socket.id} conectou`);
   });
   
   socket.on('message', ({ chatMessage, nickname }) => {
-   io.emit('newMessage', `${nickname} ${chatMessage}`);
+   io.emit('message', `${date} - ${nickname}: ${chatMessage}`);
   });
 
   socket.on('logStatus', (logStatus) => {

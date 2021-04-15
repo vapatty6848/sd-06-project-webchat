@@ -30,11 +30,11 @@
 
     document.querySelector('#sendMessage').addEventListener('click', (e) => {
       const chatMessage = document.querySelector('#message').value;
-      const nickname = `Guest - ${socket.id} :`;
+      const nickname = `Guest - ${socket.id}`;
       socket.emit('message', {chatMessage, nickname});
     })
 
-    socket.on('newMessage', (message) => {
+    socket.on('message', (message) => {
       const messageLI = document.createElement('li');
       const dataTestId = document.createAttribute('data-testid');
       dataTestId.value = 'message';
