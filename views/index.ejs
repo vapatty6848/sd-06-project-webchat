@@ -19,33 +19,55 @@
 <body>
   <h1>Welcome to The WebChat Project!</h1>
   <div class="containerNickName">
+    <h1 id="userNickName" data-testid="online-user"></h1>
     <label alt='nickNameInput'>
-      Nickname:
-      <input type='text' id='nickNameInput' placeholder="Alan Turing"> 
+      <input type='text' id='nickNameInput' placeholder="Alan Turing" data-testid="nickname-box">
+      <button id="changeNickNameButton" data-testid="nickname-button">Change Nickname</button>
     </label>
   </div>
   <div class="messageContainer">
     <label alt='messageInput'>
-      Message:
-      <textarea id="messageInput" class="messageInput" placeholder="Type your message here"></textarea>
+      <input id="messageInput" class="messageInput" placeholder="Type your message here" data-testid="message-box"></textarea>
     </label>
-    <button id="sendButton">Send</button>
+    <button id="sendButton" data-testid="send-button">Send</button>
+  </div>
+  <div>
+    <ul id="chatList"></ul>
   </div>
 </body>
 
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-  let nickname;
   const socket = io('http://localhost:3000');
   const messageInput = document.getElementById('messageInput');
-  const sendButton = document.getElementById('sendButton');
+  const sendMessageButton = document.getElementById('sendButton');
+  const changeNickNameButton = document.getElementById('changeNickNameButton');
 
-  sendButton.addEventListener('click', () => {
-    nickname = document.getElementById('nickNameInput').value;
-    let chatMessage = document.getElementById('messageInput').value;
+  changeNickNameButton.addEventListener('click', () => {
+    const newNickName = document.getElementById('nickNameInput').value;
+    document.getElementById('userNickName').innerHTML = newNickName;
+    socket.emit('nickNameChange', newNickName);
+  });
+
+  sendMessageButton.addEventListener('click', () => {
+    const nickname = document.getElementById('userNickName').innerText;
+    const chatMessage = document.getElementById('messageInput').value;
     socket.emit('message', { nickname, chatMessage });
   });
+
+  socket.on('connected', async (randomNickName) => {
+    document.getElementById('userNickName').innerText = randomNickName;
+  });
+
+  socket.on('message', async (message) => {
+    const messageList = document.getElementById('chatList');
+    const messageFromUser = document.createElement('li');
+    messageFromUser.innerHTML = message;
+    messageFromUser.setAttribute('data-testid', 'message');
+    messageList.appendChild(messageFromUser);
+  });
+
 
 </script>
 
