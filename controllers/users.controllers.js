@@ -1,17 +1,17 @@
 const { users } = require('../models');
 
-const createOrUpdate = async (user, prevuser, socketId) => {
+const createOrUpdate = async (user, socketId) => {
   try {
-    await users.createOrUpdate(user, prevuser, socketId);
+    await users.createOrUpdate(user, socketId);
     return true;
   } catch (err) {
     throw new Error(err);
   }
 };
 
-const remove = async (socketId) => {
+const remove = async (user) => {
   try {
-    await users.remove(socketId);
+    await users.remove(user);
     return true;
   } catch (err) {
     throw new Error(err);
@@ -21,6 +21,7 @@ const remove = async (socketId) => {
 const getAll = async () => {
   try {
     const usersOnline = await users.getAll();
+
     return usersOnline;
   } catch (err) {
     throw new Error(err);
