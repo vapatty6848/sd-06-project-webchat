@@ -1,7 +1,6 @@
 const app = require('express')();
 const http = require('http').createServer(app);
 const path = require('path');
-
 const cors = require('cors');
 
 const io = require('socket.io')(http, {
@@ -11,6 +10,8 @@ const io = require('socket.io')(http, {
   },
 });
 
+const dateFormat = require('dateformat');
+
 app.use(cors());
 
 app.get('/', (req, res) => {
@@ -19,19 +20,23 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('Conectado');
+  console.log(`User ${socket.id} conectado`);
 
-  socket.emit('ola', 'Que bom que você chegou aqui! Fica mais um cadin, vai ter bolo :)');
-
-  socket.broadcast
-    .emit('mensagemServer', { mensagem: ' Iiiiiirraaaa! Fulano acabou de se conectar :D' });
-
-  socket.on('disconnect', () => {
-    console.log('Desconectado');
+  socket.on('userConnect', (nickname) => {
+    socket.emit('welcome', `Bem vindo ${nickname}`);
   });
 
-  socket.on('mensagem', (msg) => {
-    io.emit('mensagemServer', { mensagem: msg });
+  socket.broadcast
+    .emit('messageServer', { message: `User ${socket.id} acabou de se conectar` });
+
+  socket.on('disconnect', () => {
+    console.log(`User ${socket.id} desconectado`);
+  });
+
+  socket.on('message', (msg) => {
+    const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss'); 
+
+   socket.emit('messageServer', { message: `${dateTimeStamp} ${msg.nickname} ${msg.chatMessage}` });
   });
 });
 

@@ -46,35 +46,68 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
+    <h1 data-testid="online-user" id="user-nickname"></h1>
     <form action="" id="nicknameForm">
-      <input id="mensagemInput" autocomplete="off" /><button>Salvar</button>
+      <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-button">Salvar</button>
     </form>
     <ul id="users"></ul>
     <ul id="messages"></ul>
     <form action="" id="messageForm">
-      <input id="mensagemInput" autocomplete="off" /><button>Enviar</button>
+      <input data-testid="message-box" id="messageInput" autocomplete="off" /><button data-testid="send-button">Enviar</button>
     </form>
     <script>
       const socket = io();
-      const form = document.querySelector('#messageForm')
-      const inputMessage = document.querySelector('#mensagemInput')
-      form.addEventListener('submit', (e) =>{
+      const userNickname = document.querySelector('#user-nickname')
+      const messageForm = document.querySelector('#messageForm');
+      const nicknameForm = document.querySelector('#nicknameForm');
+      const inputMessage = document.querySelector('#messageInput');
+      const inputNickname = document.querySelector('#nicknameInput');
+      let nickname;
+
+      const getRandomString = (length) => {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = ' ';
+        const charactersLength = characters.length;
+          for (let i = 0; i < length; i ++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+          }
+        return result;
+      };
+
+      nicknameForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        socket.emit('mensagem', inputMessage.value);
-        inputMessage.value = ''
+        nickname = inputNickname.value;
+        document.querySelector('h1').innerHTML = nickname;
+      })
+
+      messageForm.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        socket.emit('message', { nickname, chatMessage: inputMessage.value });
+        inputMessage.value = '';
         return false;
       });
-      // cria uma `li` e coloca dentro da `ul` com `id` messages
+
       const createMessage = (message) => {
         const messagesUl = document.querySelector('#messages');
         const li = document.createElement('li');
         li.innerText = message;
+        li.setAttribute('data-testid', 'message');
         messagesUl.appendChild(li);
       }
-      // Quando nosso evento `ola` for emitido, vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
-      socket.on('ola', (mensagem) => createMessage(mensagem));
-      // Aqui o evento é recebido da mesma maneira do último, mas este não é recebido pelo cliente que enviou o mesmo
-      socket.on('mensagemServer', (objeto) => createMessage(objeto.mensagem));
+
+      socket.on('connect', () => {
+        if(!nickname) {
+          nickname = getRandomString(16);
+        }
+        document.querySelector('h1').innerHTML = nickname;
+        socket.emit('userConnect', nickname);
+      })
+
+      socket.on('welcome', (message) => {
+        createMessage(message)
+      });
+
+      socket.on('messageServer', (object) => createMessage(object.message));
     </script>
   </body>
 </html>
