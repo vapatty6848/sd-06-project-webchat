@@ -61,7 +61,7 @@
       chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
-        socket.emit('clientMessage', messageObject);
+        socket.emit('message', messageObject);
         inputMessage.value = '';
         return false;
       });
