@@ -12,6 +12,7 @@ async function connection() {
     })
     .then((conn) => conn.db(process.env.DB_NAME))
     .then((dbSchema) => {
+      console.log('dbSchema', dbSchema);
       schema = dbSchema;
       return schema;
     })
