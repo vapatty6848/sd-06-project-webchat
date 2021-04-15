@@ -58,9 +58,10 @@
 
       const chatForm = document.querySelector('#chat-form');
       const inputMessage = document.querySelector('#msgInput');
-      chatForm.addEventListener('submit', (e) => {
+      chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
+        // await socket.post('/', { message: { nickname: msg.nickname, chatMessage } });
         socket.emit('clientMessage', messageObject);
         inputMessage.value = '';
         return false;

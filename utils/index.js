@@ -8,7 +8,8 @@ function addZero(i) {
   return newInt;
 }
 
-function formatTimestamp(date) {
+function setTimestamp() {
+  const date = new Date();
   const d = date.getDate();
   const m = date.getMonth();
   const y = date.getFullYear();
@@ -20,5 +21,5 @@ function formatTimestamp(date) {
 }
 
 module.exports = {
-  formatTimestamp,
+  setTimestamp,
 };
