@@ -4,14 +4,13 @@ const app = express();
 const httpServer = require('http').createServer(app);
 const moment = require('moment');
 const io = require('socket.io')(httpServer);
+const { sendMessage } = require('./utils/serverUtils');
 
 app.use(express.json());
 
 const users = [];
 
 io.on('connection', (socket) => {
-  console.log(`Usuário ${socket.id} conectou!`);
-
   socket.on('newUser', (user) => {
     users.push({ socketId: socket.id, userName: user });
     io.emit('updateUsers', users);
@@ -19,11 +18,7 @@ io.on('connection', (socket) => {
 
   socket.on('message', (obj) => {
     const date = moment().format('DD-MM-yyyy hh:mm');
-
-    io.emit('message', {
-      chatMessage: `${date} - ${obj.nickname}: ${obj.chatMessage}`,
-      nickname: obj.nickname,
-    });
+    io.emit('message', sendMessage(obj, date));
   });
 
   socket.on('disconnect', () => {
