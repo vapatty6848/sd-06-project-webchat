@@ -60,18 +60,31 @@
   <script>
     const socket = io('http://localhost:3000');
 
-    document.querySelector('#send-button').addEventListener('click', (e) => {
-      const nickname = "Exemplo-cliente-1"
+    let nickname = '';
+
+    socket.on('randomNickname', (newUser) => {
+      if (nickname === '') {
+        nickname = newUser;
+      };
+
+      const userLi = document.createElement('li');
+      userLi.setAttribute('data-testid', 'online-user'); // não está funcionando
+      userLi.innerHTML = newUser;
+      document.querySelector('#online-user').appendChild(userLi);
+    });
+
+    document.querySelector('#send-button').addEventListener('click', () => {
       const chatMessage = document.querySelector('#message-box').value;
-      socket.emit('message', { chatMessage, nickname }); // 1.aqui o cliente está enviando a msg para o backend através do cananl sentMessage
+      socket.emit('message', { chatMessage, nickname }); // 1.aqui o cliente está enviando a msg para o backend através do cananl message
     });
 
     // recebendo mensagem configurada do back!
-    // 4. para o front escutar o canal newMessage criado no back, fazemos outro .on, e aí todos tem acesso a mesg escrita por 1 usuário.
+    // 4. para o front escutar o canal newMessage criado no back, fazemos outro .on
+    // , e aí todos tem acesso a msg escrita por 1 usuário.
     socket.on('message', (message) => {
       const messageLi = document.createElement('li');
-      // falta: inserir o data-testid="message"
-      messageLi.innerHTML = message;
+      messageLi.setAttribute('data-testid', 'message'); // não está funcionando
+      messageLi.innerHTML = message; 
       document.querySelector('#message').appendChild(messageLi);
     });
 

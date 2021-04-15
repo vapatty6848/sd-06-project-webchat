@@ -14,17 +14,30 @@ const io = require('socket.io')(httpServer, {
 
 app.use(cors());
 
-io.on('connection', (socket) => {
-  // console.log(`Usuário novo conectado ${socket.id}`);
+const users = [];
 
-  socket.on('message', ({ chatMessage, nickname }) => {
+io.on('connection', (socket) => {
+  console.log(`Usuário novo conectado ${socket.id}`);
+
+  const sliceNickname = (socket.id).slice(-16);
+  io.emit('randomNickname', sliceNickname);
+
+  users.push({ socketId: sliceNickname });
+  io.emit('updateUsers', users);
+
+  socket.on('message', ({ chatMessage, nickname }) => { // 2. aqui no back ele capta o que foi escrito no canal message lá do front
     const now = new Date();
     const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
     ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
     const message = `${timestamp} ${nickname} ${chatMessage}`;
 
-    io.emit('message', message);
+    io.emit('message', message); // 3. aqui meu back, emit a mensagem captada no canal sentMessage para todos os usuarios conectados e cria outro canal, o newMessage que pode ser captado pelo front
+  });
+
+  socket.on('disconnect', () => {
+    io.emit('disconnectMessage', `Usuário no socket ${socket.id} se desconectou`);
+    io.emit('updateUsers', users);
   });
 });
 
@@ -36,23 +49,3 @@ app.get('/', (req, res) => {
 });
 
 httpServer.listen('3000');
-
-// const users = [];
-
-// io.on('connection', (socket) => {
-//   console.log(`Usuário novo conectado ${socket.id}`);
-
-//   users.push({ socketId: socket.id });
-
-//   io.emit('updateUsers', users);
-
-//   socket.on('sentMessage', (message) => { // 2. aqui no back ele capta o que foi escrito no canal sentMessage lá do front
-//     console.log(message);
-//     io.emit('newMessage', message); // 3. aqui meu back, emit a mensagem captada no canal sentMessage para todos os usuarios conectados e cria outro canal, o newMessage que pode ser captado pelo front
-//   });
-
-//   socket.on('disconnect', () => {
-//     console.log(`Usuário ${socket.id} desconectado`);
-//     // io.emit('newMessage', `Usuário no socket ${socket.id} se desconectou`);
-//   });
-// });
