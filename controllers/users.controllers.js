@@ -1,8 +1,8 @@
 const { users } = require('../models');
 
-const createOrUpdate = async (user, socketId) => {
+const createOrUpdate = async (user, lastUpdate, socketId) => {
   try {
-    await users.createOrUpdate(user, socketId);
+    await users.createOrUpdate(user, lastUpdate, socketId);
     return true;
   } catch (err) {
     throw new Error(err);

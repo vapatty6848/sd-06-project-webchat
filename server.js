@@ -30,8 +30,8 @@ app.use(errorHandler);
 // clearDB.clear();
 
 io.on('connection', (socket) => {
-  socket.on('userLogin', async ({ user }) => {
-    await users.createOrUpdate(user, socket.id);
+  socket.on('userLogin', async ({ user, lastUpdate }) => {
+    await users.createOrUpdate(user, lastUpdate, socket.id);
     const onlineList = await users.getAll();
     io.emit('usersOnline', onlineList);
     console.log('usuário logado.');

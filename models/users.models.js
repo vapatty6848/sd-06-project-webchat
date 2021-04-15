@@ -1,8 +1,8 @@
 const connection = require('./connection');
 
-const createOrUpdate = async (user, socketId) => {
+const createOrUpdate = async (user, lastUpdate, socketId) => {
   const query = { socketId };
-  const update = { $set: { user } };
+  const update = { $set: { user, lastUpdate } };
   const options = { upsert: true };
   await connection()
       .then((db) => db.collection('usersOnline').updateOne(query, update, options))
