@@ -7,15 +7,30 @@ const PORT = 3000;
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
+
 // Roda o socket io
 const io = require('socket.io')(httpServer);
+
+const manageDate = () => {
+  // const includeZero = (n) => {
+  //   if (n <= 9) return `0${n}`;
+  //   return n;
+  // };
+  const date = new Date().toLocaleDateString('en-GB');
+  const hour = new Date().toLocaleTimeString('en-GB');
+  const dateAndHour = (`${date} ${hour}`).replace(/[/]/g, '-');
+  return dateAndHour;
+};
 
 io.on('connection', (socket) => {
   console.log(`usuario novo conectado ${socket.id}`);
 
   socket.on('message', (message) => {
-    console.log(message);
-    io.emit('newMessage', message);
+    const { chatMessage, nickname } = message;
+    const dateAndHour = manageDate();
+    const formattedMessage = `${dateAndHour} - ${nickname}: ${chatMessage}`;
+    console.log(formattedMessage);
+    io.emit('message', formattedMessage);
   });
 });
 

@@ -23,12 +23,13 @@
   
   <script>
     const socket = io();
+    // let userName;
     document.querySelector('#sendMessage').addEventListener('click', (e) => {
       const message = document.querySelector('#message').value;
-      socket.emit('message', message);
+      socket.emit('message', { chatMessage: message, nickname: socket.id });
     });
 
-    socket.on('newMessage', (message) => {
+    socket.on('message', (message) => {
       const messageLI = document.createElement('li');
       messageLI.innerHTML = message;
       document.querySelector('#messages').appendChild(messageLI);
