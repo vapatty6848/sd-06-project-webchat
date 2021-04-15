@@ -14,6 +14,7 @@ const io = require('socket.io')(http, {
 
 const utils = require('./utils');
 const chatRouter = require('./routes/chat.routes');
+// const { users, chat, clearDB } = require('./controllers');
 const { users, chat } = require('./controllers');
 const errorHandler = require('./middlewares/errorHandler');
 
@@ -26,6 +27,8 @@ app.set('views', './views');
 app.use(chatRouter);
 app.use(errorHandler);
 
+// clearDB.clear();
+
 io.on('connection', (socket) => {
   socket.on('userLogin', async ({ user }) => {
     await users.createOrUpdate(user, socket.id);
@@ -34,11 +37,10 @@ io.on('connection', (socket) => {
     console.log('usuário logado.');
   });
 
-  socket.on('clientMessage', async (msg) => {
-    const timestamp = `${utils.setTimestamp()}`;
-    const message = { timestamp, nickname: msg.nickname, message: msg.chatMessage };
-    await chat.create(message);
-    io.emit('message', message);
+  socket.on('message', async (msg) => {
+    const { messageFrontend, messageBackend } = utils.setupMessages(msg);
+    await chat.create(messageBackend);
+    io.emit('message', messageFrontend);
   });
 
   socket.on('disconnect', async () => {

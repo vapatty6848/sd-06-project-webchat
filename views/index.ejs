@@ -61,20 +61,31 @@
       chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
-        socket.emit('clientMessage', messageObject);
+        socket.emit('message', messageObject);
         inputMessage.value = '';
         return false;
       });
 
       const chatUl = document.querySelector('#chat-messages');
-      const printMessage = ({ timestamp, nickname, message }) => {
+
+      const printStoredMessages = ({ timestamp, nickname, message }) => {
+        const splitTimestamp = timestamp.split(/[-]|[ ]/g);
+        const [y, m, d, t] = splitTimestamp;
+        const invertTimestamp = `${d}-${m}-${y} ${t}`;
         const li = document.createElement('li');
         li.dataset.testid = 'message';
-        li.innerText = `${timestamp} - ${nickname}: ${message}`;
+        li.innerText = `${invertTimestamp} - ${nickname}: ${message}`;
         chatUl.appendChild(li);
       };
 
-      messages.forEach((message) => printMessage(message));
+      const printMessage = ({ timestamp, nickname, chatMessage }) => {
+        const li = document.createElement('li');
+        li.dataset.testid = 'message';
+        li.innerText = chatMessage;
+        chatUl.appendChild(li);
+      };
+
+      messages.forEach((message) => printStoredMessages(message));
       socket.on('message', (msg) => printMessage(msg));
 
       const usersUl = document.querySelector('#users-online');
