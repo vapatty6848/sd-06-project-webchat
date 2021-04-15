@@ -17,16 +17,63 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
+const users = [];
+
+const addNewUser = (socket) => {
+  const newUser = {
+    id: socket.id,
+  };
+  users.push(newUser);
+};
+
+const addNickname = (nickname, socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  users[index].nickname = nickname;
+};
+
+const getTime = () => {
+  const time = new Date();
+  const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
+    .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+  return timeFormated;
+};
+
+const changeNickname = (newNickname, socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  users[index].nickname = newNickname;
+};
+
+const getNickname = (socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  console.log(users[index].nickname)
+  return users[index].nickname;
+};
+
+const getRandomString = () => {
+  const length = 16;
+  const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+  }
+  return result;
+};
+
 io.on('connection', (socket) => {
-  console.log(new Date());
+  console.log(`${socket.id} connected`);
+  addNewUser(socket);
+  console.log(users);
+  io.emit('connected', getRandomString());
 
   socket.on('message', ({ chatMessage, nickname }) => {
-    const time = new Date();
-    const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
-      .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
-    const response = `${timeFormated} ${nickname} ${chatMessage}`;
-
+    addNickname(nickname, socket);
+    const response = `${getTime()} ${getNickname(socket)} ${chatMessage}`;
     io.emit('message', response);
+  });
+
+  socket.on('changeNickname', ({ newNickname }) => {
+    changeNickname(newNickname, socket);
+    io.emit('changeNickname', users);
   });
 
   socket.on('disconnect', () => {
