@@ -37,7 +37,7 @@ io.on('connection', (socket) => {
     console.log('usuário logado.');
   });
 
-  socket.on('message', async (msg) => {
+  socket.on('clientMessage', async (msg) => {
     const { messageFrontend, messageBackend } = utils.setupMessages(msg);
     await chat.create(messageBackend);
     io.emit('message', messageFrontend);
