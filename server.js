@@ -21,6 +21,15 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Desconectado');
   });
+  
+  socket.on('userMessage', ({ nickname, chatMessage }) => {
+    let date = new Date().toLocaleDateString('pt-BR');
+    date = date.replace(/\//g, '-'); // o replaceAll() dava erro de replaceAll is not a function
+    const time = new Date().toLocaleTimeString();
+    
+    const userMessage = `${date} ${time} - ${nickname}: ${chatMessage}`;
+    io.emit('message', userMessage);
+  });
 });
 
 const chatController = require('./controllers/chatController');

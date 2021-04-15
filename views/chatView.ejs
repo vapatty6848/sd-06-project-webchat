@@ -26,6 +26,26 @@
   <script src="script.js"></script>
   <script>
     const socket = io();
+    
+    const form = document.querySelector('form');
+    const messageInput = document.querySelector('#messageInput');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      socket.emit('userMessage', { chatMessage: messageInput.value, nickname: socket.id });
+      messageInput.value = '';
+      return false;
+    });
+    
+    const createMessage = (message) => {
+      const messagesUl = document.querySelector('#messagesUl');
+      const li = document.createElement('li');
+      li.innerText = message;
+      messagesUl.appendChild(li)
+    };
+    
+    socket.on('message', (message) => createMessage(message));
   </script>
 </body>
 </html>
