@@ -13,13 +13,17 @@ const io = require('socket.io')(httpServer);
 io.on('connection', (socket) => {
   console.log(`usuario novo conectado ${socket.id}`);
 
-  socket.on('Fala Comigo Bebê', (message) => {
+  socket.on('message', (message) => {
     console.log(message);
+    io.emit('newMessage', message);
   });
 });
 
+let quantity = 0;
+
 app.get('/', (_req, res) => {
-  res.render('home');
+  res.render('home', { quantity });
+  quantity += 1;
 });
 
 httpServer.listen(PORT, () => {

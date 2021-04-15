@@ -10,9 +10,29 @@
 </head>
 <body>
   <h1>Hello World!</h1>
+  <input type="text" id="nickname" data-testid="nickname-box">
+  <button id="sendNickname" data-testid="nickname-button">Entrar</button>
+  <br>
+  <p>Quantidade de usuarios logados: <%= quantity %></p>
+  <input type="text" id="message" data-testid="message-box">
+  <button id="sendMessage" data-testid="send-button">Enviar</button>
+
+  <h3>Menssagens</h3>
+
+  <ul id="messages" data-testid="message"></ul>
+  
   <script>
     const socket = io();
-    socket.emit('Fala Comigo Bebê', 'TMJ');
+    document.querySelector('#sendMessage').addEventListener('click', (e) => {
+      const message = document.querySelector('#message').value;
+      socket.emit('message', message);
+    });
+
+    socket.on('newMessage', (message) => {
+      const messageLI = document.createElement('li');
+      messageLI.innerHTML = message;
+      document.querySelector('#messages').appendChild(messageLI);
+    })
   </script>
 </body>
 </html>
