@@ -9,7 +9,7 @@ module.exports = () => {
   const second = today.getSeconds();
   const AmPm = hour >= 12 ? 'PM' : 'AM';
   let hourAmPm = hour % 12;
-  hourAmPm = hourAmPm ? hourAmPm : 12;
+  if (!hourAmPm) hourAmPm = 12;
 
   function add0(decimal) {
     return `${decimal}`.length === 1 ? `0${decimal}` : decimal;

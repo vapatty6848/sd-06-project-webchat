@@ -110,7 +110,16 @@
         nickname.innerHTML = loadStorage('nickname', randomName());
         saveStorage('nickname', nickname.innerHTML);
 
-        socket.emit('userOn', { nickname: nickname.innerHTML });
+        const nickname2 = document.querySelectorAll('.online-user2');
+
+        nickname2.forEach((element) => {
+
+          if (element.innerHTML === nickname.innerHTML) {
+            element.style.display = 'none';
+          }
+        });
+
+        socket.emit('userOn', { nickname: nickname.innerHTML, idSocket: socket.id });
 
         const nicknameButton = document.querySelector('#nickname-button');
         nicknameButton.addEventListener('click', () => {
@@ -141,9 +150,9 @@
     </ul>
     <h2>pessoas online</h2>
     <ul id="user-on">
-      <!-- <% arrayMessages.forEach(({ nickname }) => { %>
-        <li data-testid="online-user" ><%= nickname %> ta on</li>
-      <% }) %>       -->
+      <% arrayUsersOn.forEach(({ nickname }) => { %>
+        <li class="online-user2" data-testid="online-user" ><%= nickname %></li>
+      <% }) %>      
     </ul>
     <div>
       <input id="message-box" data-testid="message-box" type="text" />
