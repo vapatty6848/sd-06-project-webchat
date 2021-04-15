@@ -9,7 +9,7 @@ const io = require('socket.io')(http, {
   },
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
