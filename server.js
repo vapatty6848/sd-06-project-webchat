@@ -13,7 +13,7 @@ const io = require('socket.io')(http, {
   },
 });
 
-const { addMessages } = require('./models/messages');
+// const { addMessages } = require('./models/messages');
 
 app.use(cors());
 app.set('view engine', 'ejs');
@@ -23,15 +23,27 @@ app.get('/', async (_req, res) => {
   res.render('../views/');
 });
 
-io.on('connection', (socket) => {
-  console.log(`User ${socket.id} connected.`);
-  socket.on('disconnect', () => console.log(`User ${socket.id} disconnected.`));
+const users = [];
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    const messageTime = new Date();
-    await addMessages({ chatMessage, nickname, messageTime });
-    const result = `${messageTime} - ${nickname} - ${chatMessage}`;
-    io.emit('message', result);
+io.on('connection', (socket) => {
+  const id = users.length;
+  let nickname = `98765432110111d${users.length}`;
+  if (nickname.length > 16) nickname = `2345678910111d${users.length}`;
+  users.push(nickname);
+  console.log(users);
+
+  socket.emit(nickname);
+
+  socket.on('mensagem', (msg) => {
+    const date = new Date();
+    const formatedDate = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+    const formatedTime = `${date.getHours()}:${date.getMinutes()}`;
+    io.emit('mensagemServer', `${formatedDate} ${formatedTime} ${users[id]}: ${msg}`);
+  });
+
+  socket.on('user', (user) => {
+    users[id] = user || nickname;
+    io.emit('userServer', users[id]);
   });
 });
 
