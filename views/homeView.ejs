@@ -68,34 +68,22 @@
       };
 
       const userLi = document.createElement('li');
-      userLi.setAttribute('data-testid', 'online-user'); // não está funcionando
+      userLi.setAttribute('data-testid', 'online-user');
       userLi.innerHTML = newUser;
       document.querySelector('#online-user').appendChild(userLi);
     });
 
     document.querySelector('#send-button').addEventListener('click', () => {
       const chatMessage = document.querySelector('#message-box').value;
-      socket.emit('message', { chatMessage, nickname }); // 1.aqui o cliente está enviando a msg para o backend através do cananl message
+      socket.emit('message', { chatMessage, nickname });
     });
 
-    // recebendo mensagem configurada do back!
-    // 4. para o front escutar o canal newMessage criado no back, fazemos outro .on
-    // , e aí todos tem acesso a msg escrita por 1 usuário.
     socket.on('message', (message) => {
       const messageLi = document.createElement('li');
-      messageLi.setAttribute('data-testid', 'message'); // não está funcionando
+      messageLi.setAttribute('data-testid', 'message');
       messageLi.innerHTML = message; 
       document.querySelector('#message').appendChild(messageLi);
     });
-
-    // listar todos os usuários:
-    // socket.on('updateUsers', (users) => {
-    //   users.forEach(user => {
-    //     const userLi = document.createElement('li');
-    //     userLi.innerHTML = user.socketId;
-    //     document.querySelector('#online-user').appendChild(userLi);
-    //   });
-    // });
 
   </script>
 </body>
