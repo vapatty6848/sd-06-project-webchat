@@ -1,4 +1,4 @@
-let socket = io();
+const socket = io();
 
 // profile
 let nick = '';
@@ -11,7 +11,7 @@ const createUserInList = (username) => {
   const li = document.createElement('li');
   li.innerText = username;
   // li.setAttribute('data-testid', 'message');
-  usersUl.appendChild(li)
+  usersUl.appendChild(li);
 };
 
 socket.on('connect', () => {
@@ -23,7 +23,7 @@ socket.on('connect', () => {
 
 socket.on('reloadUsersList', (userList) => {
   usersUl.innerHTML = '';
-  userList.forEach(user => createUserInList(user));
+  userList.forEach((user) => createUserInList(user));
 });
 
 userForm.addEventListener('submit', (e) => {
@@ -53,7 +53,7 @@ const createMessage = (message) => {
   const li = document.createElement('li');
   li.innerText = message;
   li.setAttribute('data-testid', 'message');
-  messagesUl.appendChild(li)
+  messagesUl.appendChild(li);
 };
 
 socket.on('message', (message) => createMessage(message));
