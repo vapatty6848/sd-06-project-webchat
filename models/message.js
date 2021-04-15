@@ -5,7 +5,7 @@ const createMessage = async (message, nickname) => {
     .then((db) => db.collection('message').insertOne({
       nickname,
       message,
-      timestamp: Date.now();
+      timestamp: Date.now(),
     }));
 
   return newMessage;
