@@ -5,4 +5,4 @@ const sendMessage = (obj, date) => ({
 
 module.exports = {
   sendMessage,
-}
+};
