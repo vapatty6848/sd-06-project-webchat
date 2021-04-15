@@ -2,7 +2,6 @@
 const app = require('express')();
 const http = require('http').createServer(app);
 const cors = require('cors');
-const { emit } = require('process');
 const io = require('socket.io')(http, {
   cors: {
     origin: 'http://localhost:3000',
@@ -18,7 +17,7 @@ app.set('view engine', 'ejs');
 
 app.set('views', './views');
 
-app.get('/', (req, res)=> {
+app.get('/', (req, res) => {
    res.render('index');
 });
 
@@ -43,19 +42,18 @@ const getHour = () => {
   }
   const hour = `${parseHour}:${time.getMinutes()}:${time.getSeconds()} ${code}`;
   return hour;
-}
+};
 
 io.on('connection', (socket) => {
   console.log(`entrou com id:${socket.id}`);
   socket.on('disconnect', () => {
     console.log('desconectado');  
-  })
+  });
 
   socket.on('message', (message) => {
-    const msg = `${getDate()} ${getHour()} ${message.chatMessage}, ${message.nickname}`
+    const msg = `${getDate()} ${getHour()} ${message.chatMessage}, ${message.nickname}`;
     io.emit(msg);
   });
 });
-
 
 http.listen(PORT, () => console.log(`ouvindo na porta: ${PORT}`));
