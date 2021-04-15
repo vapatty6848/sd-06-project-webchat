@@ -1,9 +1,12 @@
 const express = require('express');
+const path = require('path');
 
 const app = express();
 const http = require('http').createServer(app);
 const cors = require('cors');
 
+app.use(express.json());
+app.use(cors());
 const io = require('socket.io')(http, {
   cors: {
     origin: 'http://localhost:3000', // url aceita pelo cors
@@ -11,19 +14,23 @@ const io = require('socket.io')(http, {
   },
 });
 
-const { addMessages } = require('./models/messages');
+app.use('/', express.static(path.join(__dirname, 'views')));
 
-app.use(cors());
+const { addMessages, getAllMessages } = require('./models/messages');
+
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', async (_req, res) => {
-  res.render('../views/');
-});
+const onlineUsers = [];
 
 io.on('connection', (socket) => {
-  console.log(`User ${socket.id} connected.`);
-  socket.on('disconnect', () => console.log(`User ${socket.id} disconnected.`));
+  const userId = socket.id;
+  console.log(`User ${userId} connected.`);
+  socket.on('disconnect', () => {
+    console.log(`User ${userId} disconnected.`);
+    delete onlineUsers[userId];
+    io.emit('updateUser', { onlineUsers });
+  });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const messageTime = new Date();
@@ -31,6 +38,11 @@ io.on('connection', (socket) => {
     const result = `${messageTime} - ${nickname} - ${chatMessage}`;
     io.emit('message', result);
   });
+});
+
+app.get('/', async (_req, res) => {
+  const allMsgs = await getAllMessages();
+  res.status(200).render('view', { onlineUsers, allMsgs });
 });
 
 http.listen(3000, () => {

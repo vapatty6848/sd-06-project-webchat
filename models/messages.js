@@ -6,6 +6,13 @@ const addMessages = async (data) => connection()
   return newMessage.ops[0];
 });
 
+const getAllMessages = async () => connection()
+  .then(async (db) => {
+    const allMessages = await db.collection('messages').find().toArray();
+    return allMessages;
+});
+
 module.exports = {
   addMessages,
+  getAllMessages,
 };

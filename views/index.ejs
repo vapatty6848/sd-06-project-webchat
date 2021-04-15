@@ -8,12 +8,60 @@
 </head>
 <body>
   <h1>Welcome to FIX WebChat Project!</h1>
+  <div>
+    <input data-testid="nickname-box" id="nickname-box" />
+    <button data-testid="nickname-save" id="nickname-save">Save</button>
+    <ul id="users">
+      <li id="online-user" data-testid="online-user">
+        Visitante <%=numeros%>
+      </li>
+      <%Object.values(onlineUsers).forEach((user) =>{%>
+      <li id="<%=user.socketId%>"
+        data-testid="online-user"><%=user.nickname%>
+      </li>
+      <%})%>
+    </ul>
+  </div>
+  <div>
+    <input data-testid="message-box" id="message-box" />
+    <button data-testid="send-button" id="message-send-button">Enviar</button>
+  </div>
+  <ul id="chat-box">
+    <% messages.forEach(({date, nickname, chatMessage}) => { %>
+    <li data-testid="message">
+      <%=date%> - <%=nickname%>: <%=chatMessage%>
+    </li>
+    <%})%>
+  </ul>
 </body>
-
-<script src="/socket.io/socket.io.js"></script>
-
 <script>
-  const socket = io('http://localhost:3000');
+  const socket = io('http://localhost:3000/');
+    const messageBox = document.getElementById('message-box');
+    const messageSendButton = document.getElementById('message-send-button');
+    const userMe = document.getElementById('userMe');
+    const userButtonSave = document.getElementById('nickname-save');
+    const userInputSave = document.getElementById('nickname-box');
+    const chatBox = document.getElementById('chat-box');
+    const onlineUsers = document.getElementById('online-user');
+    const listUsers = document.getElementById('users');
+    let nickname = 'Visitante' + '<%=numeros%>';
+    const myData = {
+      nickname,
+      socketId: socket.socketId,
+    };
+    userButtonSave.addEventListener('click', () => {
+      userMe.innerHTML = userInputSave.value;
+    });
+    messageSendButton.addEventListener('click', () => {
+      socket.emit('message', { chatMessage: messageBox.value, nickname });
+    });
+    socket.on('message', (stringNewMessage) => {
+      const message = document.createElement('li');
+      message.innerHTML = stringNewMessage;
+      message.setAttribute('data-testid', 'message');
+      chatBox.appendChild(message);
+      console.log('testando');
+    });
 </script>
 
 </html>
