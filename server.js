@@ -1,10 +1,11 @@
 const express = require('express');
-const ejs = require('ejs');
+const path = require('path');
+const cors = require('cors');
 
 const app = express();
 const http = require('http').createServer(app);
 
-const cors = require('cors');
+const publicPath = path.join(__dirname, '/public');
 
 const io = require('socket.io')(http, {
   cors: {
@@ -14,14 +15,19 @@ const io = require('socket.io')(http, {
 });
 
 io.on('connection', (socket) => {
-  console.log(socket);
   console.log('connected');
 });
 
+app.set('view engine', 'ejs');
+
+app.set('views', './views');
+
 app.use(cors());
 
+app.use('/', express.static(publicPath));
+
 app.get('/', (req, res) => {
-  res.status(200).json({ message: 'ok' });
+  res.status(200).render('index');
 });
 
 http.listen(3000, () => {
