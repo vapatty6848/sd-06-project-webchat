@@ -34,6 +34,9 @@ const updateForId = (collection, id, objUpdate) => connection()
 const deleteForId = (collection, id) => connection()
   .then((db) => db.collection(collection).deleteOne({ _id: ObjectID(id) }));
 
+const deleteForIdSocket = (collection, idSocket) => connection()
+  .then((db) => db.collection(collection).deleteOne({ idSocket }));
+
 module.exports = {
   getAll,
   findById,
@@ -44,4 +47,5 @@ module.exports = {
   findByEmail,
   findByEmailAndPassword,
   findByIdAndIdUser,
+  deleteForIdSocket,
 };

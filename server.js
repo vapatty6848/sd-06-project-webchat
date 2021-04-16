@@ -13,7 +13,7 @@ const io = require('socket.io')(http, {
 });
 
 const currentDateFormat = require('./utils/currentDateFormat');
-const { getAll, uploadDB } = require('./models/mongoDbRequests');
+const { getAll, uploadDB, deleteForIdSocket } = require('./models/mongoDbRequests');
 
 const PORT = 3000;
 
@@ -25,17 +25,20 @@ app.set('views', './view');
 app.get('/', async (_req, res) => {
   const arrayMessages = await getAll('messages');
   const arrayUsersOn = await getAll('usersOn');
+  console.log('arrayUsersOn', arrayUsersOn);
   res.render('./chat', { arrayMessages, arrayUsersOn });
 });
 
 io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Desconectado');
+    deleteForIdSocket('usersOn', socket.id);
+    // socket.broadcast.emit('userOff', );
   });
 
-  socket.on('userOn', (userOn) => {
-    uploadDB('usersOn', userOn);
-    socket.broadcast.emit('usersOn', userOn.nickname);
+  socket.on('userOn', (nickname) => {
+    uploadDB('usersOn', { nickname, idSocket: socket.id });
+    socket.broadcast.emit('usersOn', nickname);
   });
 
   socket.on('message', (msg) => {

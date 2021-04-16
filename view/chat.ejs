@@ -78,20 +78,31 @@
           return false;
         })
 
+        const messagesUl = document.querySelector('#mensagens');
+
         const createMessage = (message) => {
-          const messagesUl = document.querySelector('#mensagens');
           const li = document.createElement('li');
           li.innerText = message;
           messagesUl.appendChild(li);
+          // const childrenLi = messagesUl.children;
+          // childrenLi[childrenLi.length - 1].name = 'super message';
         }
-        // Quando nosso evento `ola` for emitido, vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
+        
         socket.on('messageCli', (mensagem) => createMessage(mensagem));
 
+        // const ola = () => {
+        //   const lis = document.getElementById('mensagens');
+        //   lis.children.forEach((element) => {
+        //     element.style.display = 'none';
+        //   })
+        // }
+
+        const userUl = document.querySelector('#user-on');
+
         const createUserOn = (message) => {
-          const messagesUl = document.querySelector('#user-on');
           const li = document.createElement('li');
-          li.innerText = message + ' ta on';
-          messagesUl.appendChild(li);
+          li.innerText = message;
+          userUl.appendChild(li);
         }
         // Quando nosso evento `ola` for emitido, vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
         socket.on('usersOn', (mensagem) => createUserOn(mensagem));
@@ -113,13 +124,14 @@
         const nickname2 = document.querySelectorAll('.online-user2');
 
         nickname2.forEach((element) => {
-
           if (element.innerHTML === nickname.innerHTML) {
-            element.style.display = 'none';
+            messagesUl.removeChild(element);
           }
         });
 
-        socket.emit('userOn', { nickname: nickname.innerHTML, idSocket: socket.id });
+        console.log('socket',socket)
+        console.log('socket.id',socket.ids)
+        socket.emit('userOn', nickname.innerHTML);
 
         const nicknameButton = document.querySelector('#nickname-button');
         nicknameButton.addEventListener('click', () => {
@@ -143,9 +155,9 @@
       </p>
     </div>
     <h2>mensagens</h2>
-    <ul id="mensagens" data-testid="message">
+    <ul id="mensagens">
       <% arrayMessages.forEach(({ currentDate, nickname, chatMessage }) => { %>
-        <li><%= currentDate %> - <%= nickname %>: <%= chatMessage %></li>
+        <li data-testid="message"><%= currentDate %> - <%= nickname %>: <%= chatMessage %></li>
       <% }) %>      
     </ul>
     <h2>pessoas online</h2>
