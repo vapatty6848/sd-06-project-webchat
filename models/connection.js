@@ -17,6 +17,8 @@ db.once('open', () => {
   console.log('Db Connected');
 });
 
+mongoose.connection.useDB(process.env.DB_NAME);
+
 module.exports = connection;
 
 // const { MongoClient } = require('mongodb');
