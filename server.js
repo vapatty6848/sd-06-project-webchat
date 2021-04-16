@@ -28,6 +28,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`User ${socket.id} disconnected.`);
   });
+
   socket.on('message', async ({ chatMessage, nickname }) => {
     const messageTime = new Date();
     await addMessages({ chatMessage, nickname, messageTime });
@@ -36,6 +37,6 @@ io.on('connection', (socket) => {
   });
 });
 
-http.listen(300, () => {
+http.listen(3000, () => {
   console.log('listening...');
 });
