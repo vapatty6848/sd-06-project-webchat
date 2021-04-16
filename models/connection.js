@@ -6,6 +6,7 @@ const remoteUrl = process.env.DB_URL;
 console.log(remoteUrl);
 
 const connection = mongoose.connect(remoteUrl, {
+  dbName: process.env.DB_NAME,
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -16,8 +17,6 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
   console.log('Db Connected');
 });
-
-mongoose.connection.useDB(process.env.DB_NAME);
 
 module.exports = connection;
 
