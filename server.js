@@ -56,9 +56,7 @@ io.on('connection', (socket) => {
 
   socket.on('changeNickname', onChangeNickname);
 
-  socket.on('disconnect', () => {
-    io.emit('disconnectMessage', `Usuário no socket ${socket.id} se desconectou`);
-  });
+  socket.on('disconnect', () => console.log(`Usuário no socket ${socket.id} se desconectou`));
 });
 
 app.set('view engine', 'ejs');
