@@ -10,9 +10,13 @@
 
   <body>
     <h1>webchat</h1>
-    <input type="text" id='message'>
 
-    <button id='sendMessage'>Enviar</button>
+<!-- data-testid="nickname-box" campo nickname -->
+<!-- data-testid="nickname-button" salva name buttonu -->
+
+    <input data-testid="message-box" type="text" id='message'>
+
+    <button data-testid="send-button" id='sendMessage'>Enviar</button>
 
     <h3>Mensagens</h3>
 
@@ -23,20 +27,34 @@
     <ul id='users'></ul>
 
     <script>
+
+// data-testid="online-user" Elemento nome cliente 16 caratcteres
       const socket = io();
-      socket.emit('NewUser', `User_${socket.id}`)
+      socket.emit('NewUser', (`User_${socket.id}`));      // colocar aqui o id especifico gerado
 
       document.querySelector('#sendMessage').addEventListener('click', (e) => {
         const message = document.querySelector('#message').value;
-        socket.emit('message', { chatMessage: message, nickname: 'Paulo_123' });
+        socket.emit('message', { chatMessage: message, nickname: `User_${socket.id}` });
       });
 
-      socket.on('message', (message) => {       
+      socket.on('message', (message) => {
         const messageLI = document.createElement('li');
-        messageLI.innerHTML = message.chatMessage;
+        messageLI.innerHTML = message;
+        messageLI.setAttribute('data-testid', 'message');
         document.querySelector('#messages').appendChild(messageLI);
       });
-    </script>  
+
+      socket.on('usersNick', (users) => {
+        const usersList = document.querySelector('#users');
+        while (usersList.firstChild) usersList.removeChild(usersList.firstChild)
+        users.forEach(user => {
+          const messageLI = document.createElement('li');
+          messageLI.innerHTML = user.name;
+          document.querySelector('#users').appendChild(messageLI);
+        });
+      });
+
+    </script>
   </body>
 
 </html>
