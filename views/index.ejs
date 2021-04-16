@@ -18,16 +18,16 @@
     <section>
       <ul id="onlineUsers"></ul>
     </section>
-    <form action="/" method="POST">
-      <input type="text" id="message" data-testid="message-box" />
-      <button type="button" id="sendMessage" data-testid="send-button">
+    <section>
+      <input type="text" name="message" id="message" data-testid="message-box" />
+      <button type="submit" id="sendMessage" data-testid="send-button">
         Enviar
       </button>
-    </form>
+    </section>
     <section>
       <ul id="chatMessages">
         <% messages.forEach((message) => { %>
-          <li data-testid="message"><%= message.chatMessage %></li>
+          <li data-testid="message"><%= message %></li>
         <% }) %>
       </ul>
     </section>

@@ -14,6 +14,7 @@ const io = require('socket.io')(httpServer, {
 const { urlencoded } = require('express');
 const { sendMessage, removeUser } = require('./utils/serverUtils');
 const MessageController = require('./controllers/MessageController');
+const { create } = require('./models/messagesModel');
 
 app.use(cors());
 
@@ -33,8 +34,9 @@ io.on('connection', (socket) => {
     io.emit('updateUsers', users);
   });
 
-  socket.on('message', (obj) => {
+  socket.on('message', async (obj) => {
     const date = moment().format('DD-MM-yyyy hh:mm:ss');
+    await create({ ...obj, timestamp: moment().format('yyyy-MM-DD hh:mm:ss') });
     io.emit('message', sendMessage(obj, date));
   });
 
