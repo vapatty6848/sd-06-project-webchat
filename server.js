@@ -56,9 +56,11 @@ io.on('connection', (socket) => {
 
   saveUser(nickName);
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    await onMessage({ chatMessage, nickname });
-  });
+  socket.on('message', onMessage);
+
+  // socket.on('message', async ({ chatMessage, nickname }) => {
+  //   await onMessage({ chatMessage, nickname });
+  // });
 
   socket.on('changeNickname', onChangeNickname);
 
