@@ -23,14 +23,10 @@ io.on('connection', (socket) => {
 
   socket.on('changeNickname', (newNickname) => {
     users.map((user) => {
-      if (user.id === socket.id) {
-        console.log('dentro do if')
-        const newUserData = { id: user.id, nickname: newNickname }
-        return newUserData
-      }; /* user.nickname = newNickname; */
+      if (user.id === socket.id) Object.assign(user, { id: user.id, nickname: newNickname });
+
       return user;
     });
-    console.log(users);
     io.emit('updateOnlineUsers', users);
   });
 
