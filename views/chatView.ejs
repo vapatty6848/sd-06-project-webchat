@@ -33,9 +33,10 @@
     </div>
   </div>
   
-  <script src="http://localhost:3000/socket.io/socket.oi.js"></script>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
   <script>
+    const fetch = require('node-fetch');
     // teste
     const socket = io();
 
@@ -54,6 +55,7 @@
     };
 
     socket.on('connect', () => {
+      console.log('i');
       nick = socket.id;
       userSpan.innerText = nick;
       
