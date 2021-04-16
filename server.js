@@ -27,9 +27,7 @@ io.on('connection', (socket) => {
     console.log('Someone logged off');
     users.splice(users.indexOf(socket.id), 1);
   });
-  console.log(users);
   socket.on('message', ({ chatMessage, nickname }) => {
-    console.log(`${date} ${time} - ${nickname}: ${chatMessage} }`)
     io.emit('message', `${date} ${time} - ${nickname}: ${chatMessage} }`);
   });
 });
