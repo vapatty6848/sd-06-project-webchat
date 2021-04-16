@@ -16,6 +16,8 @@ const http = require('http').createServer(app);
 
 const dateFormat = require('dateformat');
 
+let users = [];
+
 const io = require('socket.io')(http, {
   cors: {
     origin: 'http://localhost:3000', // url aceita pelo cors
@@ -23,14 +25,26 @@ const io = require('socket.io')(http, {
   },
 });
 
+const handleNickNameChange = (newNickName, oldNickName) => {
+  users = users.map((user) => {
+    if (user.nickname === oldNickName) { 
+      return { ...user, nickname: newNickName };
+    }
+    return user;
+  });
+  console.log(users);
+};
+
 app.get('/', async (_request, response) => {
   response.render('../views/');
 });
 
 io.on('connection', (socket) => {
-  console.log(`User ${socket.id} has connected.`);
   const randomNickName = crypto.randomBytes(8).toString('hex');
+  users.push({ id: socket.id, nickname: randomNickName });
+  users.reverse();
   socket.emit('connected', randomNickName);
+  io.emit('userList', users);
 
   socket.on('message', async ({ nickname, chatMessage }) => {
     const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
@@ -38,8 +52,14 @@ io.on('connection', (socket) => {
     io.emit('message', message);
   });
 
+  socket.on('nickNameChange', async (newNickName, oldNickName) => {
+    handleNickNameChange(newNickName, oldNickName);
+    io.emit('userList', users);
+  });
+
   socket.on('disconnect', () => {
-    console.log(`User ${socket.id} has disconnected.`);
+    users = users.filter((user) => user.id !== socket.id);
+    io.emit('userList', users);
   });
 });
 
