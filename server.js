@@ -10,6 +10,8 @@ const io = require('socket.io')(httpServer, {
   },
 });
 
+const Message = require('./models/MessagesModel');
+
 app.set('view engine', 'ejs');
 
 const port = 3000;
@@ -21,10 +23,10 @@ const date = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
 
 io.on('connection', (socket) => {
   console.log(`Usuário ${socket.id} conectado`);
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    await Message.registerMessage(chatMessage, nickname, date);
 
-  socket.on('message', (data) => {
-    console.log('mensagem usuario', data);
-    io.emit('message', `${date} ${data.nickname} ${data.chatMessage}`);
+    io.emit('message', `${date} ${nickname} ${chatMessage}`);
   });
 
 /*   socket.on('updateNickname', (nickname) => {
@@ -43,8 +45,10 @@ io.on('connection', (socket) => {
   });
 });
 
-app.get('/', (_req, res) => {
-  res.render('home/index');
+app.get('/', async (_req, res) => {
+  const messages = await Message.getMessageHistory();
+  // console.log(messages);
+  res.render('home/index', { messages });
 });
 
 httpServer.listen(port, () => console.log(`Example app listening on ${port}!`));
