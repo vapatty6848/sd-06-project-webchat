@@ -14,11 +14,13 @@ const create = async (id, nickname) => {
   const newUser = await connection()
     .then((db) => db.collection(COLLECTION_NAME)
       .insertOne({ id, nickname }));
+
   const newUserData = newUser.ops[0];
+
   return newUserData;
 };
 
-const update = async (id, nickname) => {
+const update = async ({ id, nickname }) => {
   const userUpdated = await connection()
     .then((db) => db.collection(COLLECTION_NAME)
       .findOneAndUpdate(

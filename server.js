@@ -23,26 +23,32 @@ app.get('/', async (req, res) => {
   res.render(htmlPath, { users, messages });
 });
 
+const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss'); 
+
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} conectado`);
 
   socket.on('userLogin', async (nickname) => {
-    const user = await Users.create(socket.id, nickname);
+    await Users.create(socket.id, nickname);
     const users = await Users.getAll();
-    const messages = await Messages.getAll();
-    console.log('TODAS MENSAGENS', messages);
-    socket.emit('usersConnected', { user, users, messages });
+    io.emit('usersConnected', users);
+  });
+
+  socket.on('updatedUser', async (user) => {
+    await Users.update(user);
+    const users = await Users.getAll();
+    io.emit('usersConnected', users);
   });
 
   socket.on('message', async ({ nickname, chatMessage }) => {
-    const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss'); 
-    const message = await Messages.create(chatMessage, nickname, dateTimeStamp);
-    console.log('NEW MESSAGE', message);
-    io.emit('message', `${dateTimeStamp} ${nickname} ${chatMessage}`);
+    const msg = await Messages.create(chatMessage, nickname, dateTimeStamp);
+    io.emit('message', `${msg.timestamp} ${msg.nickname} ${msg.message}`);
   });
 
   socket.on('disconnect', async () => {
     await Users.removeById(socket.id);
+    const users = await Users.getAll();
+    io.emit('usersConnected', users);
     console.log(`User ${socket.id} desconectado`);
   });
 });

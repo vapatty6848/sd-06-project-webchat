@@ -2,56 +2,17 @@
 <html>
   <head>
     <title>WebChat Project</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font: 13px Helvetica, Arial;
-      }
-      #messageForm {
-        background: #000;
-        padding: 3px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-      #messageForm input {
-        border: 0;
-        padding: 10px;
-        width: 90%;
-        margin-right: 0.5%;
-      }
-      #messageForm button {
-        width: 9%;
-        background: rgb(130, 224, 255);
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-      }
-      #messages {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-      #messages li {
-        padding: 5px 10px;
-      }
-      #messages li:nth-child(odd) {
-        background: #eee;
-      }
-    </style>
+    <style></style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <% console.log('USERS INDEX.EJS', users) %>
-    <% console.log('MENSAGENS INDEX.EJS', messages) %>
-    <ol id="users"></ol>
+    <h1>WebChat</h1>
+    <h3>USERS</h3>
+    <ul id="users"></ul>
     <form action="" id="nicknameForm">
       <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-button">Salvar</button>
     </form>
+    <h3>MESSAGES</h3>
     <ul id="messages">
       <% messages.forEach((msg) => { %>
         <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
@@ -78,17 +39,13 @@
         return result;
       };
 
-      socket.on('connect', () => {
-        const nickname = getRandomString(16);
-        socket.emit('userLogin', nickname);
-      });
-
       nicknameForm.addEventListener('submit', (e) => {
         e.preventDefault();
         mainUser.nickname = inputNickname.value;
-        socket.emit('updatedUsers', mainUser);
+        console.log(mainUser);
+        socket.emit('updatedUser', mainUser);
       })
-
+      
       messageForm.addEventListener('submit', (e) =>{
         e.preventDefault();
         const { nickname } = mainUser;
@@ -96,7 +53,7 @@
         inputMessage.value = '';
         return false;
       });
-
+      
       const createMessage = (message) => {
         const messagesUl = document.querySelector('#messages');
         const li = document.createElement('li');
@@ -104,20 +61,30 @@
         li.setAttribute('data-testid', 'message');
         messagesUl.appendChild(li);
       }
+      
+      const createUserLiElement = (user) => {
+        const usersUl = document.querySelector('#users');
+        const li = document.createElement('li');
+        li.innerText = user.nickname;
+        li.setAttribute('data-testid', 'online-user');
+        usersUl.appendChild(li);
+      }
 
       const listUsers = (users) => {
         const usersUl = document.querySelector('#users');
         usersUl.innerHTML = '';
-        users.forEach(user => {
-          const li = document.createElement('li');
-          li.innerText = user.nickname;
-          li.setAttribute('data-testid', 'online-user');
-          usersUl.appendChild(li);
-        })
+        createUserLiElement(mainUser);
+        users.filter(user => user.id !== mainUser.id).forEach(user => createUserLiElement(user));
       }
 
-      socket.on('usersConnected', ({ user, users, messages }) => {
-        mainUser = user;
+      socket.on('connect', () => {
+        const nickname = getRandomString(16);
+        mainUser = { nickname };
+        socket.emit('userLogin', nickname);
+      });
+
+      socket.on('usersConnected', (users) => {
+        mainUser = users.find(user => user.nickname === mainUser.nickname);
         listUsers(users);
       })
 
