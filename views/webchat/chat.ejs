@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous"
+  >
+  <script src="/socket.io/socket.io.js"></script>
+  <title>TryChat Socket.io</title>
+</head>
+<body>
+  <div class="container">
+    <h1>TryChat</h1>
+    <form>
+      <div class="form-group">
+        <label for="nickname"></label>
+        <input
+          class="form-control"
+          id="nickname"
+          name="nickname"
+          placeholder="Nickname"
+          type="text"
+        >
+      </div>
+      <button class="btn btn-primary" id="save-btn" type="button">Save Nickname</button>
+      <div class="form-group">
+        <label for="message"></label>
+        <input
+          class="form-control"
+          id="message"
+          name="message"
+          placeholder="Type your message here..."
+          type="text"
+          >
+          <button class="btn btn-primary" id="send-btn" type="button">Send message</button>
+        </div>
+      </form>
+      <div class="container">
+        <ul class="list-group" id="chat-body"></ul>
+      </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    function saveNickname() {
+      const button = document.querySelector('#save-btn');
+      button.addEventListener('click', () => {
+        const nickname = document.querySelector('#nickname');
+        nickname.readOnly = true;
+      });
+    }
+
+    function sendMessage() {
+      const button = document.querySelector('#send-btn');
+      button.addEventListener('click', () => {
+        const chatMessage = document.querySelector('#message').value;
+        const nickname = document.querySelector('#nickname').value;
+        socket.emit('message', { chatMessage, nickname });
+      });
+    }
+
+    socket.on('message', (message) => {
+      console.log(message);
+      const chatBody = document.querySelector('#chat-body');
+      const listItem = document.createElement('li');
+      listItem.innerHTML = message;
+      listItem.className = 'list-group-item';
+      chatBody.appendChild(listItem);
+    });
+
+    sendMessage();
+    saveNickname();
+    
+  </script>
+</body>
+</html>
