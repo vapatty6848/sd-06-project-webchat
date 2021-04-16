@@ -43,14 +43,15 @@
         })
 
         socket.on('message', (messagesFromServer) => {
-            document.querySelector('#messages-list').innerHTML = ''
-            messages = messagesFromServer
-            messages?.forEach((message) => {
+            // document.querySelector('#messages-list').innerHTML = ''
+            // messages = messagesFromServer
+            // messages?.forEach((message) => {
+                // messagesFromServer.forEach((message) => {
                 const newMessageElement = document.createElement("LI")
                 newMessageElement.setAttribute("data-testid", "message");
-                newMessageElement.innerText = message
+                newMessageElement.innerText = messagesFromServer
                 document.querySelector('#messages-list').appendChild(newMessageElement)
-            })
+            // })
 
         })
 

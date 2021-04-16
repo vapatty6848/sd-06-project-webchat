@@ -6,7 +6,7 @@ const io = require('socket.io')(httpServer);
 const MessageModel = require('./models/MessageModel');
 
 const users = [];
-const messages = [];
+// const messages = [];
 
   // Source: https://attacomsian.com/blog/javascript-generate-random-string
 const randomNicknameGenerator = (length = 16) => {
@@ -35,8 +35,6 @@ const createDateString = () => {
 };
 
 io.on('connection', (socket) => {
-  console.log(`User ${socket.id} has joined the room`);
-
   socket.on('random-nickname', () => {
     const nickname = randomNicknameGenerator();
     users.push({ nickname, socketId: socket.id });
@@ -53,10 +51,12 @@ io.on('connection', (socket) => {
   socket.on('message', (message) => {
     // console.log('message', message)
     const { today, now } = createDateString();
-    const messageContent = `${today} ${now} -> ${message.nickname}: ${message.chatMessage}`;
-    messages.push(messageContent);
-    io.emit('message', messages);
-    MessageModel.createMessage({ nickname: message.nickname, message: message.chatMessage, timestamp: `${today} ${now}`})
+    // const messageContent = `${today} ${now} -> ${message.nickname}: ${message.chatMessage}`;
+    // messages.push(messageContent);
+    io.emit('message', `${today} ${now} -> ${message.nickname}: ${message.chatMessage}`);
+    MessageModel.createMessage({ nickname: message.nickname,
+      message: message.chatMessage,
+      timestamp: `${today} ${now}` });
   });
 });
 
