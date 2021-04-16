@@ -21,8 +21,22 @@ io.on('connection', (socket) => {
     io.emit('message', `${createTimestamp()} - ${nickname} disse: ${chatMessage}`);
   });
 
-  socket.on('disconnet', () => {
-    users = users.filter((user) => user.id === socket.id);
+  socket.on('changeNickname', (newNickname) => {
+    users.map((user) => {
+      if (user.id === socket.id) {
+        console.log('dentro do if')
+        const newUserData = { id: user.id, nickname: newNickname }
+        return newUserData
+      }; /* user.nickname = newNickname; */
+      return user;
+    });
+    console.log(users);
+    io.emit('updateOnlineUsers', users);
+  });
+
+  socket.on('disconnect', () => {
+    const onlineUsers = users.filter((user) => user.id !== socket.id);
+    users = onlineUsers;
     io.emit('updateOnlineUsers', users);
   });
 });

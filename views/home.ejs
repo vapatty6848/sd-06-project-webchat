@@ -26,8 +26,13 @@
   let userNickname;
   
   socket.on('updateOnlineUsers', (onlineUsers) => {
-    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname;
-    document.querySelector('#online-users').innerHTML = '';
+    userNickname = onlineUsers.find((user) => user.id === socket.id)
+      ? onlineUsers.find((user) => user.id === socket.id).nickname
+      : userNickname;
+    const onlineUsersList = document.querySelector('#online-users');
+    while (onlineUsersList.firstChild) {
+      onlineUsersList.removeChild(onlineUsersList.lastChild);
+    }
     onlineUsers.forEach((user) => {
       const userToRender = document.createElement('li');
       userToRender.setAttribute('data-testid', 'online-user')
@@ -58,6 +63,7 @@
     const newNickname = document.querySelector('#change-nickname').value;
     userNickname = newNickname;
     document.querySelector('#change-nickname').value = '';
+    socket.emit('changeNickname', userNickname);
   })
 
 </script>
