@@ -43,7 +43,6 @@
       io.emit('user', nickname);
     })
  */
-    const addZero = (number) => (number <= 9) ? `0${number}` : number;
 
     const generateRandomNickname = (length) => {
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -89,10 +88,7 @@
       e.preventDefault();
       let chatMessage = inputMessage.value;
       const nickname = localStorage.getItem('currentUser');
-      let messageDate = new Date();
-      let formattedDate = `${addZero(messageDate.getDate().toString())}-${addZero((messageDate.getMonth()+1).toString())}-${messageDate.getFullYear()} ${addZero(messageDate.getHours())}:${addZero(messageDate.getMinutes())}:${addZero(messageDate.getSeconds())}`
-
-      socket.emit('message', { chatMessage, nickname, formattedDate });
+      socket.emit('message', { chatMessage, nickname });
       inputMessage.value = '';
       return;
     });
@@ -100,7 +96,7 @@
     const createMessage = (message) => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'message');
-      li.innerText = `${message.formattedDate} ${message.nickname}: ${message.chatMessage}`;
+      li.innerText = message;
       messageUl.appendChild(li);
     }
     socket.on('message', (objUser) => createMessage(objUser));
