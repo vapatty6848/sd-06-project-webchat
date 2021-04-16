@@ -12,7 +12,7 @@ const io = require('socket.io')(httpServer, {
 });
 
 const { urlencoded } = require('express');
-const { sendMessage } = require('./utils/serverUtils');
+const { sendMessage, removeUser } = require('./utils/serverUtils');
 const MessageController = require('./controllers/MessageController');
 
 app.use(cors());
@@ -39,13 +39,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    const index = users.findIndex((u) => u.socketId === socket.id);
-    if (index !== -1) return users.splice(index, 1);
+    removeUser(socket, users);
+    io.emit('updateUsers', users);
   });
 
   socket.on('changeUser', (newUserName) => {
-    const index = users.findIndex((u) => u.socketId === socket.id);
-    if (index !== -1) users.splice(index, 1);
+    removeUser(socket, users);
     users.push({ socketId: socket.id, userName: newUserName });
     io.emit('updateUsers', users);
   });
