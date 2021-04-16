@@ -9,6 +9,5 @@ const generateChat = () => {
   
   io.on('connection', (socket) => {
     console.log('connected');
-
-}
-
+  }
+};

@@ -5,8 +5,13 @@
   </head>
   <body>
     <h1>WebChat</h1>
+    <input id="messageInput" data-testid="message-box" autocomplete="off" />
+    <button id="sendButton" data-testid="send-button" type="button">Send message!</button>
+
   </body>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="http://localhost:3000/client.js"></script>
+  <script src="/client.js"></script>
+  <script src="/sendMessage.js"></script>
+
 </html>
