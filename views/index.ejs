@@ -5,29 +5,72 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Página SocketIO</title>
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="socket.io/socket.io.js"></script>
 </head>
+
 <body>
   <div>
-    <ul id="list-users">
-      <li id="online-user" data-testid="online-user">Visitante</li>
-        <li id="" data-testid="online-user"></li>
-      </ul>
+    <div>
+      <input type="text" data-testid="message-box" id="message-box"  placeholder="Digite uma nova msg aqui">
+      <button type="button" data-testid="send-button" id="send-button">Enviar mensagem</button>      
     </div>
     <div>
-    <input data-testid="nickname-box" id="nickname-box" />
-    <button data-testid="nickname-button" id="nickname-button">Salvar</button>
-    <input data-testid="message-box" id="message-box" />
-    <button data-testid="send-button" id="send-button">Enviar</button>
+      <input type="text"  data-testid="nickname-box" id="nickname-box" placeholder="Insira seu Nick">
+      <button type="button"  data-testid="nickname-button" id="nickname-button">Salvar</button>      
+    </div>
+    <ol id="usersList"></ol>
+    <ul id="messages"></ul>
   </div>
-  <ul id="chat-box">
-    <li data-testid="message">
-  </ul>
-  
+
   <script>
-    const messageBox = document.querySelector('#message-box');
-    const messageSendButton = document.querySelector('#message-send-button');
     const socket = io();
+    const list = document.querySelector('#usersList');
+    const message = document.querySelector('#message-box');
+    const buttonNickname = document.querySelector('#nickname-button');
+    let nickname = '';
+
+    socket.on('connected', (nickCreated) => {
+      nickname = nickCreated;
+      addNickname(nickCreated);
+    });
+    const msgButton = document.querySelector('#send-button');
+    msgButton.addEventListener('click', () => {
+      socket.emit('message', { chatMessage: message.value, nickname });
+      message.value = '';
+      return false;
+    });
+    const addNickname = (nick) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = nick;
+      list.appendChild(li);
+    }
+    const createMessage = (res) => {
+      const messagesList = document.querySelector('#messages');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerText = res;
+      messagesList.appendChild(li);
+    }
+
+    socket.on('message', (message) => createMessage(message));
+    buttonNickname.addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box');
+      socket.emit('changeNickname', { newNickname: newNickname.value });
+      nickname = newNickname.value;
+      newNickname.value = '';
+    });
+    const changeNickname = (users) => {
+      list.innerHTML = '';
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerText = user.nickname;
+        list.appendChild(li);
+      })
+    }
+
+    socket.on('changeNickname', (users) => changeNickname(users));
   </script>
   
 </body>
