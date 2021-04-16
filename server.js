@@ -34,12 +34,6 @@ io.on('connection', (socket) => {
     socket.emit('usersConnected', { user, users, messages });
   });
 
-  socket.on('updatedUsers', async (user) => {
-    const { nickname, id } = user;
-
-    socket.emit('usersConnected', { user, users });
-  });
-
   socket.on('message', async ({ nickname, chatMessage }) => {
     const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss'); 
     const message = await Messages.create(chatMessage, nickname, dateTimeStamp);
@@ -52,6 +46,11 @@ io.on('connection', (socket) => {
     console.log(`User ${socket.id} desconectado`);
   });
 });
+
+// socket.on('updatedUsers', async (user) => {
+//   const { nickname, id } = user;
+//   socket.emit('usersConnected', { user, users });
+// });
 
 const PORT = process.env.PORT || 3000;
 
