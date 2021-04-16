@@ -285,8 +285,6 @@ DB_NAME=webchat                             // nome do database
 
 - Será validado que o front-end tem um campo de texto para preencher e um botão para alterar o apelido _(nickname)_;
 
-- Será validado que o _nickname_ é alterado em todos os clientes conectados;
-
 - Será validado que é possível enviar mensagens após alterar o _nickname_.
 ```
 ---
