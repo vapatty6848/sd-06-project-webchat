@@ -68,7 +68,6 @@ app.set('views', './views');
 
 app.get('/', async (req, res) => {
   const messages = await messageModel.getAll();
-  console.log(messages, 'estou aqui');
   res.render('homeView', { messages });
 });
 

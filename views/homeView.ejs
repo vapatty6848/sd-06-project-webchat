@@ -37,7 +37,7 @@
       </div>
       <div>
         <h3>Mensagens</h3>
-        <ul data-testid="message" id="message">
+        <ul id="message">
           <% messages.forEach((message) => { %>
             <li data-testid="message"><%= `${message.timestamp} ${message.nickname} ${message.chatMessage}` %></li>
           <% }) %>
