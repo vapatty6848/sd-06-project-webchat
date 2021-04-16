@@ -1,90 +1,62 @@
-const express = require('express');
+const app = require('express')();
+const path = require('path'); // resolve o caminho plantão Gargani
+const http = require('http').createServer(app);
+
 const cors = require('cors');
+const dateFormat = require('dateformat');// https://www.npmjs.com/package/dateformat
 
-const app = express();
-const httpServer = require('http').createServer(app);
-
-const io = require('socket.io')(httpServer, {
+const io = require('socket.io')(http, {
   cors: {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
   },
 });
 
-// entender por que não funciona importação
-// const nickGenerator = require('./utils/nickGenerator');
-// const getTime = require('./utils/getTime');
+const Users = require('./models/Users');
+const Messages = require('./models/Messages');
 
 app.use(cors());
 
-app.set('view engine', 'ejs');
-app.set('views', './views');
-app.get('/', (_req, res) => {
-  res.render('index');
+app.get('/', async (_req, res) => {
+  const htmlPath = path.join(__dirname, '/views/index.ejs');
+  const users = await Users.getAll();
+  const messages = await Messages.getAll();
+  res.render(htmlPath, { users, messages });
 });
 
-const users = [];
+const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss'); 
 
-const getTime = () => {
-  const date = new Date();
-  // https://blog.betrybe.com/javascript/javascript-date-format/#1
-  const dateFormated = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()} ${date
-    .getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-  return dateFormated;
-};
-
-const nickGenerator = () => {
-  const length = 16;
-  let stringAleatoria = '';
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < length; i += 1) {
-      stringAleatoria += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-  }
-  return stringAleatoria;
-};
-
-const newUser = (socket) => {
-  const user = {
-    id: socket.id,
-  };
-  users.push(user);
-};
-
-const addNickname = (nickname, socket) => {
-  const index = users.findIndex((user) => user.id === socket.id);
-  users[index].nickname = nickname;
-};
-
-const getNickname = (socket) => {
-  const index = users.findIndex((user) => user.id === socket.id);
-  return users[index].nickname;
-};
-
-const changeNickname = (newNickname, socket) => {
-  const index = users.findIndex((user) => user.id === socket.id);
-  users[index].nickname = newNickname;
+const login = async (socket, nickname, ioConnection) => {
+  await Users.create(socket.id, nickname);
+  const users = await Users.getAll();
+  ioConnection.emit('usersConnected', users);
 };
 
 io.on('connection', (socket) => {
-  console.log(`Usuário ${socket.id} conectado`);
-  newUser(socket);
-  console.log(users);
-  io.emit('connected', nickGenerator());
-
-  socket.on('message', ({ chatMessage, nickname }) => {
-    addNickname(nickname, socket);
-    const res = `${getTime()} ${getNickname(socket)} ${chatMessage}`;
-    io.emit('message', res);
+  socket.on('userLogin', async (nickname) => {
+    await login(socket, nickname, io);
   });
 
-  socket.on('changeNickname', ({ newNickname }) => {
-    changeNickname(newNickname, socket);
-    io.emit('changeNickname', users);
+  socket.on('updatedUser', async (user) => {
+    await Users.update(user);
+    const users = await Users.getAll();
+    io.emit('usersConnected', users);
   });
 
-  socket.on('disconnect', () => {
-    console.log('disconnect');
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    const msg = await Messages.create(chatMessage, nickname, dateTimeStamp);
+    io.emit('message', `${msg.timestamp} ${msg.nickname} ${msg.message}`);
+  });
+
+  socket.on('disconnect', async () => {
+    await Users.removeById(socket.id);
+    const users = await Users.getAll();
+    io.emit('usersConnected', users);
   });
 });
 
-httpServer.listen(3000);
+const PORT = process.env.PORT || 3000;
+
+http.listen(PORT, () => {
+  console.log(`Rodando na porta ${PORT}!!`);
+});
