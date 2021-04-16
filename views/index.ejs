@@ -46,12 +46,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <h1 data-testid="online-user" id="user-nickname"></h1>
+    <% console.log('USERS INDEX.EJS', users) %>
+    <% console.log('MENSAGENS INDEX.EJS', messages) %>
+    <ol id="users"></ol>
     <form action="" id="nicknameForm">
       <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-button">Salvar</button>
     </form>
-    <ul id="users"></ul>
-    <ul id="messages"></ul>
+    <ul id="messages">
+      <% messages.forEach((msg) => { %>
+        <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
+      <% }) %>
+    </ul>
     <form action="" id="messageForm">
       <input data-testid="message-box" id="messageInput" autocomplete="off" /><button data-testid="send-button">Enviar</button>
     </form>
@@ -62,26 +67,31 @@
       const nicknameForm = document.querySelector('#nicknameForm');
       const inputMessage = document.querySelector('#messageInput');
       const inputNickname = document.querySelector('#nicknameInput');
-      let nickname;
+      let mainUser;
 
       const getRandomString = (length) => {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = ' ';
-        const charactersLength = characters.length;
-          for (let i = 0; i < length; i ++ ) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-          }
+        const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i += 1) {
+          result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+        }
         return result;
       };
 
+      socket.on('connect', () => {
+        const nickname = getRandomString(16);
+        socket.emit('userLogin', nickname);
+      });
+
       nicknameForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        nickname = inputNickname.value;
-        document.querySelector('h1').innerHTML = nickname;
+        mainUser.nickname = inputNickname.value;
+        socket.emit('updatedUsers', mainUser);
       })
 
       messageForm.addEventListener('submit', (e) =>{
         e.preventDefault();
+        const { nickname } = mainUser;
         socket.emit('message', { nickname, chatMessage: inputMessage.value });
         inputMessage.value = '';
         return false;
@@ -95,19 +105,23 @@
         messagesUl.appendChild(li);
       }
 
-      socket.on('connect', () => {
-        if(!nickname) {
-          nickname = getRandomString(16);
-        }
-        document.querySelector('h1').innerHTML = nickname;
-        socket.emit('userConnect', nickname);
+      const listUsers = (users) => {
+        const usersUl = document.querySelector('#users');
+        usersUl.innerHTML = '';
+        users.forEach(user => {
+          const li = document.createElement('li');
+          li.innerText = user.nickname;
+          li.setAttribute('data-testid', 'online-user');
+          usersUl.appendChild(li);
+        })
+      }
+
+      socket.on('usersConnected', ({ user, users, messages }) => {
+        mainUser = user;
+        listUsers(users);
       })
 
-      socket.on('welcome', (message) => {
-        createMessage(message)
-      });
-
-      socket.on('messageServer', (object) => createMessage(object.message));
+      socket.on('message', (message) => createMessage(message));
     </script>
   </body>
 </html>
