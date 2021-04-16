@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SO WHERE DO I BEGIN?</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font: 13px Helvetica, Arial;
+    }
+    form {
+      background: #000;
+      padding: 3px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    form input {
+      border: 0;
+      border-radius: 3px;
+      padding: 10px;
+      width: 90%;
+      margin-right: 0.5%;
+    }
+    form button {
+      width: 9%;
+      background: rgb(130, 224, 255);
+      border: 1px solid rgb(16, 87, 110);
+      border-radius: 3px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    #mensagens {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #mensagens li {
+      padding: 5px 10px;
+    }
+    #mensagens li:nth-child(odd) {
+      background: #eee;
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <label>
+    <h3>Tocar seu nickname</h3>
+    <input id="nickname-box" data-testid="nickname-box" />
+    <button id="nickname-button" data-testid="nickname-button">Change</button>
+  </label>
+  <h3>Usuarios online</h3>
+  <ul id="users">
+
+  </ul>
+  <ul id="mensagens"></ul>
+    <form action="">
+      <input id="mensagemInput" data-testid="message-box" autocomplete="off" />
+      <button id="mensagemButton" data-testid="send-button">Send</button>
+    </form>
+
+  <script>
+    const socket = io();
+
+    document.querySelector('form').addEventListener('submit', (e) => e.preventDefault());
+
+    const generateNick = () => {
+      const user = localStorage.getItem('nickname')
+      if (!user) {
+        const randomName = `user_${Math.random().toString().substr(2, 11)}`;
+        localStorage.setItem('nickname', randomName);
+        return randomName;
+      }
+      return user;
+    };
+    socket.emit('newUser', generateNick());
+
+    socket.on('usersList', (users) => {
+      users.forEach((user) => {
+        const onlineUser = document.createElement('li');
+        onlineUser.innerHTML = user.nickname;
+        onlineUser.setAttribute('data-testid', 'online-user');
+        document.querySelector('#users').appendChild(onlineUser);
+      });
+    });
+    
+    document.querySelector('#mensagemButton').addEventListener('click', (e) => {
+      const chatMessage = document.querySelector('#mensagemInput').value;
+      const nickname = localStorage.getItem('nickname');
+      socket.emit('message', { nickname, chatMessage });
+    });
+
+    socket.on('message', (message) => {
+      const messageLi = document.createElement('li');
+      messageLi.innerHTML = message;
+      messageLi.setAttribute('data-testid', 'message');
+      document.querySelector('#mensagens').appendChild(messageLi);
+    });
+
+    document.querySelector('#nickname-button').addEventListener('click', (e) => {
+      const newNick = document.querySelector('#nickname-box').value;
+      localStorage.setItem('nickname', newNick);
+      socket.emit('newUser', newNick);
+    });
+  </script>
+</body>
+</html>
