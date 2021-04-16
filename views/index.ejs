@@ -25,89 +25,80 @@
         <button type="submit" data-testid="send-button">Send</button>
       </form>
       <section>
-        <ul id="chat-messages"></ul>
+        <ul id="chat-messages">
+          <% messages.forEach((message) => { %>
+            <li data-testid="message">
+              <%= message %>
+            </li>
+          <% }) %>
+        </ul>
       </section>
     <script>
       const socket = io();
-      const usersOnlineList = new Set();
-      const messages = JSON.parse('<%- messages %>');
 
-      const generateUser = () => {
-        // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-        return Math.random().toString(21).substring(2, 10)
+      // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+      const generateUser = () => Math.random().toString(21).substring(2, 10)
         + Math.random().toString(21).substring(2, 10);
+      let currentUser = sessionStorage.getItem('webchat-user') || generateUser();
+
+      const updateNickname = (newName, prevName = '') => {
+        currentUser = newName.slice();
+        const userElement = document.querySelector('#current-user');
+        userElement.innerText = currentUser;
+        sessionStorage.setItem('webchat-user', currentUser);
+        socket.emit('userLogin', { user: currentUser, prevUser: prevName });
+        return true;
       };
 
-      let currentUser = sessionStorage.getItem('webchat-user') || generateUser();
-      // let currentUser = generateUser();
-      socket.emit('userLogin', { user: currentUser });
-      const userElement = document.querySelector('#current-user');
-      userElement.innerText = currentUser;
+      updateNickname(currentUser);
 
-      const userForm = document.querySelector('#user-form');
-      const userInput = document.querySelector('#user-login');
-      userForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const prevUser = currentUser.slice();
-        currentUser = userInput.value;
-        sessionStorage.setItem('webchat-user', currentUser);
-        userElement.innerText = currentUser;
-        socket.emit('userLogin', { user: currentUser, prevUser });
-        userInput.value = '';
-        return false;
-      });
+      document.querySelector('#user-form')
+        .addEventListener('submit', (e) => {
+          e.preventDefault();
+          const prevName = currentUser.slice();
+          const newName = document.querySelector('#user-login');
+          updateNickname(newName.value, prevName);
+          newName.value = '';
+          return true;
+        });
 
-
-      const chatForm = document.querySelector('#chat-form');
-      const inputMessage = document.querySelector('#msgInput');
-      chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
-        socket.emit('message', messageObject);
-        inputMessage.value = '';
-        return false;
-      });
+      document.querySelector('#chat-form')
+        .addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const inputMessage = document.querySelector('#msgInput');
+          const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
+          socket.emit('message', messageObject);
+          inputMessage.value = '';
+          return false;
+        });
 
       const chatUl = document.querySelector('#chat-messages');
-
-      const printStoredMessages = ({ timestamp, nickname, message }) => {
-        const splitTimestamp = timestamp.split(/[-]|[ ]/g);
-        const [y, m, d, t] = splitTimestamp;
-        const invertTimestamp = `${d}-${m}-${y} ${t}`;
-        const li = document.createElement('li');
-        li.dataset.testid = 'message';
-        li.innerText = `${invertTimestamp} - ${nickname}: ${message}`;
-        chatUl.appendChild(li);
-      };
-
       const printMessage = (chatMessage) => {
         const li = document.createElement('li');
         li.dataset.testid = 'message';
         li.innerText = chatMessage;
         chatUl.appendChild(li);
       };
-
-      messages.forEach((message) => printStoredMessages(message));
       socket.on('message', (msg) => printMessage(msg));
 
-      const usersUl = document.querySelector('#users-online');
       socket.on('usersOnline', (users) => {
-        console.log(users);
+        const usersUl = document.querySelector('#users-online');
         usersUl.innerHTML = '';
-        const userIndex = users.indexOf(currentUser);
-        const thisUser = users.splice(userIndex, 1);
+
+        users.splice(users.indexOf(currentUser), 1);
         const li = document.createElement('li');
         li.dataset.testid = 'online-user';
         li.innerText = currentUser;
         usersUl.appendChild(li);
 
         users.forEach((user) => {
-              const li = document.createElement('li');
-              li.dataset.testid = 'online-user';
-              li.innerText = user;
-              usersUl.appendChild(li);
-            });
+          const userLi = document.createElement('li');
+          userLi.dataset.testid = 'online-user';
+          userLi.innerText = user;
+          usersUl.appendChild(userLi);
+        });
       });
+
     </script>
   </body>
 </html>

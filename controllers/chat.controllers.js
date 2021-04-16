@@ -1,6 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
 
 const { chat } = require('../models');
+const { setupMessages } = require('../utils');
 
 const create = async (message) => {
   try {
@@ -13,9 +14,12 @@ const create = async (message) => {
 
 const getMessages = async (req, res, next) => {
   try {
-    const messages = await chat.getAll();
-
-    res.status(StatusCodes.OK).render('index', { messages: JSON.stringify(messages) });
+    const messagesStored = await chat.getAll();
+    const messages = messagesStored.map((message) => {
+      const { messageStored } = setupMessages(message);
+      return messageStored;
+    });
+    res.status(StatusCodes.OK).render('index', { messages });
   } catch (err) {
     return next({ err });
   }

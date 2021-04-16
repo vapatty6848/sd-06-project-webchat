@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 const addUserOnlineList = (usersOnline, user, prevUser) => {
   const prevUserIndex = usersOnline.indexOf(prevUser);
   if (prevUserIndex >= 0) { usersOnline.splice(prevUserIndex, 1); }
@@ -14,37 +16,21 @@ const removeUserOnlineList = (usersOnline, user) => {
   return newList;
 };
 
-const addZero = (i) => {
-  const newInt = (i < 10) ? `0${i}` : i;
-  return newInt;
-};
-
-function setTimestamp(order = '') {
-  const date = new Date();
-  const d = addZero(date.getDate());
-  const m = addZero(date.getMonth());
-  const y = addZero(date.getFullYear());
-
-  const h = addZero(date.getHours());
-  const min = addZero(date.getMinutes());
-  const s = addZero(date.getSeconds());
-  if (order === 'year-first') return `${y}-${m}-${d} ${h}:${min}:${s}`;
-  return `${d}-${m}-${y} ${h}:${min}:${s}`;
-}
-
 const setupMessages = (msg) => {
-  const messageFrontend = `${setTimestamp()} - ${msg.nickname}: ${msg.chatMessage}`;
+  const frontendTimestamp = moment(msg.timestamp).format('DD-MM-yyyy hh:mm:ss');
+  const backendTimestamp = moment(msg.timestamp).format('yyyy-MM-DD hh:mm:ss');
+  const messageFrontend = `${frontendTimestamp} - ${msg.nickname}: ${msg.chatMessage}`;
+  const messageStored = `${frontendTimestamp} - ${msg.nickname}: ${msg.message}`;
   const messageBackend = {
-    timestamp: setTimestamp('year-first'),
+    timestamp: backendTimestamp,
     nickname: msg.nickname,
     message: msg.chatMessage,
   };
 
-  return { messageBackend, messageFrontend };
+  return { messageBackend, messageFrontend, messageStored };
 };
 
 module.exports = {
-  setTimestamp,
   addUserOnlineList,
   removeUserOnlineList,
   setupMessages,
