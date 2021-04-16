@@ -1,6 +1,7 @@
 const app = require('express')();
 const httpServer = require('http').createServer(app);
 const dateFormat = require('dateformat');
+
 // const path = require('path');
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
@@ -9,8 +10,11 @@ const io = require('socket.io')(httpServer, {
     methods: ['GET', 'POST'],
   },
 });
+const model = require('./models/message');
+const controller = require('./controller/controller');
 
 app.use(cors());
+app.use('/', controller);
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
@@ -60,17 +64,16 @@ const removeDisconnected = (socket) => {
 };
 
 io.on('connection', (socket) => {
-  console.log(`${socket.id} connected`);
   const stringNickname = randomNickname();
   addNewUser(socket, stringNickname);
-  // io.emit('connected', randomNickname());
   socket.broadcast.emit('connected', stringNickname);
   socket.emit('userConnected', { stringNickname, users });
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', async ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);
     const dateTime = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
     const response = `${dateTime} ${getNickname(socket)} ${chatMessage}`;
     io.emit('message', response);
+    await model.createMessage(chatMessage, getNickname(socket), dateTime);
   });
   socket.on('changeNickname', ({ newNickname }) => {
     changeNickname(newNickname, socket);

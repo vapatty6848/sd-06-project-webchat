@@ -94,6 +94,22 @@
     };
 
     socket.on('changeNickname', (users) => changeNickname(users));
+
+    window.onload = async () => {
+      const messages = await fetch('http://localhost:3000/getmessages', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then((res) => res.json());
+      const messages1 = document.querySelector('#messages');
+      messages.forEach((message) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerText = `${message.timestamp} ${message.nickname} ${message.message}`;
+        messages1.appendChild(li);
+      });
+    }
   </script>
 </body>
 </html>
