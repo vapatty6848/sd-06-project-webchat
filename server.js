@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 
 const app = express();
 const http = require('http').createServer(app);
@@ -49,7 +50,7 @@ io.on('connection', (socket) => {
     io.emit('reloadUsersList', userList);
   });
   
-  socket.on('userMessage', ({ nickname, chatMessage }) => {
+  socket.on('message', ({ nickname, chatMessage }) => {
     generateUserMessage(nickname, chatMessage);
   });
 });
