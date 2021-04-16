@@ -7,8 +7,12 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   },
 });
+const model = require('./models/model');
+const controller = require('./controller/controller');
 
 app.use(cors());
+
+app.use('/', controller);
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
@@ -65,16 +69,17 @@ const removeDisconnected = (socket) => {
 };
 
 io.on('connection', (socket) => {
-  console.log(`${socket.id} connected`);
   const stringNickname = getRandomString();
   addNewUser(socket, stringNickname);
   socket.broadcast.emit('connected', stringNickname);
   socket.emit('userConnected', { stringNickname, users });
 
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', async ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);
-    const response = `${getTime()} ${getNickname(socket)} ${chatMessage}`;
+    const time = getTime();
+    const response = `${time} ${getNickname(socket)} ${chatMessage}`;
     io.emit('message', response);
+    await model.createMessage(chatMessage, getNickname(socket), time);
   });
 
   socket.on('changeNickname', ({ newNickname }) => {

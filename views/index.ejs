@@ -21,13 +21,12 @@
 
     let nickname = '';
     socket.on('connected', (stringNickname) => {
-      console.log('teste')
       nickname = stringNickname;
       addNickname(stringNickname);
     });
 
     socket.on('userConnected', ({ stringNickname, users }) => {
-      nickname = stringNickname;      
+      nickname = stringNickname;
       addUsersConnected(users);
       // addNicknameToBeginning(stringNickname);
     });
@@ -98,6 +97,22 @@
     }
 
     socket.on('changeNickname', (users) => changeNickname(users));
+
+    window.onload = async () => {
+      const messages = await fetch('http://localhost:3000/getmessages', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then((res) => res.json());
+      const messagesUl = document.querySelector('#messages');
+      messages.forEach((message) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerText = `${message.timestamp} ${message.nickname} ${message.message}`;
+        messagesUl.appendChild(li);
+      });
+    }
   </script>
 </body>
 
