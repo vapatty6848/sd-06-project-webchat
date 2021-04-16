@@ -25,13 +25,15 @@ app.get('/', async (req, res) => {
 
 const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss'); 
 
-io.on('connection', (socket) => {
-  console.log(`User ${socket.id} conectado`);
+const login = async (socket, nickname, ioConnection) => {
+  await Users.create(socket.id, nickname);
+  const users = await Users.getAll();
+  ioConnection.emit('usersConnected', users);
+};
 
+io.on('connection', (socket) => {
   socket.on('userLogin', async (nickname) => {
-    await Users.create(socket.id, nickname);
-    const users = await Users.getAll();
-    io.emit('usersConnected', users);
+    await login(socket, nickname, io);
   });
 
   socket.on('updatedUser', async (user) => {
@@ -49,14 +51,8 @@ io.on('connection', (socket) => {
     await Users.removeById(socket.id);
     const users = await Users.getAll();
     io.emit('usersConnected', users);
-    console.log(`User ${socket.id} desconectado`);
   });
 });
-
-// socket.on('updatedUsers', async (user) => {
-//   const { nickname, id } = user;
-//   socket.emit('usersConnected', { user, users });
-// });
 
 const PORT = process.env.PORT || 3000;
 
