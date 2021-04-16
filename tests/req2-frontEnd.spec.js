@@ -103,43 +103,6 @@ describe('2 - Crie um frontend para que as pessoas interajam com o chat', () => 
     expect(nicknameButton).not.toBeNull();
   });
 
-
-  it('Será validado que o nickname é alterado em todos os clientes conectados', async () => {
-
-    //There is no changed nickname
-    const client1Nicknames = await page.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
-    expect(client1Nicknames).not.toContain(nickname);
-
-    //another client gets in
-    const page2 = await browser.newPage();
-    await page2.setCacheEnabled(false);
-    await page2.goto(BASE_URL);
-
-    //Still no changed nickname
-    const client2Nicknames = await page2.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
-    expect(client2Nicknames).not.toContain(nickname);
-
-    //the former client changes its nickname
-    await page.bringToFront();
-    const nicknameBox = await page.$(`input${dataTestid('nickname-box')}`);
-    await nicknameBox.type(nickname);
-
-    const nicknameButton = await page.$(`button${dataTestid('nickname-button')}`);
-    await nicknameButton.click();
-
-    //It gets changed
-    const client1ChangedNicknames = await page.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
-    expect(client1ChangedNicknames).toContain(nickname);
-
-
-    //It gets changed for the latter client too
-    await page2.bringToFront();
-
-    const client2ChangedNicknames = await page2.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
-    expect(client2ChangedNicknames).toContain(nickname);
-  });
-
-
   it('Será validado que é possível enviar mensagens após alterar o nickname', async () => {
 
     //Client changes nickname
