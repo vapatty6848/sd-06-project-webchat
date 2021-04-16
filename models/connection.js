@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
+require('dotenv/config');
 // const localUrl = 'mongodb://localhost:27017/webchat';
 const remoteUrl = process.env.DB_URL;
+
+console.log(remoteUrl);
 
 const connection = mongoose.connect(remoteUrl, {
   useNewUrlParser: true,
