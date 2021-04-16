@@ -23,7 +23,29 @@
   
   <script>
     const socket = io();
-    // let userName;
+    console.log("socket", socket);
+    
+    // const test = socket.map((e) => ({ id: e.id }));
+    // console.log("socket map", test);
+
+    // socket = socket.filter((user) => {
+    //   console.log(user.id);
+    // });
+   
+    let nickname = socket.id;
+    console.log('nickname', nickname);
+    localStorage.setItem('nickname', nickname);
+    
+    document.querySelector('#sendNickname').addEventListener('click', (e) => {
+      const nickname = document.querySelector('#nickname').value;
+      console.log("socket", socket);
+      console.log("socket.id", socket.id);
+      socket.id = nickname;
+      localStorage.setItem('nickname', nickname);
+      console.log("nickname socket", nickname);
+      // socket.emit('message', { chatMessage: message, nickname: socket.id });
+    });
+
     document.querySelector('#sendMessage').addEventListener('click', (e) => {
       const message = document.querySelector('#message').value;
       socket.emit('message', { chatMessage: message, nickname: socket.id });
