@@ -19,9 +19,10 @@ app.get('/', (req, res) => {
 
 const users = [];
 
-const addNewUser = (socket) => {
+const addNewUser = (socket, nickname) => {
   const newUser = {
     id: socket.id,
+    nickname,
   };
   users.push(newUser);
 };
@@ -58,13 +59,17 @@ const getRandomString = () => {
   return result;
 };
 
+const removeDisconnected = (socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  users.splice(index, 1);
+};
+
 io.on('connection', (socket) => {
   console.log(`${socket.id} connected`);
-  addNewUser(socket);
   const stringNickname = getRandomString();
-  console.log(users);
-  socket.broadcast.emit('connected', { stringNickname, users });
-  socket.emit('userConnected', stringNickname);
+  addNewUser(socket, stringNickname);
+  socket.broadcast.emit('connected', stringNickname);
+  socket.emit('userConnected', { stringNickname, users });
 
   socket.on('message', ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);
@@ -78,7 +83,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('disconnect');
+    removeDisconnected(socket);
   });
 });
 
