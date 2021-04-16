@@ -61,8 +61,10 @@ const getRandomString = () => {
 io.on('connection', (socket) => {
   console.log(`${socket.id} connected`);
   addNewUser(socket);
+  const stringNickname = getRandomString();
   console.log(users);
-  io.emit('connected', getRandomString());
+  socket.broadcast.emit('connected', { stringNickname, users });
+  socket.emit('userConnected', stringNickname);
 
   socket.on('message', ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);

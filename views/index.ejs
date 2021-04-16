@@ -20,9 +20,15 @@
     const socket = io();
 
     let nickname = '';
-    socket.on('connected', (nicknameGenerated) => {
+    socket.on('connected', ({ stringNickname, users }) => {
+      nickname = stringNickname;
+      addNickname(stringNickname);
+      users.forEach((user) => addNickname(user.nickname));
+    });
+
+    socket.on('userConnected', (nicknameGenerated) => {
       nickname = nicknameGenerated;
-      addNickname(nicknameGenerated);
+      addNicknameToBeginning(nicknameGenerated);
     });
 
     const button = document.querySelector('#buttonSend');
@@ -35,6 +41,14 @@
     });
 
     const addNickname = (nickname) => {
+      const listNickname = document.querySelector('#nicknameList');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = nickname;
+      listNickname.prepend(li);
+    }
+
+    const addNicknameToBeginning = (nickname) => {
       const listNickname = document.querySelector('#nicknameList');
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
