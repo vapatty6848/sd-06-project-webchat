@@ -5,56 +5,90 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web Chat Project</title>
+  <style>
+    #messages { list-style-type: none; margin: 0; padding: 0; }
+    #messages > li { padding: 0.5rem 1rem; }
+    #messages > li:nth-child(odd) { background: #ccffb3; }
+  </style>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <h1>Web Chat Project</h1>
-  <span>User:</span>
-  <input id="userInput" type="text"  autocomplete="off" />
-  <button id="userButton" type="button">Entrar</button>
+  <div class="h1 text-center text-success">ZAP ZAP <span class="text-dark">Tr00 Project</span></div>
+  <div class='d-flex align-items-center'>
+    <div class="input-group w-50">
+      <h3 class="h3 text-center text-success">ZAP</h3><h3>Name:</h3>
+      <input id="userInput" data-testid="nickname-box" type="text" class="form-control" autocomplete="off">
+      <div class="input-group-prepend">
+        <button id="userButton" data-testid="nickname-button" class="btn btn-outline-secondary" type="button">Alterar</button>
+      </div>
+    </div>
+  </div>
   <ul id="users"></ul>
-  <br>
-  <span>Message:</span>
-  <input id="messageInput" type="text"  autocomplete="off" />
-  <button id="messageButton" type="button">Enviar</button>
+  <hr>
   <ul id="messages"></ul>
+  <div class='fixed-bottom'>
+    <div class="input-group">
+      <input id="messageInput" data-testid="message-box" type="text" class="form-control" autocomplete="off">
+      <div class="input-group-prepend">
+        <button id="messageButton" data-testid="send-button" class="btn btn-outline-secondary" type="button">Enviar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const socket = io();
-  
-    const userInput = document.querySelector('#userInput');
+    const randomNickname = `user_${Math.random().toString(36).substr(2, 16)}`;
     const userButton = document.querySelector('#userButton');
-    userButton.addEventListener('click', () =>{
-      console.log(userInput.value)
-      socket.emit('user', (`${userInput.value} entrou!`));
-      return false;
-    });
-
-    const messageInput = document.querySelector('#messageInput');
     const messageButton = document.querySelector('#messageButton');
-    messageButton.addEventListener('click', () =>{
-      console.log(messageInput.value)
-      socket.emit('message', {
-        nickname: userInput.value,
-        chatMessage: messageInput.value
-      });
-      messageInput.value = ''
+    const userInput = document.querySelector('#userInput');
+    const messageInput = document.querySelector('#messageInput');
+    let currentUser;
+
+    socket.on('connect', () => {
+      socket.emit('user', (randomNickname));
+    });
+
+    userButton.addEventListener('click', () => {
+      currentUser.nickname = userInput.value;
+      socket.emit('updatedUser', currentUser);
       return false;
     });
 
-    const createUser = (user) => {
-      const userUl = document.querySelector('#users');
-      const li = document.createElement('li');
-      li.innerText = user;
-      userUl.appendChild(li);
-    }
+    messageButton.addEventListener('click', () => {
+      const { nickname } = currentUser;
+      socket.emit('message', ({
+        nickname,
+        chatMessage: messageInput.value,
+      }));
+      messageInput.value = '';
+      return false;
+    });
 
     const createMessage = (message) => {
       const messagesUl = document.querySelector('#messages');
       const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message')
       li.innerText = message;
       messagesUl.appendChild(li);
-    }
-    socket.on('user', (user) => createUser(user));
+    };
+
+    const listUsers = (users) => {
+      const userUl = document.querySelector('#users');
+      userUl.innerHTML= '';
+      users.map((u) => {
+        const li = document.createElement('li');
+        li.innerText = u.nickname
+        li.setAttribute('data-testid', 'online-user')
+        userUl.appendChild(li);
+      })
+    };
+    
+    socket.on('users', ({ user, users, messages }) => {
+      currentUser = user;
+      listUsers(users);
+    })
+
     socket.on('message', (message) => createMessage(message));
   </script>
 </body>

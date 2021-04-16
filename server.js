@@ -1,4 +1,5 @@
 // Faça seu código aqui
+// const express = require('express');
 const app = require('express')();
 const http = require('http').createServer(app);
 const cors = require('cors');
@@ -11,6 +12,9 @@ const io = require('socket.io')(http, {
 
 const PORT = 3000;
 
+const Users = require('./models/Users');
+const Messages = require('./models/Messages');
+
 app.use(cors());
 
 app.set('view engine', 'ejs');
@@ -21,26 +25,26 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('Conectado');
+  console.log(`${socket.id} conected!`);
 
-  socket.on('user', (user) => {
-  socket.broadcast.emit('user', user);
+  socket.on('user', async (nickname) => {
+  const user = await Users.createUser(socket.id, nickname);
+  const users = await Users.getAllUsers();
+  const messages = await Messages.getAllMessages();
+  io.emit('users', { user, users, messages });
   });
 
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', async ({ chatMessage, nickname }) => {
     const time = new Date();
     const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
      .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
-    const response = `${timeFormated} ${nickname} ${chatMessage}`;
-    // ________________
-    // NÃO ENTENDI:
-    // socket.broadcast.emit('message', response);
-    io.emit('message', response);
-    // ________________
+    await Messages.createMessage(nickname, chatMessage, timeFormated);
+    io.emit('message', `${timeFormated} ${nickname} ${chatMessage}`);
   });
     
-  socket.on('disconnect', () => {
-    console.log('Desconectado');
+  socket.on('disconnect', async () => {
+    console.log(`${socket.id} disconnected!`);
+    await Users.removeUser(socket.id);
   });
 });
 
