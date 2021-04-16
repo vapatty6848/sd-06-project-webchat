@@ -38,7 +38,8 @@
         + Math.random().toString(21).substring(2, 10);
       };
 
-      let currentUser = localStorage.getItem('webchat-user') || generateUser();
+      let currentUser = sessionStorage.getItem('webchat-user') || generateUser();
+      // let currentUser = generateUser();
       socket.emit('userLogin', { user: currentUser });
       const userElement = document.querySelector('#current-user');
       userElement.innerText = currentUser;
@@ -49,7 +50,7 @@
         e.preventDefault();
         const prevUser = currentUser.slice();
         currentUser = userInput.value;
-        localStorage.setItem('webchat-user', currentUser);
+        sessionStorage.setItem('webchat-user', currentUser);
         userElement.innerText = currentUser;
         socket.emit('userLogin', { user: currentUser, prevUser });
         userInput.value = '';
