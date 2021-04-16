@@ -1,0 +1,62 @@
+.main {
+  background-color:azure;
+  display: flex;
+  height: 95vh;
+  width: 100%;
+}
+
+aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 2vw;
+  width: 30%;
+}
+
+.user-field {
+  width: 100%;
+}
+
+ul {
+  font-size: 2vh;
+  list-style-type: none;
+}
+
+#user {
+  font-size: 2vh;
+}
+
+.online-users {
+  display: inline-block;
+  height: 80vh;
+  overflow: scroll;
+  white-space: nowrap;
+  width: 100%;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 2vw;
+  margin-right: 2vw;
+  width: 70%;
+}
+
+.messages-box {
+  border: 2px solid grey;
+  border-radius: 5px;
+  height: 85vh;
+}
+
+#chatMessages {
+  padding: 2vh;
+}
+
+.messages {
+  background-color: rgb(126, 187, 245);
+  border-radius: 5px;
+  margin-bottom: 2vh;
+  padding: 1vh;
+  width: fit-content;
+}
