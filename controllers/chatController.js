@@ -5,7 +5,7 @@ const chatModel = require('../models/chatModel');
 
 router.get('/', async (req, res) => {
   const messages = await chatModel.getAll();
-  // console.log(messages);
+  console.log(messages);
   
   res.status(200).render('chatView');
 });
