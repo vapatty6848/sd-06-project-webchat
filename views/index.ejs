@@ -18,9 +18,15 @@
   <script>
     const socket = io();
     let nickname = '';
-    socket.on('connected', (nicknameGenerated) => {
-      nickname = nicknameGenerated;
-      addNickname(nicknameGenerated);
+    socket.on('connected', (stringNickname) => {
+      nickname = stringNickname;
+      addNickname(stringNickname);
+      // users.forEach((user) => addNickname(user.nickname));
+    });
+    socket.on('userConnected', ({ stringNickname, users }) => {
+      nickname = stringNickname;
+      addUsersConnected(users);
+      // addNickName1(nicknameGenerated);
     });
 
     const btnSend = document.querySelector('#send-button');
@@ -33,6 +39,14 @@
     });
 
     const addNickname = (nickname) => {
+      const allNickname = document.querySelector('#nickname-list');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = nickname;
+      allNickname.prepend(li);
+    }
+
+    const addNickname1 = (nickname) => {
       const allNickname = document.querySelector('#nickname-list');
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
@@ -67,7 +81,17 @@
         li.innerText = user.nickname;
         allNickname.appendChild(li);
       });
-    }
+    };
+
+    const addUsersConnected = (users) => {
+      const allNickname = document.querySelector('#nickname-list');
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerText = user.nickname;
+        allNickname.appendChild(li);
+      });
+    };
 
     socket.on('changeNickname', (users) => changeNickname(users));
   </script>

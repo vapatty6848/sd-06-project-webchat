@@ -21,9 +21,10 @@ app.get('/', (req, res) => {
 
 const users = [];
 
-const addNewUser = (socket) => {
+const addNewUser = (socket, nickname) => {
   const newUser = {
     id: socket.id,
+    nickname,
   };
   users.push(newUser);
 };
@@ -53,25 +54,30 @@ const randomNickname = () => {
   return randomic;
 };
 
+const removeDisconnected = (socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  users.splice(index, 1);
+};
+
 io.on('connection', (socket) => {
   console.log(`${socket.id} connected`);
-  addNewUser(socket);
-  console.log(users);
-  io.emit('connected', randomNickname());
+  const stringNickname = randomNickname();
+  addNewUser(socket, stringNickname);
+  // io.emit('connected', randomNickname());
+  socket.broadcast.emit('connected', stringNickname);
+  socket.emit('userConnected', { stringNickname, users });
   socket.on('message', ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);
     const dateTime = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
     const response = `${dateTime} ${getNickname(socket)} ${chatMessage}`;
     io.emit('message', response);
   });
-
   socket.on('changeNickname', ({ newNickname }) => {
     changeNickname(newNickname, socket);
     io.emit('changeNickname', users);
   });
-
   socket.on('disconnect', () => {
-    console.log('Disconnected');
+    removeDisconnected(socket);
   });
 });
 
