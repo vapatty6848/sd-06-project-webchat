@@ -57,10 +57,12 @@
     <button id="nickname-button" data-testid="nickname-button">Change</button>
   </label>
   <h3>Usuarios online</h3>
-  <ul id="users">
-
+  <ul id="users"></ul>
+  <ul id="mensagens">
+    <% messages.forEach((msg) => { %>
+      <li data-testid="message"><%=`${msg.timestamp} - ${msg.nickname}: ${msg.message}`%></li>
+    <% }) %>
   </ul>
-  <ul id="mensagens"></ul>
     <form action="">
       <input id="mensagemInput" data-testid="message-box" autocomplete="off" />
       <button id="mensagemButton" data-testid="send-button">Send</button>

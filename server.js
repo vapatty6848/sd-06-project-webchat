@@ -7,17 +7,21 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   },
 });
+// const webchatController = require('./controllers/webchatController');
+const model = require('./models/webchat');
 
 app.use(cors());
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
-  res.render('page');
+app.get('/', async (req, res) => {
+  const messages = await model.getAll();
+  res.render('page', { messages });
   // res.sendFile(__dirname + '/');
 });
+// app.use('/', webchatController);
 
 const users = [];
-const beforeMessage = () => {
+const formatedTimestamp = () => {
   const date = new Date();
   const formatedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
   const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
@@ -34,9 +38,10 @@ io.on('connection', (socket) => {
     io.emit('usersList', users);
   });
 
-  socket.on('message', ({ nickname, chatMessage }) => {
+  socket.on('message', async ({ nickname, chatMessage }) => {
     console.log(chatMessage);
-    io.emit('message', `${beforeMessage()} - ${nickname}: ${chatMessage}`);
+    await model.postMessages(chatMessage, nickname, formatedTimestamp());
+    io.emit('message', `${formatedTimestamp()} - ${nickname}: ${chatMessage}`);
   });
 
   socket.on('disconnect', () => {
