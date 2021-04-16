@@ -25,6 +25,8 @@
     <script>
         const socket = io();
         socket.emit('random-nickname', socket.id);
+        let users = [];
+        let messages = [];
 
         socket.on('public-nickname', (nicknamesFromServer, shouldClearNicknameList) => {
             if (shouldClearNicknameList) {
@@ -32,20 +34,31 @@
             }
             // console.log('nickname: ', nicknamesFromServer);
             nicknamesFromServer.forEach(({ nickname }) => {
-                // document.querySelector('#user-names').innerHTML = ''
                 const newUser = document.createElement("LI")
                 newUser.innerText = nickname
                 newUser.setAttribute("data-testid", "online-user");
                 document.querySelector('#user-names').appendChild(newUser)
             })
+            users = nicknamesFromServer
+        })
+
+        socket.on('new-message', (messagesFromServer) => {
+            document.querySelector('#messages-list').innerHTML = ''
+            messages = messagesFromServer
+            messages?.forEach((message) => {
+                const newMessageElement = document.createElement("LI")
+                newMessageElement.setAttribute("data-testid", "message");
+                newMessageElement.innerText = message
+                document.querySelector('#messages-list').appendChild(newMessageElement)
+            })
+
         })
 
         document.querySelector('#send-button').addEventListener('click', () => {
-            const message = document.querySelector('#message-box').value;
-            const newMessageElement = document.createElement("LI")
-            newMessageElement.setAttribute("data-testid", "message");
-            newMessageElement.innerText = message
-            document.querySelector('#messages-list').appendChild(newMessageElement)
+            const messageFromInput = document.querySelector('#message-box').value;
+            const messageAuthor = users.find((user) => user.socketId === socket.id)
+            const message = { nickname: messageAuthor.nickname, chatMessage: messageFromInput }
+            socket.emit('message', message)
         });
 
         document.querySelector('#change-nickname').addEventListener('click', () => {

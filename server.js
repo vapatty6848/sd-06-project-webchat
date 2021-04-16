@@ -2,55 +2,57 @@ const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app);
-
 const io = require('socket.io')(httpServer);
 
 const users = [];
+const messages = [];
+
   // Source: https://attacomsian.com/blog/javascript-generate-random-string
-  const randomNicknameGenerator = (length = 16) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const randomNicknameGenerator = (length = 16) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
-    let nickname = '';
-    for (let i = 0; i < length; i++) {
-        nickname += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+  let nickname = '';
+  for (let i = 0; i < length; i += 1) {
+      nickname += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
 
-    return nickname;
-  };
+  return nickname;
+};
+
+const createDateString = () => {
+  const currentDate = new Date();
+  const day = currentDate.getDate();
+  const month = currentDate.getMonth() + 1;
+  const year = currentDate.getFullYear();
+  const today = `${day}/${month}/${year}`;
+  const hour = currentDate.getHours();
+  const minute = currentDate.getMinutes();
+  const now = `${hour}:${minute}`;
+
+  return { today, now };
+};
 
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} has joined the room`);
 
   socket.on('random-nickname', () => {
-    // console.log(`socketId: ${socketId}`);
     const nickname = randomNicknameGenerator();
-    const newUser = { nickname, socketId: socket.id };
-    users.push(newUser)
+    users.push({ nickname, socketId: socket.id });
     socket.emit('public-nickname', users);
-  })
+  });
 
   socket.on('change-nickname', (nickname, idFromClient) => {
-    const userToChangeNickname = users.find((user) => user.socketId === idFromClient)
-    console.log('users: ', users);
+    const userToChangeNickname = users.find((user) => user.socketId === idFromClient);
     userToChangeNickname.nickname = nickname;
-    
-    // users.forEach((user) => {
-    //   if (user.nickname === userToChangeNickname.nickname) {
-    //     user.nickname = userToChangeNickname.nickname
-    //   }
-    // })
-    // console.log('users: ', users);
-    
-    
-    // console.log('userToChangeNickname: ', userToChangeNickname);
-    // console.log('idFromClient: ', idFromClient);
     const shouldClearNicknameList = true;
-
     socket.emit('public-nickname', users, shouldClearNicknameList);
-  })
-
-  socket.on('disconnect', () => {
-    io.emit('newMessage', `User ${socket.id} has left the room`);
+  });
+  
+  socket.on('message', (message) => {
+    const { today, now } = createDateString();
+    const messageContent = `${today} ${now} -> ${message.nickname}: ${message.chatMessage}`;
+    messages.push(messageContent);
+    io.emit('new-message', messages);
   });
 });
 
