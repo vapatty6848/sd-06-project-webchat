@@ -1,39 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset='UTF-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <title>Welcome to Webchat!</title>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src='/socket.io/socket.io.js'></script>
+  <script src='https://code.jquery.com/jquery-1.11.1.js'></script>
 </head>
 <body>
   <h1>Bate-Papo MilhUOL</h1>
-  <form action="">
-    <input type="text" name="nickname" id="nickname" placeholder="Identifique-se">
-    <button type="submit" id='nickname-btn'>Confirmar</button>
-  </form>
+  <h3 id='online-user' data-testid='online-user'></h3>
+  <!-- <form action=''> -->
+    <input
+      type='text'
+      name='nickname'
+      id='nickname'
+      data-testid='nickname-box'
+      placeholder='Identifique-se'
+    >
+    <button
+      type='submit'
+      id='nickname-btn'
+      data-testid='nickname-button'
+    >
+      Confirmar
+    </button>
+  <!-- </form> -->
   <ul id='msg-board' style='list-style-type:none;'>Mensagens</ul>
-  <form action="">
-    <input type="text" id='msg-input' autocomplete="off">
-    <button type="submit" id='send-msg'>Enviar</button>
-  </form>
+  <!-- <form action=''> -->
+    <input
+      type='text'
+      id='msg-input'
+      data-testid='message-box'
+      autocomplete='off'
+    >
+    <button
+      type='submit'
+      id='send-msg'
+      data-testid='send-button'
+    >
+      Enviar
+    </button>
+  <!-- </form> -->
 
   <script>
     const socket = io();
 
-    let userNickname = '';
-    $('#nickname-btn').click((e) => {
-      e.preventDefault();
-      userNickname = $('#nickname').val();
-      $('#nickname-btn').prop('disabled', true);
+    let nickname = '';
+
+    // Sets new user's random nickname, which is coming from the back-end
+    socket.on('userLogin', (nick) => {
+      nickname = nick;
+      $('#online-user').text(nickname);
     });
 
+    // User can set his own nickname by entering it in the respective input field
+    $('#nickname-btn').click((e) => {
+      e.preventDefault();
+      nickname = ($('#nickname').val() !== '') ? $('#nickname').val() : nickname;
+      $('#online-user').text(nickname);
+    });
+
+    // Sends nickname and chatMessage to back-end
     $('#send-msg').click((e) => {
       e.preventDefault();
-      const data = { userNickname, message: $('#msg-input').val() };
-      ($('#msg-input').val() !== '') ?  socket.emit('bc-message', data) : false;
+      const data = { nickname, chatMessage: $('#msg-input').val() };
+      ($('#msg-input').val() !== '') ?  socket.emit('message', data) : false;
       $('#msg-input').val('');
       return;
     });
@@ -42,6 +75,8 @@
     //   return $('#msg-board').append(`<li>${msg}<li>`);
     // };
 
+    // Shows message in the message-board, which is coming
+    // formatted with date and time from the back-end
     socket.on('message', (msg) => {
       $('#msg-board').append(msg);
     });

@@ -1,31 +1,34 @@
-const express = require('express');
+const app = require('express')();
 const dayjs = require('dayjs');
-const app = express();
 const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer);
+const randomUserNickname = require('./utils/randomUserNickname');
 
 let msgsArray = [];
 
 io.on('connection', (socket) => {
   console.log(`Novo usuário! ${socket.id}`);
-  socket.on('bc-message', (data) => {
+  const nickname = randomUserNickname();
+
+  socket.emit('userLogin', nickname);
+
+  socket.on('message', (data) => {
     console.log(data);
 
-    msgsArray = [...msgsArray, data.message];
+    msgsArray = [...msgsArray, data.chatMessage];
     const date = dayjs().format('DD-MM-YYYY hh:mm:ss A');
 
-    const message = `<li>
-      <strong>${date} - ${data.userNickname}</strong>: ${data.message}
+    const message = `<li data-testid='message'>
+      <strong>${date} - ${data.nickname}</strong>: ${data.chatMessage}
     </li>`;
 
     io.emit('message', message);
   });
 });
 
-
 app.set('view engine', 'ejs');
 
-app.get('/webchat', (req, res) => {
+app.get('/', (req, res) => {
   res.render('home');
 });
 
