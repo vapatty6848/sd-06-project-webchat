@@ -21,9 +21,9 @@ io.on('connection', (socket) => {
   console.log('Usuário Conectado:', socket.id);
 
   socket.on('message', ({ chatMessage, nickname }) => {
-    const date = Helpers.dateGenerator().replace(/\//g, '-');
-    const formatedMessage = `${date} - ${nickname} ${chatMessage}`;
-    console.log(formatedMessage);
+    const date = Helpers.dateGenerator();
+    const formatedMessage = Helpers.formatMessage({ date, nickname, chatMessage });
+
     io.emit('message', formatedMessage);
   });
 });

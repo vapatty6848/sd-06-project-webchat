@@ -6,7 +6,7 @@ function generateDate() {
   const date = Date.now();
   const formatedDate = new Intl.DateTimeFormat('pt-BR', options).format(date);
 
-  return formatedDate;
+  return formatedDate.replace(/\//g, '-');
 }
 
 module.exports = generateDate;

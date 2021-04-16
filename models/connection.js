@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
+// const localUrl = 'mongodb://localhost:27017/webchat';
+const remoteUrl = process.env.DB_URL;
 
-// const dbUrl = process.env.DB_URL;
-
-const connection = mongoose.connect('mongodb://localhost:27017/webchat', {
+const connection = mongoose.connect(remoteUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

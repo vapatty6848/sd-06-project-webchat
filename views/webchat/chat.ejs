@@ -13,30 +13,44 @@
 <body>
   <div class="container">
     <h1>TryChat</h1>
+    <div class="container">
+      <p>Nickname: </p>
+      <span data-testid="online-user" id="nickname"></span>
+    </div>
     <form>
       <div class="form-group">
-        <label for="nickname"></label>
+        <label for="message"></label>
         <input
           class="form-control"
-          id="nickname"
-          name="nickname"
-          placeholder="Nickname"
+          id="message"
+          data-testid="message-box"
+          name="message"
+          placeholder="Type your message here..."
           type="text"
         >
       </div>
+
       <button class="btn btn-primary" id="save-btn" type="button">Save Nickname</button>
       <div class="form-group">
         <label for="message"></label>
         <input
           class="form-control"
           id="message"
+          data-testid="message-box"
           name="message"
           placeholder="Type your message here..."
           type="text"
+        >
+          <button
+            class="btn btn-primary"
+            id="send-btn"
+            data-testid="send-button"
+            type="button"
           >
-          <button class="btn btn-primary" id="send-btn" type="button">Send message</button>
-        </div>
-      </form>
+            Send message
+          </button>
+      </div>
+    </form>
       <div class="container">
         <ul class="list-group" id="chat-body"></ul>
       </div>
@@ -45,19 +59,35 @@
   <script>
     const socket = io();
 
-    function saveNickname() {
-      const button = document.querySelector('#save-btn');
-      button.addEventListener('click', () => {
-        const nickname = document.querySelector('#nickname');
-        nickname.readOnly = true;
-      });
+    // function saveNickname() {
+    //   const button = document.querySelector('#save-btn');
+    //   button.addEventListener('click', () => {
+    //     const nickname = document.querySelector('#nickname');
+    //     nickname.readOnly = true;
+    //   });
+    // }
+
+    function nicknameGenerator() {
+      const digits = Math.floor(1000000000 + Math.random() * 900000000);
+      const nickname = `Guest_${ digits }`;
+
+      return nickname;
+    };
+
+    function setNickname() {
+      const generatedNickname = nicknameGenerator()
+      const nickname = document.querySelector('#nickname');
+      nickname.innerHTML = generatedNickname;
     }
 
     function sendMessage() {
       const button = document.querySelector('#send-btn');
+
+  
       button.addEventListener('click', () => {
         const chatMessage = document.querySelector('#message').value;
         const nickname = document.querySelector('#nickname').value;
+
         socket.emit('message', { chatMessage, nickname });
       });
     }
@@ -68,11 +98,12 @@
       const listItem = document.createElement('li');
       listItem.innerHTML = message;
       listItem.className = 'list-group-item';
+      listItem.setAttribute('data-testid', 'message');
       chatBody.appendChild(listItem);
     });
 
     sendMessage();
-    saveNickname();
+    setNickname();
     
   </script>
 </body>
