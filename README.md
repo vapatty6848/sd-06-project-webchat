@@ -241,8 +241,6 @@ DB_NAME=webchat                             // nome do database
 
 #### As seguintes verificações serão feitas:
 ```
-- Será validado que vários clientes conseguem se conectar ao mesmo tempo;
-
 - Será validado que todos os clientes que estão conectados ao chat recebem as mensagens enviadas;
 
 - Será validado que toda mensagem que um cliente recebe contém as informações acerca de quem a enviou, data-hora do envio e o conteúdo da mensagem em si.
@@ -286,8 +284,6 @@ DB_NAME=webchat                             // nome do database
 - Será validado que as mensagens são exibidas na ordem correta;
 
 - Será validado que o front-end tem um campo de texto para preencher e um botão para alterar o apelido _(nickname)_;
-
-- Será validado que o _nickname_ é alterado em todos os clientes conectados;
 
 - Será validado que é possível enviar mensagens após alterar o _nickname_.
 ```
