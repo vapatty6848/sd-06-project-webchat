@@ -60,22 +60,23 @@
   <script>
     const socket = io('http://localhost:3000');
 
-    let nickname = '';
+    let nickName = '';
 
     socket.on('randomNickname', (newUser) => {
-      if (nickname === '') {
-        nickname = newUser;
+      if (nickName === '') {
+        nickName = newUser;
       };
 
       const userLi = document.createElement('li');
       userLi.setAttribute('data-testid', 'online-user');
+      userLi.setAttribute('id', newUser);
       userLi.innerHTML = newUser;
       document.querySelector('#online-user').appendChild(userLi);
     });
 
     document.querySelector('#send-button').addEventListener('click', () => {
       const chatMessage = document.querySelector('#message-box').value;
-      socket.emit('message', { chatMessage, nickname });
+      socket.emit('message', { chatMessage, nickName });
     });
 
     socket.on('message', (message) => {
@@ -85,6 +86,16 @@
       document.querySelector('#message').appendChild(messageLi);
     });
 
+    document.querySelector('#nickname-button'). addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box').value;
+      if (newNickname !== '') {
+        const oldNickname = document.querySelector(`#${nickName}`);
+        oldNickname.innerHTML = newNickname;
+        oldNickname.setAttribute('id', newNickname);
+        socket.emit('changeNickname', { nickName, newNickname });
+        nickName = newNickname;
+      };
+    });
   </script>
 </body>
 </html>

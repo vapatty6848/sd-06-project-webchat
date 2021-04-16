@@ -16,28 +16,37 @@ app.use(cors());
 
 const users = [];
 
+const onMessage = ({ chatMessage, nickName }) => {
+  const now = new Date();
+  const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
+  ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+
+  const message = `${timestamp} ${nickName} ${chatMessage}`;
+
+  io.emit('message', message);
+};
+
+const generateNickName = (id) => {
+  const sliceNickname = (id).slice(-16);
+  return sliceNickname;
+};
+
+const saveUser = (nickName) => {
+  users.push(nickName);
+};
+
 io.on('connection', (socket) => {
   console.log(`Usuário novo conectado ${socket.id}`);
+  const nickName = generateNickName(socket.id);
 
-  const sliceNickname = (socket.id).slice(-16);
-  io.emit('randomNickname', sliceNickname);
+  io.emit('randomNickname', nickName);
 
-  users.push({ socketId: sliceNickname });
-  io.emit('updateUsers', users);
+  saveUser(nickName);
 
-  socket.on('message', ({ chatMessage, nickname }) => {
-    const now = new Date();
-    const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
-    ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-
-    const message = `${timestamp} ${nickname} ${chatMessage}`;
-
-    io.emit('message', message);
-  });
+  socket.on('message', onMessage);
 
   socket.on('disconnect', () => {
     io.emit('disconnectMessage', `Usuário no socket ${socket.id} se desconectou`);
-    io.emit('updateUsers', users);
   });
 });
 
