@@ -35,6 +35,15 @@ const saveUser = (nickName) => {
   users.push(nickName);
 };
 
+const onChangeNickname = ({ nickName, newNickname }) => {
+  const index = users.indexOf(nickName);
+  if (index >= 0) {
+    users[index] = newNickname;
+    
+    io.emit('changeNickName', { nickName, newNickname });
+  }
+};
+
 io.on('connection', (socket) => {
   console.log(`Usuário novo conectado ${socket.id}`);
   const nickName = generateNickName(socket.id);
@@ -44,6 +53,8 @@ io.on('connection', (socket) => {
   saveUser(nickName);
 
   socket.on('message', onMessage);
+
+  socket.on('changeNickname', onChangeNickname);
 
   socket.on('disconnect', () => {
     io.emit('disconnectMessage', `Usuário no socket ${socket.id} se desconectou`);
