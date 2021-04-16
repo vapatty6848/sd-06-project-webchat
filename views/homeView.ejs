@@ -60,11 +60,11 @@
   <script>
     const socket = io('http://localhost:3000');
 
-    let nickName = '';
+    let nickname = '';
 
     socket.on('randomNickname', (newUser) => {
-      if (nickName === '') {
-        nickName = newUser;
+      if (nickname === '') {
+        nickname = newUser;
       };
 
       const userLi = document.createElement('li');
@@ -76,7 +76,7 @@
 
     document.querySelector('#send-button').addEventListener('click', () => {
       const chatMessage = document.querySelector('#message-box').value;
-      socket.emit('message', { chatMessage, nickName });
+      socket.emit('message', { chatMessage, nickname });
     });
 
     socket.on('message', (message) => {
@@ -89,16 +89,16 @@
     document.querySelector('#nickname-button'). addEventListener('click', () => {
       const newNickname = document.querySelector('#nickname-box').value;
       if (newNickname !== '') {
-        const oldNickname = document.querySelector(`#${nickName}`);
+        const oldNickname = document.querySelector(`#${nickname}`);
         oldNickname.innerHTML = newNickname;
         oldNickname.setAttribute('id', newNickname);
-        socket.emit('changeNickname', { nickName, newNickname });
-        nickName = newNickname;
+        socket.emit('changeNickname', { nickname, newNickname });
+        nickname = newNickname;
       };
     });
 
-    socket.on('changeNickName', ({ nickName, newNickname }) => {
-      const oldNickname = document.querySelector(`#${nickName}`);
+    socket.on('changeNickName', ({ nickname, newNickname }) => {
+      const oldNickname = document.querySelector(`#${nickname}`);
       if (oldNickname) {
         oldNickname.innerHTML = newNickname;
         oldNickname.setAttribute('id', newNickname);

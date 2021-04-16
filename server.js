@@ -16,12 +16,12 @@ app.use(cors());
 
 const users = [];
 
-const onMessage = ({ chatMessage, nickName }) => {
+const onMessage = ({ chatMessage, nickname }) => {
   const now = new Date();
   const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
   ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
-  const message = `${timestamp} ${nickName} ${chatMessage}`;
+  const message = `${timestamp} ${nickname} ${chatMessage}`;
 
   io.emit('message', message);
 };
@@ -31,16 +31,16 @@ const generateNickName = (id) => {
   return sliceNickname;
 };
 
-const saveUser = (nickName) => {
-  users.push(nickName);
+const saveUser = (nickname) => {
+  users.push(nickname);
 };
 
-const onChangeNickname = ({ nickName, newNickname }) => {
-  const index = users.indexOf(nickName);
+const onChangeNickname = ({ nickname, newNickname }) => {
+  const index = users.indexOf(nickname);
   if (index >= 0) {
     users[index] = newNickname;
     
-    io.emit('changeNickName', { nickName, newNickname });
+    io.emit('changeNickName', { nickname, newNickname });
   }
 };
 
