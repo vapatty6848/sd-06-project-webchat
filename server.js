@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer);
+const MessageModel = require('./models/MessageModel');
 
 const users = [];
 const messages = [];
@@ -24,10 +25,11 @@ const createDateString = () => {
   const day = currentDate.getDate();
   const month = currentDate.getMonth() + 1;
   const year = currentDate.getFullYear();
-  const today = `${day}/${month}/${year}`;
+  const today = `${day}-${month}-${year}`;
   const hour = currentDate.getHours();
   const minute = currentDate.getMinutes();
-  const now = `${hour}:${minute}`;
+  const second = currentDate.getSeconds();
+  const now = `${hour}:${minute}:${second}`;
 
   return { today, now };
 };
@@ -49,10 +51,12 @@ io.on('connection', (socket) => {
   });
   
   socket.on('message', (message) => {
+    // console.log('message', message)
     const { today, now } = createDateString();
     const messageContent = `${today} ${now} -> ${message.nickname}: ${message.chatMessage}`;
     messages.push(messageContent);
-    io.emit('new-message', messages);
+    io.emit('message', messages);
+    MessageModel.createMessage({ nickname: message.nickname, message: message.chatMessage, timestamp: `${today} ${now}`})
   });
 });
 

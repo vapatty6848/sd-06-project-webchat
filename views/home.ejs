@@ -42,7 +42,7 @@
             users = nicknamesFromServer
         })
 
-        socket.on('new-message', (messagesFromServer) => {
+        socket.on('message', (messagesFromServer) => {
             document.querySelector('#messages-list').innerHTML = ''
             messages = messagesFromServer
             messages?.forEach((message) => {
