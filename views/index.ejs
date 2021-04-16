@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebChat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font: 13px Helvetica, Arial;
+      }
+
+      form {
+        background: #000;
+        padding: 3px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+      }
+
+      form input {
+        border: 0;
+        padding: 10px;
+        width: 90%;
+        margin-right: 0.5%;
+      }
+
+      form button {
+        width: 9%;
+        background: rgb(130, 224, 255);
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      #mensagens {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      #mensagens li {
+        padding: 5px 10px;
+      }
+
+      #mensagens li:nth-child(odd) {
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WebChat</h1>
+    <div>
+      <Span>Nickname:</Span>
+      <input type="text" id="nickname" placeholder="Insira seu nickname" autocomplete="off" />
+      <button type="button" id="btn-nickname">Salvar</button>
+    </div>
+    <section>
+      <ul id="onlineUsers"></ul>
+    </section>
+    <div>
+      <ul id="chat">
+        <li id="message">
+        </li>
+      </ul>
+    </div>
+    
+
+    <form>      
+      <input type="text" id="mensagemInput" autocomplete="off" /><button>Enviar</button>
+    </form>
+
+    <script>
+      const id = Math.floor(
+        Math.random() * (99999 - 99999) + 99999
+      );
+      const socket = io();
+
+      socket.emit("newUser", `user_${id}`);
+      document.getElementById("btn-nickname").addEventListener("click", (e) => {
+        const newNickname = document.getElementById("nickname").value;
+        console.log(newNickname);
+        socket.emit("changeUser", newNickname);
+        document.getElementById("nickname").value = "";
+      });
+
+      const form = document.querySelector('form')
+      
+      form.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        const chatMessage = document.getElementById("mensagemInput").value;
+        const user = document.getElementById(`${socket.id}`);
+
+        socket.emit("message", {
+          chatMessage,
+          nickname: user ? user.innerText : "User",
+        });
+
+        document.getElementById("mensagemInput").value = "";
+        return false;
+      });
+
+      // cria uma `li` e coloca dentro da `ul` com `id` mensagens
+      const createMessage = (message) => {
+        const messagesUl = document.querySelector('#chat');
+        const li = document.createElement('li');
+        li.innerText = message.chatMessage;
+        messagesUl.appendChild(li);
+      }
+
+      // Recebendo a mensagem do servidor e exibindo no cliente
+      socket.on('message', (message) => createMessage(message));
+
+      // Aqui o evento é recebido da mesma maneira do último, mas este não é recebido pelo cliente que enviou o mesmo
+      socket.on('serverMessage', ({ message }) => createMessage(message));
+    </script>
+
+  </body>
+</html>
