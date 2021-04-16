@@ -1,6 +1,7 @@
 const express = require('express');
 
 const app = express();
+const path = require('path');
 const httpServer = require('http').createServer(app);
 const cors = require('cors');
 const moment = require('moment');
@@ -15,6 +16,8 @@ const { urlencoded } = require('express');
 const { sendMessage, removeUser } = require('./utils/serverUtils');
 const MessageController = require('./controllers/MessageController');
 const { create } = require('./models/messagesModel');
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors());
 
