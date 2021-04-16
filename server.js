@@ -12,14 +12,18 @@ const io = require('socket.io')(httpServer, {
   },
 });
 
+const messageModel = require('./models/messageModel');
+
 app.use(cors());
 
 const users = [];
 
-const onMessage = ({ chatMessage, nickname }) => {
+const onMessage = async ({ chatMessage, nickname }) => {
   const now = new Date();
   const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
   ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+
+  await messageModel.create(nickname, chatMessage, timestamp);
 
   const message = `${timestamp} ${nickname} ${chatMessage}`;
 
@@ -62,8 +66,10 @@ io.on('connection', (socket) => {
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', (req, res) => {
-  res.render('homeView');
+app.get('/', async (req, res) => {
+  const messages = await messageModel.getAll();
+  console.log(messages, 'estou aqui');
+  res.render('homeView', { messages });
 });
 
 httpServer.listen('3000');

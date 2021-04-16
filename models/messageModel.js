@@ -1,14 +1,14 @@
 const connection = require('./connection');
 
-const create = async (nickname, message) => {
+const create = async (nickname, chatMessage, timestamp) => {
   const newMessage = await connection()
     .then((db) => db.collection('messages').insertOne({
       nickname,
-      message,
-      timestamp: new Date().toLocaleString(),
+      chatMessage,
+      timestamp,
     }));
 
-  return newMessage;
+  return newMessage.ops[0];
 };
 
 const getAll = async () => {
