@@ -4,44 +4,12 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/assets/css/style.css" >
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   <title>WebChat</title>
-  <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font: 13px Helvetica, Arial;
-      }
-      .input-message-div {
-        background: #000;
-        padding: 3px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-      .input-message-div #message-box {
-        border: 0;
-        padding: 10px;
-        width: 90%;
-        margin-right: 0.5%;
-      }
-      .users {
-        display: flex;
-        border: 1px solid black;
-        width: 200px;
-      }
-      .messages {
-        display: flex;
-        border: 1px solid black;
-        width: 200px;
-      }
-  </style>
 </head>
 <body>
-  <h1>Projeto WebChat</h1>
+  <ul data-testid="online-user" id="online-user"></ul>
   <div class="username-div">
     <form>
       <input data-testid="nickname-box" id="nickname-input" placeholder="username" />
@@ -49,7 +17,7 @@
     </form>
   </div>
   <div class="users">
-    <ul></ul>
+    <ul class="ul-container"></ul>
   </div>
   <div class="messages">
     <ul id="message-list"></ul>
@@ -67,19 +35,55 @@
     const saveNickname = document.querySelector('#button-nickname');
     const inputMessage = document.querySelector('#message-input');
     const inputNickname = document.querySelector('#nickname-input');
-    const messageUl = document.querySelector('#message-list')
+    const messageUl = document.querySelector('#message-list');
+    const onlineUser = document.querySelector('#online-user');
 
-    function addZero(number) {
-      return (number <= 9) ? `0${number}` : number;
+/*     socket.on('connect', () => {
+      let nickname = generateRandomNickname(16);
+      io.emit('user', nickname);
+    })
+ */
+    const addZero = (number) => (number <= 9) ? `0${number}` : number;
+
+    const generateRandomNickname = (length) => {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let str = '';
+      for (let i = 0; i < length; i ++) {
+        str += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return str;
+    }
+
+/*     const createUserList = (arr) => {
+      const li = document.createElement('li');
+
+      arr.map((user) => {
+        li.innerText = user;
+        onlineUser.appendChild(li);
+      });
+    } */
+
+    const createUser = () => {
+      const li = document.createElement('li');
+      li.setAttribute('id', 'user-nickname');
+      let newUser = generateRandomNickname(16);
+
+      socket.emit('user', newUser);
+      li.innerText = newUser;
+      onlineUser.appendChild(li);
     }
 
     saveNickname.addEventListener('click', (e) => {
       e.preventDefault();
       let userNickname = inputNickname.value;
+      // io.on('user', (arrayUser) => createUserList(arrayUser));
+      let li = document.querySelector('#user-nickname');
       localStorage.setItem('currentUser', userNickname);
+      socket.emit('updateNickname', userNickname);
+      li.innerText = userNickname;
       inputNickname.value = "";
       return;
-    })
+    });
 
     sendMessage.addEventListener('click', (e) => {
       e.preventDefault();
@@ -87,8 +91,7 @@
       const nickname = localStorage.getItem('currentUser');
       let messageDate = new Date();
       let formattedDate = `${addZero(messageDate.getDate().toString())}-${addZero((messageDate.getMonth()+1).toString())}-${messageDate.getFullYear()} ${addZero(messageDate.getHours())}:${addZero(messageDate.getMinutes())}:${addZero(messageDate.getSeconds())}`
-      // console.log('nickname localstorage', nickname);
-      // console.log(formattedDate);
+
       socket.emit('message', { chatMessage, nickname, formattedDate });
       inputMessage.value = '';
       return;
@@ -96,10 +99,13 @@
 
     const createMessage = (message) => {
       const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
       li.innerText = `${message.formattedDate} ${message.nickname}: ${message.chatMessage}`;
       messageUl.appendChild(li);
     }
     socket.on('message', (objUser) => createMessage(objUser));
+
+    window.onload = createUser;
   </script>
 </body>
 </html>

@@ -15,12 +15,29 @@ const port = 3000;
 
 app.use(cors());
 
+const users = [];
+
 io.on('connection', (socket) => {
   console.log(`Usuário ${socket.id} conectado`);
 
   socket.on('message', (data) => {
     // console.log('mensagem usuario', data);
     io.emit('message', data);
+  });
+
+/*   socket.on('updateNickname', (nickname) => {
+    users = {
+      userId: socket.id,
+      userNickname: nickname,
+    };
+    console.log(users);
+  });
+ */
+  socket.on('user', (user) => {
+    console.log(user);
+    users.push(user);
+    console.log('array users', users);
+    io.emit('user', users);
   });
 });
 
