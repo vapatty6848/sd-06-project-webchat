@@ -96,6 +96,14 @@
         nickName = newNickname;
       };
     });
+
+    socket.on('changeNickName', ({ nickName, newNickname }) => {
+      const oldNickname = document.querySelector(`#${nickName}`);
+      if (oldNickname) {
+        oldNickname.innerHTML = newNickname;
+        oldNickname.setAttribute('id', newNickname);
+      }
+    });
   </script>
 </body>
 </html>
