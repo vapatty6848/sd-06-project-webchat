@@ -18,14 +18,18 @@
     <section>
       <ul id="onlineUsers"></ul>
     </section>
-    <section>
+    <form action="/" method="POST">
       <input type="text" id="message" data-testid="message-box" />
       <button type="button" id="sendMessage" data-testid="send-button">
         Enviar
       </button>
-    </section>
+    </form>
     <section>
-      <ul id="chatMessages"></ul>
+      <ul id="chatMessages">
+        <% messages.forEach((message) => { %>
+          <li data-testid="message"><%= message.chatMessage %></li>
+        <% }) %>
+      </ul>
     </section>
 
     <script>
@@ -39,7 +43,6 @@
       document.getElementById("sendMessage").addEventListener("click", (e) => {
         const chatMessage = document.getElementById("message").value;
         const user = document.getElementById(`${socket.id}`);
-        console.log(user);
 
         socket.emit("message", {
           chatMessage,
@@ -52,9 +55,8 @@
 
       socket.on("message", (message) => {
         const messageLi = document.createElement("li");
-        const newMessage = message.chatMessage;
 
-        messageLi.innerHTML = newMessage;
+        messageLi.innerHTML = message;
         messageLi.setAttribute("data-testid", "message");
         document.getElementById("chatMessages").appendChild(messageLi);
       });

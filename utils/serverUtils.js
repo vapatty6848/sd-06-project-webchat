@@ -1,7 +1,4 @@
-const sendMessage = (obj, date) => ({
-  chatMessage: `${date} - ${obj.nickname}: ${obj.chatMessage}`,
-  nickname: obj.nickname,
-});
+const sendMessage = (obj, date) => `${date} ${obj.nickname} ${obj.chatMessage}`;
 
 module.exports = {
   sendMessage,
