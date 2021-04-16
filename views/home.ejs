@@ -9,42 +9,56 @@
 </head>
 <body>
   <h1>Webchat</h1>
-  <ul id="chat-messages">
-
-  </ul>
+  <ul id="online-users"></ul>
+  <input id="change-nickname" data-testid="nickname-box">
+  <button id="change-nickname-button" data-testid="nickname-button">Change nickname</button>
+  <ul id="chat-messages"></ul>
   <form class="input-group mb-3 fixed-bottom">
-    <input id="message" type= "text" class="form-control" placeholder="Digite a sua mensagem"></input>
+    <input id="message" data-testid="message-box" type= "text" class="form-control" placeholder="Digite a sua mensagem">
     <div class="input-group-append">
-      <button id="send-button" class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+      <button id="send-button" data-testid="send-button" class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
     </div>
   </form>
 </body>
 <script src="/socket.io/socket.io.js"></script>
-<!-- <script type="text/javascript" src="script.js"></script> -->
 <script>
   const socket = io();
-  let username;
+  let userNickname;
   
-  localStorage.setItem('username', username);
+  socket.on('updateOnlineUsers', (onlineUsers) => {
+    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname;
+    document.querySelector('#online-users').innerHTML = '';
+    onlineUsers.forEach((user) => {
+      const userToRender = document.createElement('li');
+      userToRender.setAttribute('data-testid', 'online-user')
+      userToRender.innerHTML = user.nickname;
+      document.querySelector('#online-users').appendChild(userToRender);
+    })
+  });
+  
+  socket.on('message', (message) => {
+    const messageToRender = document.createElement('li');
+    messageToRender.setAttribute('data-testid', 'message');
+    messageToRender.innerHTML = message;
 
-  document.querySelector('form').addEventListener('submit', (e) => e.preventDefault());
-  
-  document.querySelector('#send-button').addEventListener('click', () => {
+    document.querySelector('#chat-messages').appendChild(messageToRender);
+  });
+
+  document.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+
     const chatMessage = document.querySelector('#message').value;
-
-    if (!username) username = 'user_' + Math.random().toString().substr(2, 11);
     
-    socket.emit('message', { nickname: username, chatMessage });
+    socket.emit('message', { nickname: userNickname, chatMessage });
 
     document.querySelector('#message').value = '';
   });
 
-  socket.on('message', (message) => {
-    const messageToRender = document.createElement('li');
-    messageToRender.innerHTML = message;
-
-    document.querySelector('#chat-messages').appendChild(messageToRender);
+  document.querySelector('#change-nickname-button').addEventListener('click', () => {
+    const newNickname = document.querySelector('#change-nickname').value;
+    userNickname = newNickname;
+    document.querySelector('#change-nickname').value = '';
   })
-  
+
 </script>
 </html>

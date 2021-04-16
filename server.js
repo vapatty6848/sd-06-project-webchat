@@ -10,13 +10,20 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(express.static(`${__dirname}/public/`));
 
+let users = [];
+
 io.on('connection', (socket) => {
-  console.log(`Usuário ${socket.id} conectado!`);
+  const newUser = { id: socket.id, nickname: `user_${Math.random().toString().substr(2, 11)}` };
+  users.push(newUser);
+  io.emit('updateOnlineUsers', users);
 
   socket.on('message', ({ nickname, chatMessage }) => {
-    const timestamp = createTimestamp();
+    io.emit('message', `${createTimestamp()} - ${nickname} disse: ${chatMessage}`);
+  });
 
-    io.emit('message', `${timestamp} - ${nickname} disse: ${chatMessage}`);
+  socket.on('disconnet', () => {
+    users = users.filter((user) => user.id === socket.id);
+    io.emit('updateOnlineUsers', users);
   });
 });
 
