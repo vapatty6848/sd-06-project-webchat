@@ -7,16 +7,19 @@
   <script src="/socket.io/socket.io.js"></script>
   <title>Project WebChat</title>
 </head>
-<body>
   <h1>Inciando Projeto</h1>
 
-  <input type="text" id="message" data-testid="message-box">
+  <h2 id='userNickname' data-testid="online-user"></h2>
+  <input type="text" id="userNicknameInput" data-testid="nickname-box" placeholder="Digite seu apelido...">
+  <button id='userNicknameChange' data-testid="nickname-button">Salvar</button>
+    
+  <input type="text" id="message" data-testid="message-box" placeholder="Digite sua mensagem...">
   <button id='sendMessage' data-testid="send-button">Enviar</button>
 
   <h3>Mensagens</h3>
   <ul id='messages'></ul>
 
-  <h3>Usuários</h3>
+  <h3>Usuários Online</h3>
   <ul id='users'></ul>
 
   <h3>Log Status</h3>
@@ -26,12 +29,24 @@
     // aqui define o canal do front com o back
     const socket = io('http://localhost:3000');
 
-    socket.emit('newUser');
+    let nickname = Math.random().toString(16).substr(2, 8)
+      +Math.random().toString(16).substr(2, 8);
+    let nicknameField = document.getElementById('userNickname');
+    nicknameField.innerHTML = nickname;
+
+    socket.emit('newUser', nickname);
 
     document.querySelector('#sendMessage').addEventListener('click', (e) => {
       const chatMessage = document.querySelector('#message').value;
-      const nickname = `Guest - ${socket.id}`;
+      nickname = nicknameField.innerHTML;
       socket.emit('message', {chatMessage, nickname});
+    })
+
+    document.getElementById('userNicknameChange').addEventListener('click', (e) => {
+      const nicknameInput = document.getElementById('userNicknameInput').value;
+      nicknameField.innerHTML = nicknameInput;
+      // socket.emit('message', {chatMessage, nickname});
+      socket.emit('newUser', nicknameInput);
     })
 
     socket.on('message', (message) => {
@@ -40,10 +55,10 @@
       dataTestId.value = 'message';
       messageLI.setAttributeNode(dataTestId);
       messageLI.innerHTML = message;
-
+      
       document.querySelector('#messages').appendChild(messageLI);
     });
-
+        
     socket.on('updateUsers', (users) => {
       const usersList = document.querySelector('#users');
       usersList.innerHTML = '';
