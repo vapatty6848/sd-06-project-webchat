@@ -2,7 +2,6 @@ const app = require('express')();
 const httpServer = require('http').createServer(app);
 const dateFormat = require('dateformat');
 
-// const path = require('path');
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
   cors: {
@@ -19,7 +18,6 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 
 app.get('/', (req, res) => {
-  // res.render(path.join(__dirname, '/views/index'));
   res.render('index');
 });
 
