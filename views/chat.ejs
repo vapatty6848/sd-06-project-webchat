@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página com Socket.io</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Socket.io</h1>
+
+  <input type="text" id="message">
+  <button id="send-message-btn">Enviar</button>
+
+  <h3>Usuarios</h3>
+  <ul id='users'></ul>
+
+  <h3>Mensagens</h3>
+  <ul id='messages'></ul>
+
+  <script>
+    const socket = io('http://localhost:3000'); //abre conexão no front-end com o socket
+
+    socket.emit('newUser', `Usuario_${socket.id}`)
+
+    document.querySelector('#send-message-btn').addEventListener('click', (e) => {
+      const mensagem = document.querySelector('#message').value;
+      const message = {chatMessage: mensagem, nickname: socket.id}
+      socket.emit('message', message)
+    });
+
+    socket.on('newMessage', (message) => {
+      const messageLi = document.createElement('li');
+      messageLi.innerHTML = message;
+      document.querySelector('#messages').appendChild(messageLi)
+    })
+
+    socket.on('privateMessage', (data) => {
+      console.log(data)
+    })
+
+    socket.on('broadcastMessage', (data) => {
+      console.log(data)
+    })
+
+    socket.on('updateUsers', (users) => {
+      const userUl = document.querySelector('#users');
+      userUl.innerHTML = '';
+      users.forEach((user) => { 
+        const userLi = document.createElement('li');
+        userLi.innerHTML = user.socketId;
+        userUl.appendChild(userLi)
+      })
+    })
+
+  </script>
+</body>
+</html>
