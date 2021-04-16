@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quer TC</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js"></script>>
+</head>
+<body>
+  <form id="chat">
+    <input
+      type="text"
+      name="username"
+      data-testid="nickname-box"
+      placeholder="Digite seu usuário"
+    >
+    <div class="messages"></div>
+    <input
+      type="text"
+      name="message"
+      data-testid="message-box"
+      placeholder="Digite sua mensagem"
+    >
+    <button
+      type="button"
+      data-testid="nickname-save"
+    >
+      Salvar
+    </button>
+    <button
+      type="submit"
+      data-testid="send-button"
+    >
+      Enviar
+    </button>
+  </form>
+
+  <script type="text/javascript">
+    const socket = io('http://localhost:3000');
+    const sendMessage = document.querySelector('[data-testid="send-button"]');
+    const nicknameInput = document.querySelector('[data-testid="nickname-box"]');
+    const messageInput = document.querySelector('[data-testid="message-box"]');
+    const chat = document.querySelector('.messages');
+
+    sendMessage.addEventListener('click', function() {
+      const nickname = nicknameInput.value;
+      const message = messageInput.value;
+      if (nickname.length && message.length) {
+        const messageObj = {
+          nickname,
+          message,
+        };
+        socket.emit('message', messageObj);
+      }
+    });
+
+    socket.on('message', (message) => {
+      const p = document.createElement('p');
+      p.innerHTML = message;
+      p.setAttribute('data-testid', message);
+      chat.appendChild(p);
+    });
+
+  </script>
+</body>
+</html>
