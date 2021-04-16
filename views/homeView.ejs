@@ -80,6 +80,7 @@
 
     document.querySelector('#send-button').addEventListener('click', () => {
       const chatMessage = document.querySelector('#message-box').value;
+      // nickname = document.querySelector(`#${nickname}`).innerHTML;
       socket.emit('message', { chatMessage, nickname });
     });
 
