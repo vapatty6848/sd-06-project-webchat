@@ -2,52 +2,55 @@ const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app);
-// const data = require('./data');
 
 const io = require('socket.io')(httpServer);
-// const io = require('socket.io')(httpServer, {
-//   cors: {
-//     origin: 'http://localhost:3000',
-//     methods: ['GET', 'POST']
-//   }
-// });
 
 const users = [];
+  // Source: https://attacomsian.com/blog/javascript-generate-random-string
+  const randomNicknameGenerator = (length = 16) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+    let nickname = '';
+    for (let i = 0; i < length; i++) {
+        nickname += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    return nickname;
+  };
 
 io.on('connection', (socket) => {
-  console.log(`Usuário novo conectado ${socket.id}`);
+  console.log(`User ${socket.id} has joined the room`);
 
-//   io.emit('chat.updateUsers', users);
+  socket.on('random-nickname', () => {
+    // console.log(`socketId: ${socketId}`);
+    const nickname = randomNicknameGenerator();
+    const newUser = { nickname, socketId: socket.id };
+    users.push(newUser)
+    socket.emit('public-nickname', users);
+  })
 
-//   socket.on('chat.addUser', (username) => {
-//     const foundUser = data.find((u) => u.username === username);
-//     const user = { id: socket.id, name: foundUser.username, avatar: foundUser.avatar };
-//     users.push(user);
+  socket.on('change-nickname', (nickname, idFromClient) => {
+    const userToChangeNickname = users.find((user) => user.socketId === idFromClient)
+    console.log('users: ', users);
+    userToChangeNickname.nickname = nickname;
     
-//     socket.emit('chat.currentUser', user);
-//     socket.broadcast.emit('chat.updateUsers', users);
+    // users.forEach((user) => {
+    //   if (user.nickname === userToChangeNickname.nickname) {
+    //     user.nickname = userToChangeNickname.nickname
+    //   }
+    // })
+    // console.log('users: ', users);
     
-//   });
+    
+    // console.log('userToChangeNickname: ', userToChangeNickname);
+    // console.log('idFromClient: ', idFromClient);
+    const shouldClearNicknameList = true;
 
-  socket.on('newUser', (user) => {
-    console.log('here!');
-    users.push({ socketId: socket.id, name: user });
-
-    io.emit('updateUsers', users);
-
-    io.emit('newMessage', `Usuário no socket ${socket.id} se conectou`);
-  });
-
-//   socket.on('message', (message) => {
-//     io.emit('newMessage', message);
-
-//     socket.emit('xyz', 'lflkajsdflkasd');
-
-//     socket.broadcast.emit('broadcastMessage', 'qualquer coisa');
-//   });
+    socket.emit('public-nickname', users, shouldClearNicknameList);
+  })
 
   socket.on('disconnect', () => {
-    io.emit('newMessage', `Usuário no socket ${socket.id} se desconectou`);
+    io.emit('newMessage', `User ${socket.id} has left the room`);
   });
 });
 
