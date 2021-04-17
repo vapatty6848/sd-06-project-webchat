@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebChat</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>WebChat</h1>
+    </header>
+    <aside>
+      <input
+        type="text"
+        id="nickName"
+        placeholder="Digite seu apelido..."
+        data-testid="nickname-box"
+      />
+      <button type="button" id="sendNickName" data-testid="nickname-button">
+        Entrar
+      </button>
+      <h3>Usuários Oline</h3>
+      <ul id="onlineUsers"></ul>
+    </aside>
+    <main id="messages"></main>
+    <footer>
+      <input
+        type="text"
+        id="message"
+        placeholder="Digite sua mensagem..."
+        data-testid="message-box"
+      />
+      <button type="button" id="sendMessage" data-testid="send-button">Enviar</button>
+    </footer>
+
+    <script>
+      // entrada de dados do usuário
+      const socket = io();
+      let nickName = '';
+      document.querySelector('#sendNickName').addEventListener('click', (e) => {
+        nickName = document.querySelector('#nickName').value;
+        socket.emit('nickName', nickName);
+      });
+
+      socket.on('newNickName', (users) => {
+        const ulUsers = document.querySelector('#onlineUsers');
+        while (ulUsers.firstChild) {
+          ulUsers.removeChild(ulUsers.firstChild);
+        }
+        users.forEach((element) => {
+          const newNickName = document.createElement('li');
+          newNickName.setAttribute('data-testid', 'online-user');
+          newNickName.innerHTML = element;
+          document.querySelector('#onlineUsers').appendChild(newNickName);
+        });
+      });
+
+      // entrada de dados de mensagem
+      document.querySelector('#sendMessage').addEventListener('click', (e) => {
+        const message = {};
+        message.chatMessage = document.querySelector('#message').value;
+        message.nickname = nickName;
+        socket.emit('message', message);
+      });
+
+      socket.on('message', (message) => {
+        const newMessage = document.createElement('p');
+        newMessage.setAttribute('data-testid', 'message');
+        newMessage.innerHTML = message;
+        document.querySelector('#messages').appendChild(newMessage);
+      });
+    </script>
+  </body>
+</html>
