@@ -113,17 +113,17 @@
         messagesUl.appendChild(li);
       });
 
-      // const disconnect = (users) => {
-      //   const listNickname = document.querySelector('#nicknameList');
-      //   users.forEach((user) => {
-      //     const li = document.createElement('li');
-      //     li.setAttribute('data-testid', 'online-user');
-      //     li.innerText = user.nickname;
-      //     listNickname.appendChild(li);
-      //   })
-      // }
+      const disconnect = (users) => {
+        const listNickname = document.querySelector('#nicknameList');
+        users.forEach((user) => {
+          const li = document.createElement('li');
+          li.setAttribute('data-testid', 'online-user');
+          li.innerText = user.nickname;
+          listNickname.appendChild(li);
+        })
+      }
 
-      // socket.on('disconnected', (users) => disconnected(users));
+      socket.on('disconnected', (users) => disconnected(users));
     }
   </script>
 </body>

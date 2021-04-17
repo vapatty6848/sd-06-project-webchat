@@ -85,7 +85,7 @@ io.on('connection', (socket) => {
   });
   socket.on('disconnect', () => {
     removeDisconnected(socket);
-    // io.emit('disconnected', users);
+    io.emit('disconnected', users);
   });
 });
 
