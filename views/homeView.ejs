@@ -76,21 +76,16 @@
       return result;
     }
 
-    socket.on('randomNickname', (newUser) => {
-      if (nickname === '') {
-        nickname = newUser;
-      };
-
+    socket.on('randomNickname', (user) => {
       const userLi = document.createElement('li');
       userLi.setAttribute('data-testid', 'online-user');
-      userLi.setAttribute('id', newUser);
-      userLi.innerHTML = newUser;
+      userLi.setAttribute('id', user);
+      userLi.innerHTML = user;
       document.querySelector('#online-user').appendChild(userLi);
     });
 
     document.querySelector('#send-button').addEventListener('click', () => {
       const chatMessage = document.querySelector('#message-box').value;
-      // nickname = document.querySelector(`#${nickname}`).innerHTML;
       socket.emit('message', { chatMessage, nickname });
     });
 
@@ -122,7 +117,8 @@
 
     socket.on('connect', () => {
       const randomNick = generateNickName(16);
-      socket.emit('connectUser', { randomNick });
+      nickname = randomNick
+      socket.emit('connectUser', { nickname });
     });
   </script>
 </body>

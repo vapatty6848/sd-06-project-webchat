@@ -18,26 +18,9 @@ app.use(cors());
 
 const users = [];
 
-// const onMessage = async ({ chatMessage, nickname }) => {
-//   const now = new Date();
-//   const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
-//   ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-
-//   await messageModel.create(nickname, chatMessage, timestamp);
-
-//   const message = `${timestamp} ${nickname} ${chatMessage}`;
-
-//   io.emit('message', message);
-// };
-
 const now = new Date();
 const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
 ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-
-// const generateNickName = (id) => {
-//   const sliceNickname = (id).slice(-16);
-//   return sliceNickname;
-// };
 
 const saveUser = (nickname) => {
   users.push(nickname);
@@ -55,7 +38,7 @@ const onChangeNickname = ({ nickname, newNickname }) => {
 
 io.on('connection', (socket) => {
   console.log(`Usuário novo conectado ${socket.id}`);
-  socket.on('connectUser', ({ randomNick }) => saveUser(randomNick));
+  socket.on('connectUser', ({ nickname }) => saveUser(nickname));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const msg = await messageModel.create(nickname, chatMessage, timestamp);
