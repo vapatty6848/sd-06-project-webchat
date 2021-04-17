@@ -13,7 +13,7 @@ const io = require('socket.io')(http, {
 });
 
 const currentDateFormat = require('./utils/currentDateFormat');
-const { getAll, uploadDB, deleteForIdSocket } = require('./models/mongoDbRequests');
+const { getAll, uploadDB } = require('./models/mongoDbRequests');
 
 const PORT = 3000;
 
