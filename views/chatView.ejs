@@ -12,7 +12,7 @@
     <div class="profile">
       <div class="profile-pic"></div>
       <div class="username-container">
-        <span data-testid="online-user" id="username"></span>
+        <span id="username"></span>
         <form id="user-form">
           <input data-testid="nickname-box" id="name-input" />
           <button data-testid="nickname-button">Set</button>
@@ -33,15 +33,12 @@
     </div>
   </div>
   
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="socket.io/socket.io.js"></script>
   <script src="script.js"></script>
   <script>
-    const fetch = require('node-fetch');
-    // teste
     const socket = io();
 
     // profile
-    let nick = '';
     const userSpan = document.querySelector('#username');
     const userForm = document.querySelector('#user-form');
     const userInput = document.querySelector('#name-input');
@@ -50,54 +47,165 @@
     const createUserInList = (username) => {
       const li = document.createElement('li');
       li.innerText = username;
-      // li.setAttribute('data-testid', 'message');
+      li.setAttribute('data-testid', 'online-user');
       usersUl.appendChild(li);
+      // console.log(username)
     };
+    
+    const createUser = async () => {
+      const body = {};
+      
+      const newUser = await fetch('http://localhost:3000/users', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+      
+      return newUser;
+    }
+    
+    // MUDEI ELE, VAI TER QUE MUDAR QUANDO ESCREVE MENSAGEM NOVA
+    const createMessage = ({ message, nickname, timestamp }) => {
+      const userMessage = `${timestamp} - ${nickname}: ${message}`;
+      
+      
+      const messagesUl = document.querySelector('#messagesUl');
+      const li = document.createElement('li');
+      li.innerText = userMessage;
+      li.setAttribute('data-testid', 'message');
+      messagesUl.appendChild(li);
+    };
+    
+    // pra rolar até o fim das mensagens
+    updateScroll = () => {
+      const chatBox = document.getElementsByClassName('chat-box')[0];
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    const getAllMessages = async () => {
+      const messagesUl = document.querySelector('#messagesUl');
+      messagesUl.innerHTML = '';
+      
+      const messages = await fetch('http://localhost:3000/messages')
+        .then(response => response.json())
+      // console.log(messages)
+      
+      messages.forEach((DBmessage) => {
+        const { message, nickname, timestamp } = DBmessage;
+        createMessage({ message, nickname, timestamp });
+      });
+      
+      updateScroll();
+    }
 
-    socket.on('connect', () => {
-      console.log('i');
-      nick = socket.id;
+    socket.on('connect', async () => {
+      
+      // COLOCA DE VOLTA O LOCALSTORAGE E CRIA USUARIOS NO BANCO!!!!!!!!!!!!!!!!!!!!!!!!
+      // const storageUser = localStorage.getItem('user');
+      // if(storageUser) {
+      //   nick = storageUser;
+      //   // console.log(storageUser);
+      // } else {
+      //   nick = socket.id.substr(1, 16);
+      //   localStorage.setItem('user', nick);
+      // }
+      
+      nick = socket.id.substr(1, 16);
+      getAllMessages();
+      
       userSpan.innerText = nick;
       
-      socket.emit('userConnected');
+      socket.emit('userConnected', nick);
     });
+    
+    socket.on('createUserList', ({ nick, userList }) => {
+      usersUl.innerHTML = '';
+      
+      const indexOfUser = userList.indexOf(nick);
+      const user = userList[indexOfUser]
+      userList.splice(indexOfUser, 1)
+      userList.unshift(user);
+      
+      // socket.emit('updateUserList', userList)
+      
+      userList.forEach((user) => createUserInList(user));
+      
+      // add data-testid ao primeiro li
+      // const userInList = document.querySelector('li');
+      // userInList.setAttribute('data-testid', 'online-user');
+    });
+    
+    socket.on('createListForOthers', (userList) => {
+      usersUl.innerHTML = '';
+      
+      const nick = document.querySelector('#username').innerHTML;
+      const indexOfUser = userList.indexOf(nick);
+      const user = userList[indexOfUser]
+      userList.splice(indexOfUser, 1)
+      userList.unshift(user);
+      
+      userList.forEach((user) => createUserInList(user));
+      
+      // add data-testid ao primeiro li
+      // const userInList = document.querySelector('li');
+      // userInList.setAttribute('data-testid', 'online-user');
+    })
 
     socket.on('reloadUsersList', (userList) => {
       usersUl.innerHTML = '';
       userList.forEach((user) => createUserInList(user));
+      
+      // const userLi = document.querySelector('li');
+      // userLi.setAttribute('data-testid', 'online-user');
     });
 
     userForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      const oldNick = nick;
       
       nick = userInput.value;
       userSpan.innerText = nick;
       userInput.value = '';
-      socket.emit('userChangedName', nick);
+      // const oldNick = localStorage.getItem('user');
+      socket.emit('userChangedName', { oldNick, nick });
+      // localStorage.clear();
+      // localStorage.setItem('user', nick);
       return false;
     });
 
     // messages
     const messageForm = document.querySelector('#message-form');
     const messageInput = document.querySelector('#messageInput');
+    
+    const saveMessageInDB = async({ message, nickname, timestamp }) => {
+      return await fetch('http://localhost:3000/', {
+        method: 'POST',
+        body: JSON.stringify({ message, nickname, timestamp }),
+        headers: { 'Content-type': 'application/json' },
+      })
+    };
 
     messageForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
       socket.emit('message', { chatMessage: messageInput.value, nickname: nick });
+      // saveMessageInDB(message);
       messageInput.value = '';
       return false;
     });
+    
+    socket.on('addClassOnTop', () => {
+      const userLi = document.querySelector('li');
+      userLi.setAttribute('data-testid', 'online-user');
+    });
 
-    const createMessage = (message) => {
-      const messagesUl = document.querySelector('#messagesUl');
-      const li = document.createElement('li');
-      li.innerText = message;
-      li.setAttribute('data-testid', 'message');
-      messagesUl.appendChild(li);
-    };
-
-    socket.on('message', (message) => createMessage(message));
+    socket.on('message', (message) => {
+      saveMessageInDB(message);
+      createMessage(message)      
+    });
+    
+    socket.on('reload', () => {
+      getAllMessages()
+    })
   </script>
 </body>
 </html>

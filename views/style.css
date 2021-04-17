@@ -58,4 +58,6 @@ body {
   height: 500px;
   margin: auto;
   width: 95%;
+  overflow: hidden;
+  overflow-y: scroll;
 }

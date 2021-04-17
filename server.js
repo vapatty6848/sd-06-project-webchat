@@ -1,5 +1,4 @@
 const express = require('express');
-require('dotenv').config();
 
 const app = express();
 const http = require('http').createServer(app);
@@ -15,14 +14,18 @@ const io = require('socket.io')(http, {
 });
 
 app.use(cors());
+app.use(express.json());
 
-const userList = [];
+let userList = [];
 
-function generateUserMessage(nickname, chatMessage) {
+function generateUserMessage(message, nickname, socket) {
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
   const time = new Date().toLocaleTimeString();
-  const userMessage = `${date} ${time} - ${nickname}: ${chatMessage}`;
-  io.emit('message', userMessage);
+  const timestamp = `${date} ${time}`;
+  
+  const userMessage = { message, nickname, timestamp };
+  socket.emit('message', userMessage);
+  io.emit('reload');
 }
 
 function removeUserFromList(id) {
@@ -31,36 +34,63 @@ function removeUserFromList(id) {
     io.emit('reloadUsersList', userList);
 }
 
+function nameChange(socket, oldNick, nick) {
+  const indexOfUser = userList.indexOf(oldNick);
+    userList[indexOfUser] = nick;
+    
+    socket.emit('createUserList', { nick, userList });
+    socket.broadcast.emit('createListForOthers', userList);
+    // socket.emit('putUserOnTop', userList);
+    // socket.broadcast.emit('reloadUsersList', userList);
+}
+
+function userConnected(socket, nick) {
+  userList.push(nick);
+    socket.emit('createUserList', { nick, userList });
+    socket.broadcast.emit('createListForOthers', userList);
+    // socket.broadcast.emit('reloadUsersList', userList);
+}
+
+function updateUserList(newUserList) {
+  userList = newUserList;
+  console.log(newUserList);
+}
+
 io.on('connection', (socket) => {
   console.log('Conectado');
-  userList.push(socket.id);
   
-  socket.on('userConnected', () => {
-    io.emit('reloadUsersList', userList);
+  socket.on('userConnected', (nick) => {
+    userConnected(socket, nick);
+  });
+  
+  socket.on('updateUserList', (newUserList) => {
+    updateUserList(newUserList);
   });
   
   socket.on('disconnect', () => {
     removeUserFromList(socket.id);
+    socket.broadcast.emit('addClassOnTop');
     console.log('Desconectado');
   });
   
-  socket.on('userChangedName', (nick) => {
-    const indexOfUser = userList.indexOf(socket.id);
-    userList[indexOfUser] = nick;
-    io.emit('reloadUsersList', userList);
+  socket.on('userChangedName', ({ oldNick, nick }) => {
+    nameChange(socket, oldNick, nick);
   });
   
-  socket.on('message', ({ nickname, chatMessage }) => {
-    generateUserMessage(nickname, chatMessage);
+  socket.on('message', ({ chatMessage, nickname }) => {
+    generateUserMessage(chatMessage, nickname, socket);
   });
 });
 
 const chatController = require('./controllers/chatController');
+const usersController = require('./controllers/usersController');
+const { update } = require('lodash');
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(express.static(path.join(__dirname, '/views/')));
 
 app.use('/', chatController);
+app.use('/users', usersController);
 
 http.listen(process.env.PORT, () => console.log('Server open...'));
