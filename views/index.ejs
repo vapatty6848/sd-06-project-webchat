@@ -8,106 +8,182 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <input type="text" id="message-box" data-testid="message-box">
-  <button type="button" id="send-button" data-testid="send-button">Enviar</button>
-  <input type="text" id="nickname-box" data-testid="nickname-box">
-  <button type="button" id="nickname-button" data-testid="nickname-button">Mudar nickname</button>
-  <ul id="nickname-list"></ul>
-  <ul id="messages"></ul>
+  <!-- <input type="text" id="message-box" data-testid="message-box">
+  <button type="button" id="send-button" data-testid="send-button">Enviar</button> -->
+  <!-- <input type="text" id="nickname-box" data-testid="nickname-box"> -->
+  <ul id="users"></ul>
+  <form action="" id="nicknameForm">
+    <input data-testid="nickname-box" id="changeNickname" placeholder="Insira seu Nickname" /><button data-testid="nickname-button">Salvar Nickname</button>
+  </form>
+  <!-- <button type="button" id="nickname-button" data-testid="nickname-button">Mudar nickname</button> -->
+  <ul id="messages">
+    <% messages.forEach((msg) => { %>
+      <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
+    <% }) %>
+  </ul>
+  <form action="" id="messageForm">
+    <input data-testid="message-box" id="newMessage" placeholder="Digite sua mensagem" /><button data-testid="send-button">Enviar</button>
+  </form>
+
   <script>
     const socket = io();
-    let nickname = '';
-    socket.on('connected', (stringNickname) => {
-      nickname = stringNickname;
-      addNickname(stringNickname);
-    });
-    socket.on('userConnected', ({ stringNickname, users }) => {
-      nickname = stringNickname;
-      addUsersConnected(users);
+    const newMessage = document.querySelector('#newMessage');
+    let initialUser;
+
+    const randomNickname = () => {
+      const size = 16;
+      const randomCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let randomic = '';
+      for (let i = 0; i < size; i += 1) {
+        randomic += randomCharacters.charAt(Math.floor(Math.random() * randomCharacters.length));
+      }
+      return randomic;
+    };
+
+    document.querySelector('#nicknameForm').addEventListener('submit', (elem) => {
+      elem.preventDefault();
+      initialUser.nickname = document.querySelector('#changeNickname').value;
+      socket.emit('updatedUser', initialUser);
     });
 
-    const btnSend = document.querySelector('#send-button');
-
-    btnSend.addEventListener('click', () => {
-      const inputMessage = document.querySelector('#message-box');
-      socket.emit('message', { chatMessage: inputMessage.value, nickname });
-      inputMessage.value = '';
+    document.querySelector('#messageForm').addEventListener('submit', (elem) => {
+      elem.preventDefault();
+      const { nickname } = initialUser;
+      socket.emit('message', { nickname, chatMessage: newMessage.value });
+      newMessage.value = '';
       return false;
     });
 
-    const addNickname = (nickname) => {
-      const allNickname = document.querySelector('#nickname-list');
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.innerText = nickname;
-      allNickname.prepend(li);
-    }
-
-    const addNickname1 = (nickname) => {
-      const allNickname = document.querySelector('#nickname-list');
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.innerText = nickname;
-      allNickname.appendChild(li);
-    }
-
-    const createMessage = (res) => {
-      const messages1 = document.querySelector('#messages');
+    const createMessage = (message) => {
+      const messageList = document.querySelector('#messages');
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'message');
-      li.innerText = res;
-      messages1.appendChild(li);
+      li.innerText = message;
+      messageList.appendChild(li);
     }
+
+    const createListUsers = (user) => {
+      const usersList = document.querySelector('#users');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = user.nickname;
+      usersList.appendChild(li);
+    }
+
+    const listUsers = (users) => {
+      const usersList = document.querySelector('#users');
+      usersList.innerHTML = '';
+      createListUsers(initialUser);
+      users.filter(user => user.id !== initialUser.id).forEach(user => createListUsers(user));
+    }
+
+    socket.on('connect', () => {
+      const nickname = randomNickname();
+      initialUser = { nickname };
+      socket.emit('userLogin', nickname);
+    });
+
+    socket.on('usersConnected', (users) => {
+      initialUser = users.find(user => user.nickname === initialUser.nickname);
+      listUsers(users);
+    });
 
     socket.on('message', (message) => createMessage(message));
 
-    const btnNickname = document.querySelector('#nickname-button');
+    /*Here*/
+    // const socket = io();
+    // let nickname = '';
+    // socket.on('connected', (stringNickname) => {
+    //   nickname = stringNickname;
+    //   addNickname(stringNickname);
+    // });
+    // socket.on('userConnected', ({ stringNickname, users }) => {
+    //   nickname = stringNickname;
+    //   addUsersConnected(users);
+    // });
 
-    btnNickname.addEventListener('click', () => {
-      const newNickname = document.querySelector('#nickname-box');
-      socket.emit('changeNickname', { newNickname: newNickname.value });
-      nickname = newNickname.value;
-      newNickname.value = '';
-    });
+    // const btnSend = document.querySelector('#send-button');
 
-    const changeNickname = (users) => {
-      const allNickname = document.querySelector('#nickname-list');
-      allNickname.innerHTML = '';
-      users.forEach((user) => {
-        const li = document.createElement('li');
-        li.setAttribute('data-testid', 'online-user');
-        li.innerText = user.nickname;
-        allNickname.appendChild(li);
-      });
-    };
+    // btnSend.addEventListener('click', () => {
+    //   const inputMessage = document.querySelector('#message-box');
+    //   socket.emit('message', { chatMessage: inputMessage.value, nickname });
+    //   inputMessage.value = '';
+    //   return false;
+    // });
 
-    const addUsersConnected = (users) => {
-      const allNickname = document.querySelector('#nickname-list');
-      users.forEach((user) => {
-        const li = document.createElement('li');
-        li.setAttribute('data-testid', 'online-user');
-        li.innerText = user.nickname;
-        allNickname.appendChild(li);
-      });
-    };
+    // const addNickname = (nickname) => {
+    //   const allNickname = document.querySelector('#nickname-list');
+    //   const li = document.createElement('li');
+    //   li.setAttribute('data-testid', 'online-user');
+    //   li.innerText = nickname;
+    //   allNickname.prepend(li);
+    // }
 
-    socket.on('changeNickname', (users) => changeNickname(users));
+    // const addNickname1 = (nickname) => {
+    //   const allNickname = document.querySelector('#nickname-list');
+    //   const li = document.createElement('li');
+    //   li.setAttribute('data-testid', 'online-user');
+    //   li.innerText = nickname;
+    //   allNickname.appendChild(li);
+    // }
 
-    window.onload = async () => {
-      const messages = await fetch('http://localhost:3000/getmessages', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      }).then((res) => res.json());
-      const messages1 = document.querySelector('#messages');
-      messages.forEach((message) => {
-        const li = document.createElement('li');
-        li.setAttribute('data-testid', 'message');
-        li.innerText = `${message.timestamp} ${message.nickname} ${message.message}`;
-        messages1.appendChild(li);
-      });
-    }
+    // const createMessage = (res) => {
+    //   const messages1 = document.querySelector('#messages');
+    //   const li = document.createElement('li');
+    //   li.setAttribute('data-testid', 'message');
+    //   li.innerText = res;
+    //   messages1.appendChild(li);
+    // }
+
+    // socket.on('message', (message) => createMessage(message));
+
+    // const btnNickname = document.querySelector('#nickname-button');
+
+    // btnNickname.addEventListener('click', () => {
+    //   const newNickname = document.querySelector('#nickname-box');
+    //   socket.emit('changeNickname', { newNickname: newNickname.value });
+    //   nickname = newNickname.value;
+    //   newNickname.value = '';
+    // });
+
+    // const changeNickname = (users) => {
+    //   const allNickname = document.querySelector('#nickname-list');
+    //   allNickname.innerHTML = '';
+    //   users.forEach((user) => {
+    //     const li = document.createElement('li');
+    //     li.setAttribute('data-testid', 'online-user');
+    //     li.innerText = user.nickname;
+    //     allNickname.appendChild(li);
+    //   });
+    // };
+
+    // const addUsersConnected = (users) => {
+    //   const allNickname = document.querySelector('#nickname-list');
+    //   users.forEach((user) => {
+    //     const li = document.createElement('li');
+    //     li.setAttribute('data-testid', 'online-user');
+    //     li.innerText = user.nickname;
+    //     allNickname.appendChild(li);
+    //   });
+    // };
+
+    // socket.on('changeNickname', (users) => changeNickname(users));
+
+    // window.onload = async () => {
+    //   const messages = await fetch('http://localhost:3000/getmessages', {
+    //     method: 'GET',
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //     },
+    //   }).then((res) => res.json());
+    //   const messages1 = document.querySelector('#messages');
+    //   messages.forEach((message) => {
+    //     const li = document.createElement('li');
+    //     li.setAttribute('data-testid', 'message');
+    //     li.innerText = `${message.timestamp} ${message.nickname} ${message.message}`;
+    //     messages1.appendChild(li);
+    //   });
+    // }
   </script>
 </body>
 </html>
