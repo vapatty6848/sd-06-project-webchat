@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/styles/chat.css" rel="stylesheet" type="text/css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+
+  <title>WeChat</title>
+</head>
+<body>
+  <div class="container">
+    <div class="chat-content">
+      <aside>
+        <div class="header-form">
+          <form id="set-nickname">
+            <input id="nickname-input" type="text" placeholder="Insira seu nickname">
+            <button>Salvar</button>
+          </form>
+        </div>
+
+        <hr class="divider">
+
+        <div class="connected-users">
+          <h3>Usuários Conectados</h3>
+
+          <ul id="online-users">
+
+          </ul>
+        </div>
+      </aside>
+
+      <div id="messages" class="chat-container">
+        {% for message in messages %}
+          <div class="message">
+              <span data-testid="message">{{message}}</span>
+          </div>
+        {% endfor %}
+
+
+
+      </div>
+    </div>
+
+    <footer>
+      <form id="send-message">
+        <input id="message-input" type="text" placeholder="Digite uma nova mensagem aqui" data-testid="message-box">
+        <button data-testid="send-button">Enviar</button>
+      </form>
+    </footer>
+  </div>
+
+  <script src="/scripts/socketIO.js"></script>
+</body>
+</html>

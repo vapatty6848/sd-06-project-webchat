@@ -5,6 +5,7 @@ let schema = null;
 
 async function connection() {
   if (schema) return Promise.resolve(schema);
+
   return MongoClient
     .connect(process.env.DB_URL, {
       useNewUrlParser: true,

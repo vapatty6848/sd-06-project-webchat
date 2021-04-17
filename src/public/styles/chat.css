@@ -1,0 +1,152 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+button {
+  cursor: pointer;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 12px 20px;
+}
+
+.chat-content {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  padding: 15px;
+  height: 85vh;
+}
+
+.chat-content aside {
+  width: 15%;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border: 2px solid rgb(184, 184, 184);
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.connected-users {
+  flex: 1;
+}
+
+.header-form {
+  height: 50px;
+  padding: 10px 0;
+}
+
+.header-form form {
+  height: 100%;
+  display: flex;
+}
+
+.header-form input {
+  width: 70%;
+  padding: 0 8px;
+}
+
+.header-form button {
+  flex: 1;
+  margin-left: 5px;
+  background-color: rgb(64, 155, 155);
+  border-radius: 5px;
+  outline: none;
+  border: none;
+  color: #fff;
+}
+
+.divider {
+  border-bottom: 2px solid rgb(184, 184, 184);
+  margin: 10px 0;
+}
+
+.connected-users h3 {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+}
+
+.connected-users ul {
+  margin-top: 20px;
+  padding: 0 20px;
+  list-style: none;
+  overflow-y: auto;
+  text-align: center;
+}
+
+ul li {
+  margin-bottom: 7px;
+}
+
+.chat-container {
+  padding: 10px 20px;
+  border: 2px solid rgb(184, 184, 184);
+  border-radius: 5px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+
+.message {
+  padding: 4px 8px;
+  background-color: rgb(182, 242, 190);
+  max-width: 400px;
+  width: fit-content;
+  margin-top: 10px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.message:before {
+  position: absolute;
+  background-color: rgb(182, 242, 190);
+  top: 50%;
+  transform: translateY(-50%);
+  left: -8px;
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 100%;
+}
+
+footer {
+  height: 40px;
+}
+
+footer form {
+  display: flex;
+  padding: 0 20px;
+}
+
+footer form, footer form input {
+  height: 100%;
+}
+
+footer form input {
+  width: 90%;
+  padding: 8px;
+}
+
+footer form button {
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  background-color: rgb(102, 209, 102);
+  color: #fff;
+  font-weight: 500;
+  flex: 1;
+  margin-left: 8px;
+  transition: background-color 0.2s ease;
+}
+
+footer form button:hover {
+  background-color: rgb(91, 189, 91);
+}
