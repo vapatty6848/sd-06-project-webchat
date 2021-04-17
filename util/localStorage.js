@@ -19,4 +19,4 @@ const saveState = (nameKey, state) => {
   }
 };
 
-module.export = {loadState, saveState};
+module.export = { loadState, saveState };

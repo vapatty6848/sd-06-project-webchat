@@ -1,30 +1,31 @@
 // Faça seu código aqui
 const express = require('express');
 const cors = require('cors');
-const generateDate = require('./util/timestamp');
 
 const app = express();
 
 const httpServer = require('http').createServer(app);
+
 app.use(cors());
 
 const io = require('socket.io')(httpServer);
+
+const generateDate = require('./util/timestamp');
+
 app.set('view engine', 'ejs');
 
 const { createMessage, getAllMessages } = require('./models/Messages');
 
 app.get('/', async (_req, res) => {
-  const arrayMessages =  await getAllMessages();
+  const arrayMessages = await getAllMessages();
   res.render('home', { arrayMessages });
 });
 
 const users = [];
 
 io.on('connection', (socket) => {
-  // io.emit('message', `${generateDate()} ${nickname} se conectou!`);
-  
   socket.on('newUser', (nickname) => {
-    users.push({socketId: socket.id, nickname});
+    users.push({ socketId: socket.id, nickname });
     io.emit('updateUsers', users);
   });
 
@@ -44,8 +45,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => { // disconnect canal padrao do socket.io
     // io.emit('message', `${generateDate()} ${nickname} se desconectou!`);
-
-    const userIndex = users.findIndex(u => u.socketId === socket.id);
+    const userIndex = users.findIndex((u) => u.socketId === socket.id);
     users.splice(userIndex, 1);
     io.emit('updateUsers', users);
   });

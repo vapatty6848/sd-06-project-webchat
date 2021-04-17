@@ -5,15 +5,15 @@ const collectionName = 'messages';
 const createMessage = async (message, nickname, timestamp) => {
   const { insertedId } = await connection()
     .then((db) => db.collection(collectionName).insertOne({
-      message, nickname, timestamp
+      message, nickname, timestamp,
     }));
-  return insertedId ;
+  return insertedId;
 };
 
 const getMessageByNickname = async (nickname) => {
   const menssageResponse = await connection()
     .then((db) => db.collection(collectionName).find({
-      nickname
+      nickname,
     }).toArray());
   return menssageResponse;
 };
