@@ -59,8 +59,8 @@ footer form input {
 
 footer form button {
   background-color: rgb(102, 209, 102);
-  border-radius: 5px;
   border: none;
+  border-radius: 5px;
   color: white;
   flex: 1;
   font-weight: 500;
@@ -81,8 +81,8 @@ footer form button {
 
 .header-form button {
   background-color: rgb(64, 155, 155);
-  border-radius: 5px;
   border: none;
+  border-radius: 5px;
   color: white;
   flex: 1;
   margin-left: 5px;
