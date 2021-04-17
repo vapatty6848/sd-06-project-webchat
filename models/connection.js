@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 require('dotenv/config');
-// const localUrl = 'mongodb://localhost:27017/webchat';
-const remoteUrl = process.env.DB_URL;
 
-console.log(remoteUrl);
+const localUrl = 'mongodb://localhost:27017/webchat';
+// const remoteUrl = process.env.DB_URL;
 
-const connection = mongoose.connect(remoteUrl, {
+const connection = mongoose.connect(localUrl, {
   dbName: process.env.DB_NAME,
   useNewUrlParser: true,
   useUnifiedTopology: true,

@@ -22,15 +22,22 @@
         <label for="message"></label>
         <input
           class="form-control"
-          id="message"
-          data-testid="message-box"
-          name="message"
-          placeholder="Type your message here..."
+          id="nickname-input"
+          data-testid="nickname-box"
+          name="nickname-input"
+          placeholder="Nickname"
           type="text"
         >
       </div>
 
-      <button class="btn btn-primary" id="save-btn" type="button">Save Nickname</button>
+      <button
+        class="btn btn-primary"
+        data-testid="nickname-button"
+        id="save-btn"
+        type="button"
+      >
+        Save Nickname
+      </button>
       <div class="form-group">
         <label for="message"></label>
         <input
@@ -59,20 +66,23 @@
   <script>
     const socket = io();
 
-    // function saveNickname() {
-    //   const button = document.querySelector('#save-btn');
-    //   button.addEventListener('click', () => {
-    //     const nickname = document.querySelector('#nickname');
-    //     nickname.readOnly = true;
-    //   });
-    // }
-
     function nicknameGenerator() {
       const digits = Math.floor(1000000000 + Math.random() * 900000000);
       const nickname = `Guest_${ digits }`;
 
       return nickname;
     };
+
+    function saveNickname() {
+      const button = document.querySelector('#save-btn');
+      button.addEventListener('click', () => {
+        const nicknameField = document.querySelector('#nickname');
+        const nickname = document.querySelector('#nickname-input');
+
+        nicknameField.innerHTML = nickname.value;
+        // nickname.readOnly = true;
+      });
+    }
 
     function setNickname() {
       const generatedNickname = nicknameGenerator()
@@ -83,10 +93,9 @@
     function sendMessage() {
       const button = document.querySelector('#send-btn');
 
-  
       button.addEventListener('click', () => {
         const chatMessage = document.querySelector('#message').value;
-        const nickname = document.querySelector('#nickname').value;
+        const nickname = document.querySelector('#nickname').innerHTML;
 
         socket.emit('message', { chatMessage, nickname });
       });
@@ -104,6 +113,7 @@
 
     sendMessage();
     setNickname();
+    saveNickname();
     
   </script>
 </body>
