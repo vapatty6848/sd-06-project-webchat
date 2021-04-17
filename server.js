@@ -69,11 +69,9 @@ const removeDisconnected = (socket) => {
 };
 
 io.on('connection', (socket) => {
-  const stringNickname = getRandomString();
-  addNewUser(socket, stringNickname);
+  const stringNickname = getRandomString(); addNewUser(socket, stringNickname);
   socket.broadcast.emit('connected', stringNickname);
   socket.emit('userConnected', { stringNickname, users });
-
   socket.on('message', async ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);
     const time = getTime();
@@ -81,14 +79,13 @@ io.on('connection', (socket) => {
     io.emit('message', response);
     await model.createMessage(chatMessage, getNickname(socket), time);
   });
-
   socket.on('changeNickname', ({ newNickname }) => {
     changeNickname(newNickname, socket);
     io.emit('changeNickname', users);
   });
-
   socket.on('disconnect', () => {
     removeDisconnected(socket);
+    // io.emit('disconnected', users);
   });
 });
 
