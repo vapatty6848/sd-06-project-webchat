@@ -112,6 +112,7 @@
         li.innerText = `${message.timestamp} ${message.nickname} ${message.message}`;
         messagesUl.appendChild(li);
       });
+    }
 
       const disconnect = (users) => {
         const listNickname = document.querySelector('#nicknameList');
@@ -124,7 +125,6 @@
       }
 
       socket.on('disconnected', (users) => disconnected(users));
-    }
   </script>
 </body>
 
