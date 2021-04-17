@@ -36,13 +36,17 @@
 
   
   socket.on('updateOnlineUsers', (onlineUsers) => {
-    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname
+    const otherUsers =  onlineUsers.filter((user) => user.id !== socket.id);
+    const firstUser = onlineUsers.filter((user) => user.id === socket.id);
+    const orderedUsers = firstUser.concat(otherUsers);
 
+    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname
+    
     const onlineUsersList = document.querySelector('#online-users');
 
     while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
 
-    onlineUsers.forEach((user) => {
+    orderedUsers.forEach((user) => {
       const userToRender = document.createElement('li');
   
       userToRender.setAttribute('data-testid', 'online-user');
