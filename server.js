@@ -20,8 +20,10 @@ app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', (req, res) => {
-  res.render('index');
+app.get('/', async (req, res) => {
+  const users = await Users.getAllUsers();
+  const messages = await Messages.getAllMessages();
+  res.render('index', { users, messages });
 });
 
 io.on('connection', (socket) => {
