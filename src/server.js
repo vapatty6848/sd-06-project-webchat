@@ -61,8 +61,8 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => { connectedUsers = fil(connectedUsers, user); });
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    const formattedMessage = createMessage({ chatMessage, nickname });
+  socket.on('message', async ({ chatMessage }) => {
+    const formattedMessage = await createMessage({ chatMessage, nickname: user.nickname });
 
     io.emit('message', formattedMessage);
   });

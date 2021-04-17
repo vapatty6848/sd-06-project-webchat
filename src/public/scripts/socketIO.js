@@ -41,7 +41,7 @@ function getNickname() {
   return nickname;
 }
 
-const nickname = getNickname();
+let nickname = getNickname();
 
 function addUser(userName) {
   const usersList = document.getElementById('online-users');
@@ -50,7 +50,7 @@ function addUser(userName) {
   userContainer.classList.add('online-user');
 
   if (userName === nickname) {
-    userContainer.setAttribute('data-testid', 'message');
+    userContainer.setAttribute('data-testid', 'online-user');
   }
 
   userContainer.innerText = userName;
@@ -107,6 +107,7 @@ nicknameForm.addEventListener('submit', (e) => {
   const newNickname = nicknameInput.value;
 
   if (newNickname) {
+    nickname = newNickname;
     saveNickname(newNickname);
 
     socket.emit('newNickname', newNickname);
