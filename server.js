@@ -26,27 +26,38 @@ app.get('/', async (req, res) => {
   res.render('index', { users, messages });
 });
 
+// eslint-disable-next-line max-lines-per-function
 io.on('connection', (socket) => {
   console.log(`${socket.id} conected!`);
-
   socket.on('user', async (nickname) => {
   const user = await Users.createUser(socket.id, nickname);
   const users = await Users.getAllUsers();
   const messages = await Messages.getAllMessages();
-  io.emit('users', { user, users, messages });
+  console.log('user', user);
+  console.log('users', users);
+  console.log('messages', messages);
+  io.emit('users', users);
+  });
+
+  socket.on('userUpdate', async (user) => {
+    await Users.updateUser(user);
+    const users = await Users.getAllUsers();
+    io.emit('users', users);
   });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const time = new Date();
     const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
-     .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+      .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
     await Messages.createMessage(nickname, chatMessage, timeFormated);
     io.emit('message', `${timeFormated} ${nickname} ${chatMessage}`);
   });
-    
+
   socket.on('disconnect', async () => {
-    console.log(`${socket.id} disconnected!`);
     await Users.removeUser(socket.id);
+    console.log(`${socket.id} disconnected!`);
+    const users = await Users.getAllUsers();
+    io.emit('users', users);
   });
 });
 

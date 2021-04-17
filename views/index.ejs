@@ -42,20 +42,17 @@
 
   <script>
     const socket = io();
-    const randomNickname = `user_${Math.random().toString(36).substr(2, 16)}`;
+    const randomNickname = `user_${Math.random().toString().substr(2, 11)}`;
+    console.log(randomNickname);
     const userButton = document.querySelector('#userButton');
     const messageButton = document.querySelector('#messageButton');
     const userInput = document.querySelector('#userInput');
     const messageInput = document.querySelector('#messageInput');
     let currentUser;
 
-    socket.on('connect', () => {
-      socket.emit('user', (randomNickname));
-    });
-
     userButton.addEventListener('click', () => {
       currentUser.nickname = userInput.value;
-      socket.emit('updatedUser', currentUser);
+      socket.emit('userUpdate', currentUser);
       return false;
     });
 
@@ -72,24 +69,35 @@
     const createMessage = (message) => {
       const messagesUl = document.querySelector('#messages');
       const li = document.createElement('li');
-      li.setAttribute('data-testid', 'message')
       li.innerText = message;
+      li.setAttribute('data-testid', 'message')
       messagesUl.appendChild(li);
     };
+
+    const createUser = (user) => {
+        const usersUl = document.querySelector('#users');
+        const li = document.createElement('li');
+        li.innerText = user.nickname;
+        li.setAttribute('data-testid', 'online-user');
+        usersUl.appendChild(li);
+      }
 
     const listUsers = (users) => {
       const userUl = document.querySelector('#users');
       userUl.innerHTML= '';
-      users.map((u) => {
-        const li = document.createElement('li');
-        li.innerText = u.nickname
-        li.setAttribute('data-testid', 'online-user')
-        userUl.appendChild(li);
-      })
+      createUser(currentUser)
+      users.filter(user => user.id !== currentUser.id)
+        .forEach(user => createUser(user));
     };
+
+    socket.on('connect', () => {
+      const nickname = randomNickname;
+      currentUser = { nickname }
+      socket.emit('user', nickname);
+    });
     
-    socket.on('users', ({ user, users, messages }) => {
-      currentUser = user;
+    socket.on('users', (users) => {
+      currentUser = users.find(user => user.nickname === currentUser.nickname);
       listUsers(users);
     })
 

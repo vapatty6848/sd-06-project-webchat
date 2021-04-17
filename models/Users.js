@@ -17,6 +17,17 @@ const createUser = async (id, nickname) => {
   return (newUser.ops[0]);
 };
 
+const updateUser = async ({ id, nickname }) => {
+  const update = await connection()
+    .then((db) => db.collection('users')
+    .findOneAndUpdate(
+      { id },
+      { $set: { nickname } },
+      { returnOriginal: false },
+    ));
+  return update.value;
+};
+
 const removeUser = async (id) => {
   const excludedUser = await connection()
     .then((db) => db.collection('users').findOneAndDelete({ id }));
@@ -27,5 +38,6 @@ module.exports = {
   createUser,
   findUserById,
   getAllUsers,
+  updateUser,
   removeUser,
 };
