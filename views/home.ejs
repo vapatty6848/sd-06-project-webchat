@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebChat</title>
-    <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
     <header>
@@ -21,7 +20,7 @@
       <button type="button" id="sendNickName" data-testid="nickname-button">
         Entrar
       </button>
-      <h3>Usuários Oline</h3>
+      <h3 id="onlineUsersLabel">Usuários Online</h3>
       <ul id="onlineUsers"></ul>
     </aside>
     <main id="messages"></main>
@@ -34,25 +33,33 @@
       />
       <button type="button" id="sendMessage" data-testid="send-button">Enviar</button>
     </footer>
-
+    <script src="/socket.io/socket.io.js"></script>
     <script>
       // entrada de dados do usuário
       const socket = io();
       let nickName = '';
+
       document.querySelector('#sendNickName').addEventListener('click', (e) => {
         nickName = document.querySelector('#nickName').value;
-        socket.emit('nickName', nickName);
+        socket.emit('nickNameUpdate', nickName);
       });
 
-      socket.on('newNickName', (users) => {
+      socket.on('nickNameUpdate', (users) => {
         const ulUsers = document.querySelector('#onlineUsers');
         while (ulUsers.firstChild) {
           ulUsers.removeChild(ulUsers.firstChild);
         }
+        console.log(users);
+        const currentUser = users.find((usr) => usr.id === socket.id);
+        const userIndex = users.indexOf(currentUser);
+        if (userIndex) {
+          users.splice(0, 1, users[userIndex]);
+          users.splice(userIndex, 1);
+        }
         users.forEach((element) => {
           const newNickName = document.createElement('li');
           newNickName.setAttribute('data-testid', 'online-user');
-          newNickName.innerHTML = element;
+          newNickName.innerHTML = element.nickName;
           document.querySelector('#onlineUsers').appendChild(newNickName);
         });
       });

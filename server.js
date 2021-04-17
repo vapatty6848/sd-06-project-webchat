@@ -11,9 +11,17 @@ const users = [];
 const dateTime = new Date().toLocaleString().replace(/\//g, '-');
 
 io.on('connection', (socket) => {
-  socket.on('nickName', (nickName) => {
-    users.splice(0, 0, nickName);
-    io.emit('newNickName', users);
+  const randomNick = `User-${Math.random().toString(36).substr(2, 16)}`;
+  const { id } = socket;
+  users.push({ id, nickName: randomNick });
+  io.emit('nickNameUpdate', users);
+
+  socket.on('nickNameUpdate', (nickName) => {
+    const currentUser = users.find((usr) => usr.id === socket.id);
+    const userIndex = users.indexOf(currentUser);
+    users.splice(userIndex, 1, { id, nickName });
+    io.emit('nickNameUpdate', users);
+    console.log(users);
   }); 
   socket.on('message', (message) => {
     io.emit('message', `${dateTime} - ${message.nickname}: ${message.chatMessage}`);
