@@ -69,9 +69,9 @@ const removeDisconnected = (socket) => {
 };
 
 io.on('connection', (socket) => {
-  const stringNickname = getRandomString(); addNewUser(socket, stringNickname);
+  const stringNickname = getRandomString();
+  socket.emit('userConnected', { stringNickname, users }); addNewUser(socket, stringNickname);
   socket.broadcast.emit('connected', stringNickname);
-  socket.emit('userConnected', { stringNickname, users });
   socket.on('message', async ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);
     const time = getTime();

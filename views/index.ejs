@@ -28,7 +28,7 @@
     socket.on('userConnected', ({ stringNickname, users }) => {
       nickname = stringNickname;
       addUsersConnected(users);
-      // addNicknameToBeginning(stringNickname);
+      addNicknameToBeginning(stringNickname);
     });
 
     const button = document.querySelector('#buttonSend');
@@ -40,7 +40,7 @@
       return false;
     });
 
-    const addNickname = (nickname) => {
+    const addNicknameToBeginning = (nickname) => {
       const listNickname = document.querySelector('#nicknameList');
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
@@ -48,7 +48,7 @@
       listNickname.prepend(li);
     }
 
-    const addNicknameToBeginning = (nickname) => {
+    const addNickname = (nickname) => {
       const listNickname = document.querySelector('#nicknameList');
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
