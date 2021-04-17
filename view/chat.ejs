@@ -79,24 +79,16 @@
         })
 
         
-        const createMessage = ({ message }) => {
+        const createMessage = (message) => {
           const messagesUl = document.querySelector('#mensagens');
           const li = document.createElement('li');
           li.innerText = message;
+          li.setAttribute('data-testid', 'message');
           messagesUl.appendChild(li);
-          // const childrenLi = messagesUl.children;
-          // childrenLi[childrenLi.length - 1].name = 'super message';
         }
         
-        socket.on('messageCli', (mensagem) => createMessage(mensagem));
+        socket.on('message', (mensagem) => createMessage(mensagem));
 
-        // const ola = () => {
-        //   const lis = document.getElementById('mensagens');
-        //   lis.children.forEach((element) => {
-        //     element.style.display = 'none';
-        //   })
-        // }
-        
         const createUserOn = ({ nickname, idSocket }) => {
           const userUl = document.querySelector('#user-on');
           const li = document.createElement('li');

@@ -48,8 +48,7 @@ io.on('connection', (socket) => {
     const { nickname, chatMessage } = msg;
     const currentDate = currentDateFormat();
     uploadDB('messages', { currentDate, nickname, chatMessage });
-    io.emit('messageCli', {
-      message: `${currentDate} - ${nickname}: ${chatMessage}`, idCli: socket.id });
+    io.emit('message', `${currentDate} - ${nickname}: ${chatMessage}`);
   });
 });
 
