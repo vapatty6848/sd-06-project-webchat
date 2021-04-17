@@ -66,6 +66,16 @@
 
     let nickname = '';
 
+    function generateNickName(length) {
+      let result = '';
+      let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let charactersLength = characters.length;
+      for ( let i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
+    }
+
     socket.on('randomNickname', (newUser) => {
       if (nickname === '') {
         nickname = newUser;
@@ -108,6 +118,11 @@
         oldNickname.innerHTML = newNickname;
         oldNickname.setAttribute('id', newNickname);
       }
+    });
+
+    socket.on('connect', () => {
+      const randomNick = generateNickName(16);
+      socket.emit('connectUser', { randomNick });
     });
   </script>
 </body>

@@ -18,25 +18,30 @@ app.use(cors());
 
 const users = [];
 
-const onMessage = async ({ chatMessage, nickname }) => {
-  const now = new Date();
-  const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
-  ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+// const onMessage = async ({ chatMessage, nickname }) => {
+//   const now = new Date();
+//   const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
+//   ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
-  await messageModel.create(nickname, chatMessage, timestamp);
+//   await messageModel.create(nickname, chatMessage, timestamp);
 
-  const message = `${timestamp} ${nickname} ${chatMessage}`;
+//   const message = `${timestamp} ${nickname} ${chatMessage}`;
 
-  io.emit('message', message);
-};
+//   io.emit('message', message);
+// };
 
-const generateNickName = (id) => {
-  const sliceNickname = (id).slice(-16);
-  return sliceNickname;
-};
+const now = new Date();
+const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
+${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+
+// const generateNickName = (id) => {
+//   const sliceNickname = (id).slice(-16);
+//   return sliceNickname;
+// };
 
 const saveUser = (nickname) => {
   users.push(nickname);
+  io.emit('randomNickname', nickname);
 };
 
 const onChangeNickname = ({ nickname, newNickname }) => {
@@ -50,14 +55,11 @@ const onChangeNickname = ({ nickname, newNickname }) => {
 
 io.on('connection', (socket) => {
   console.log(`Usuário novo conectado ${socket.id}`);
-  const nickName = generateNickName(socket.id);
-
-  io.emit('randomNickname', nickName);
-
-  saveUser(nickName);
+  socket.on('connectUser', ({ randomNick }) => saveUser(randomNick));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    await onMessage({ chatMessage, nickname });
+    const msg = await messageModel.create(nickname, chatMessage, timestamp);
+    io.emit('message', `${msg.timestamp} ${msg.nickname} ${msg.message}`);
   });
 
   socket.on('changeNickname', onChangeNickname);
