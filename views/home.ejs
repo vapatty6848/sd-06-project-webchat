@@ -9,20 +9,28 @@
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>  -->
 </head>
 <body>
-  <h1>Hello World!</h1>
+  <h1>WebChat!</h1>
   <input type="text" id="nickname" data-testid="nickname-box">
   <button id="sendNickname" data-testid="nickname-button">Entrar</button>
   <br>
   <p>Quantidade de usuarios logados: <%= quantity %></p>
   
-  <ul id="online-user" data-testid="online-user"></ul>
+  <ul id="online-user">
+    <% nicknameMapFormat.forEach((nickname) => { %>
+      <li data-testid="online-user"><%= nickname %></li>
+    <% }); %>
+  </ul>
   
   <input type="text" id="message" data-testid="message-box">
   <button id="sendMessage" data-testid="send-button">Enviar</button>
 
-  <h3>Menssagens</h3>
+  <h3>Mensagens</h3>
 
-  <ul id="messages" data-testid="message"></ul>
+  <ul id="messages">
+    <% messagesMapFormat.forEach((message) => { %>
+      <li data-testid="message"><%= message %></li>
+    <% }); %>
+  </ul>
   
   <script>
     const socket = io();
