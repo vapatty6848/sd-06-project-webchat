@@ -22,35 +22,41 @@ app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './view');
 
-app.get('/', async (_req, res) => {
-  const arrayMessages = await getAll('messages');
-  const arrayUsersOn = await getAll('usersOn');
-  console.log('arrayUsersOn', arrayUsersOn);
-  res.render('./chat', { arrayMessages, arrayUsersOn });
-});
+let arrayUsersOn = [];
+
+const disconnect = (socket) => {
+  arrayUsersOn = arrayUsersOn.filter((element) => element.idSocket !== socket.id);
+  io.emit('userOff', socket.id);
+};
 
 io.on('connection', (socket) => {
-  socket.on('disconnect', () => {
-    console.log('Desconectado');
-    deleteForIdSocket('usersOn', socket.id);
-    // socket.broadcast.emit('userOff', );
-  });
+  socket.on('disconnect', () => disconnect(socket));
 
   socket.on('userOn', (nickname) => {
-    uploadDB('usersOn', { nickname, idSocket: socket.id });
-    socket.broadcast.emit('usersOn', nickname);
+    arrayUsersOn.push({ nickname, idSocket: socket.id });
+    socket.broadcast.emit('usersOn', { nickname, idSocket: socket.id });
+  });
+
+  socket.on('userUpdate', (nickname) => {
+    arrayUsersOn = arrayUsersOn.filter((element) => element.idSocket !== socket.id);
+    arrayUsersOn.push({ nickname, idSocket: socket.id });
+    console.log('arrayUsersOn update', arrayUsersOn);
+    socket.broadcast.emit('userNicknameUpdate', { nickname, idSocket: socket.id });
   });
 
   socket.on('message', (msg) => {
-    console.log(`Mensagem ${msg}`);
     const { nickname, chatMessage } = msg;
-
     const currentDate = currentDateFormat();
-
     uploadDB('messages', { currentDate, nickname, chatMessage });
-    
-    io.emit('messageCli', `${currentDate} - ${nickname}: ${chatMessage}`);
+    io.emit('messageCli', {
+      message: `${currentDate} - ${nickname}: ${chatMessage}`, idCli: socket.id });
   });
+});
+
+app.get('/', async (_req, res) => {
+  const arrayMessages = await getAll('messages');
+  console.log('arrayUsersOn 1', arrayUsersOn);
+  res.render('./chat', { arrayMessages, arrayUsersOn });
 });
 
 app.use((err, _req, res, _next) => {
