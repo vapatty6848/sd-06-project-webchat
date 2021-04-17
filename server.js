@@ -1,45 +1,62 @@
 const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+require('dotenv').config();
 
 const app = express();
 const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer, {
+ cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
 
-const PORT = 3000;
-const io = require('socket.io')(httpServer);
+const { urlencoded } = require('express');
+const { historicModel } = require('./models');
+const { ChatController } = require('./controllers');
+const { ChatUtils } = require('./utils');
 
-const generateData = () => {
-  const data = new Date().toLocaleDateString('en-GB');
-  const time = new Date().toLocaleTimeString('en-GB');
-  const dateTime = (`0${data} ${time}`).replace(/[/]/g, '-');
-  return dateTime;
+const PORT = process.env.PORT || 3000;
+let users = [];
+
+const formatMessage = (msg) => {
+  const { chatMessage: message, nickname } = msg;
+  const timestamps = ChatUtils.generateData();
+  const dataMsg = { message, nickname, timestamps };
+  historicModel.create(dataMsg);
+  const messageFormat = `${timestamps} - ${nickname}: ${message}`;
+  return messageFormat;
 };
 
-const users = [];
 io.on('connection', (socket) => {
 console.log(`${socket.id}, Conectou`);
 
   socket.on('NewUser', (user) => {
-    console.log(''+ '' + user)
-    users.push({ id: `${socket.id}`, name: user });
+    users.unshift({ id: `${socket.id}`, name: user });
     io.emit('usersNick', users);
 });
-  socket.on('message', (message) => {   
-    const { chatMessage, nickname } = message;
-    const dateTime = generateData();
-    const messageFormat = `${dateTime} - ${nickname}: ${chatMessage}`;
-    io.emit('message', messageFormat);
+  socket.on('message', (message) => {
+    io.emit('message', formatMessage(message));
+  });
+
+  socket.on('newNick', (user) => {
+    users = ChatUtils.updateUsers(users, user);  
+    io.emit('usersNick', users);
   });
 
   socket.on('disconnect', () => {
-    const userIndex = users.findIndex((user) => user.id === socket.id);
-    if (userIndex !== -1) users.splice(userIndex, 1);  
+    ChatUtils.removeUser(users, socket);
     io.emit('usersNick', users);
     console.log(`${socket.id}, Desconectou`);
   });
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
-// app.set('views', './views');
-
-app.get('/', (_req, res) => res.render('home'));
+app.set('views', './views');
+app.use('/', ChatController);
+app.use(express.static(path.join(__dirname, 'utils')));
 
 httpServer.listen(PORT, () => console.log(`Escutando a porta ${PORT}`));

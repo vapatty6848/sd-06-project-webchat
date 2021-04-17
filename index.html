@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project</title>
+
+
+  </head>
+
+  <body>
+    <h1>webchat</h1>
+    <div>
+      <h3 data-testid="online-user" id="username"></h3>
+      <!-- data-testid="nickname-box" campo nickname -->
+      <!-- data-testid="nickname-button" salva name buttonu -->
+    </div>
+    <input data-testid="message-box" type="text" id='message'>
+
+    <button data-testid="send-button" id="sendMessage">Enviar</button>
+
+    <h3>Mensagens</h3>
+
+    <ul id='messages'></ul>
+
+    <h3>Usuários</h3>
+
+    <ul id='users'></ul>
+    <script type="text/javascript" src="/utils/scripts.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+      // data-testid="online-user" Elemento nome cliente 16 caratcteres
+      const socket = io();
+      const userNick = document.querySelector('#username').innerHTML
+      console.log(userNick)
+      socket.emit('NewUser', (`User_${userNick}`));      // colocar aqui o id especifico gerado
+
+      const inputMessage = document.querySelector('#message');
+      document.querySelector('#sendMessage').addEventListener('click', (e) => {
+        const message = inputMessage.value;
+        socket.emit('message', { chatMessage: message, nickname: `User_${socket.id}` });
+      });
+
+      inputMessage.addEventListener('keyup', (e) => {
+        const message = inputMessage.value;
+        const dataUser = { chatMessage: message, nickname: `User_${socket.id}` }
+        if (e.key === 'Enter') socket.emit('message', dataUser);
+      });
+
+      socket.on('message', (message) => {
+        const messageLI = document.createElement('li');
+        messageLI.innerHTML = message;
+        messageLI.setAttribute('data-testid', 'message');
+        document.querySelector('#messages').appendChild(messageLI);
+      });
+
+      socket.on('usersNick', (users) => {
+        const usersList = document.querySelector('#users');
+        while (usersList.firstChild) usersList.removeChild(usersList.firstChild)
+        users.forEach(user => {
+          const messageLI = document.createElement('li');
+          messageLI.innerHTML = user.name;
+          document.querySelector('#users').appendChild(messageLI);
+        });
+      });
+
+    </script>
+  </body>
+
+</html>
