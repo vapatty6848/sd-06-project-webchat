@@ -114,8 +114,10 @@
       });
     }
 
-      const disconnect = (users) => {
+      const disconnected = (users) => {
+        console.log('disco')
         const listNickname = document.querySelector('#nicknameList');
+        listNickname.innerHTML = '';
         users.forEach((user) => {
           const li = document.createElement('li');
           li.setAttribute('data-testid', 'online-user');
@@ -124,7 +126,7 @@
         })
       }
 
-      socket.on('disconnected', (users) => disconnected(users));
+      socket.on('desconectar', (users) => disconnected(users));
   </script>
 </body>
 
