@@ -28,11 +28,15 @@
 <script>
   const socket = io();
   let userNickname;
+
+  socket.on('connect', () => { 
+    userNickname = `user_${Math.random().toString().substr(2, 11)}`;
+    socket.emit('sendNickname', { nickname: userNickname });
+  })
+
   
   socket.on('updateOnlineUsers', (onlineUsers) => {
-    userNickname = onlineUsers.find((user) => user.id === socket.id)
-      ? onlineUsers.find((user) => user.id === socket.id).nickname
-      : userNickname;
+    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname
 
     const onlineUsersList = document.querySelector('#online-users');
 

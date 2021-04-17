@@ -29,10 +29,11 @@ const disconnectFunction = (socket) => {
   io.emit('updateOnlineUsers', users);
 };
 
-io.on('connection', async (socket) => {
-  const newUser = { id: socket.id, nickname: `user_${Math.random().toString().substr(2, 11)}` };
-  users.push(newUser);
-  io.emit('updateOnlineUsers', users);
+io.on('connection', async (socket) => {  
+  socket.on('sendNickname', ({ nickname }) => {
+    users.push({ id: socket.id, nickname });
+    io.emit('updateOnlineUsers', users);
+  });
 
   socket.on('message', async ({ nickname, chatMessage }) => {
     const timestamp = createTimestamp();
