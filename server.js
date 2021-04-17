@@ -26,39 +26,49 @@ app.get('/', async (req, res) => {
   res.render('index', { users, messages });
 });
 
-// eslint-disable-next-line max-lines-per-function
-io.on('connection', (socket) => {
-  console.log(`${socket.id} conected!`);
-  socket.on('user', async (nickname) => {
-  const user = await Users.createUser(socket.id, nickname);
-  const users = await Users.getAllUsers();
-  const messages = await Messages.getAllMessages();
-  console.log('user', user);
-  console.log('users', users);
-  console.log('messages', messages);
-  io.emit('users', users);
-  });
+const time = new Date();
+const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
+  .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
 
+const socketOnUser = (socket) => {
+  socket.on('user', async (nickname) => { 
+    await Users.createUser(socket.id, nickname);
+    const users = await Users.getAllUsers();
+    await Messages.getAllMessages();
+    io.emit('users', users);
+  });
+};
+
+const socketOnUserUpdate = (socket) => {
   socket.on('userUpdate', async (user) => {
     await Users.updateUser(user);
     const users = await Users.getAllUsers();
-    io.emit('users', users);
+    io.emit('users', users); 
   });
+};
 
+const socketOnMessage = (socket) => {
   socket.on('message', async ({ chatMessage, nickname }) => {
-    const time = new Date();
-    const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
-      .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
     await Messages.createMessage(nickname, chatMessage, timeFormated);
     io.emit('message', `${timeFormated} ${nickname} ${chatMessage}`);
   });
+};
 
+const socketOnDisconnect = (socket) => {
   socket.on('disconnect', async () => {
     await Users.removeUser(socket.id);
     console.log(`${socket.id} disconnected!`);
     const users = await Users.getAllUsers();
     io.emit('users', users);
   });
+};
+
+io.on('connection', (socket) => {
+  console.log(`${socket.id} conected!`);
+  socketOnUser(socket);
+  socketOnUserUpdate(socket);
+  socketOnMessage(socket);
+  socketOnDisconnect(socket);
 });
 
 http.listen(PORT, () => {
