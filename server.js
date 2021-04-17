@@ -8,27 +8,25 @@ const io = require('socket.io')(http, {
   },
 });
 
+const { messageFormat } = require('./utils');
+
 app.use(cors());
 
 app.get('/', (req, res) => {
-  res.sendFile(`${__dirname}/index.html`);
+  res.sendFile(`${__dirname}/views/index.html`);
 });
 
 io.on('connection', (socket) => {
-  console.log(`Conectado: ${socket.id}`);
+  console.log(`${socket.id} conectou!`);
 
   socket.emit('hello', 'Seja bem vindo(a)');
 
-  socket.broadcast.emit('messageServer', { 
-    chatMessage: 'Alguém se conectou', 
-  });
+  // socket.broadcast.emit('message', message({ chatMessage: 'se conectou', nickname: socket.id }));
 
-  socket.on('disconnect', () => {
-    console.log('Desconectado');
-  });
+  socket.on('disconnect', () => console.log('Desconectado'));
 
   socket.on('message', ({ chatMessage, nickname }) => {
-    io.emit('messageServer', { chatMessage, nickname });
+    io.emit('message', messageFormat({ chatMessage, nickname }));
   });
 });
 

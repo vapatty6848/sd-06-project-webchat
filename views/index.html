@@ -80,11 +80,7 @@
 
     socket.on('hello', (message) => createMessage(message));
 
-    socket.on('messageServer', ({ chatMessage, nickname }) => {
-      const date = new Date()
-      const fullDate = `${date.getDay()}-${date.getMonth()}-${date.getFullYear()} ${date.toLocaleTimeString()}`
-      createMessage(`${fullDate} - ${nickname}: ${chatMessage}`)
-    });
+    socket.on('message', (message) => createMessage(message));
   </script>
 </body>
 
