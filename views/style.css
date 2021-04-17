@@ -57,7 +57,7 @@ body {
   border: 1px solid;
   height: 500px;
   margin: auto;
-  width: 95%;
-  overflow: hidden;
   overflow-y: scroll;
+  overflow: hidden;
+  width: 95%;
 }

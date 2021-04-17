@@ -193,8 +193,11 @@
       return false;
     });
     
-    socket.on('addClassOnTop', () => {
+    socket.on('addClassOnTop', ({ nick, userList }) => {
       const userLi = document.querySelector('li');
+      // console.log(userLi.innerText === nick);
+      console.log(nick)
+      console.log(userList)
       userLi.setAttribute('data-testid', 'online-user');
     });
 

@@ -56,6 +56,13 @@ function updateUserList(newUserList) {
   console.log(newUserList);
 }
 
+function onDisconnect(nick, socket) {
+  removeUserFromList(socket.id);
+    socket.broadcast.emit('createListForOthers', userList);
+    socket.broadcast.emit('addClassOnTop', { nick, userList });
+    console.log('Desconectado');
+}
+
 io.on('connection', (socket) => {
   console.log('Conectado');
   
@@ -67,10 +74,8 @@ io.on('connection', (socket) => {
     updateUserList(newUserList);
   });
   
-  socket.on('disconnect', () => {
-    removeUserFromList(socket.id);
-    socket.broadcast.emit('addClassOnTop');
-    console.log('Desconectado');
+  socket.on('disconnect', (nick) => {
+    onDisconnect(nick, socket);
   });
   
   socket.on('userChangedName', ({ oldNick, nick }) => {
@@ -84,7 +89,7 @@ io.on('connection', (socket) => {
 
 const chatController = require('./controllers/chatController');
 const usersController = require('./controllers/usersController');
-const { update } = require('lodash');
+// const { update } = require('lodash');
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
