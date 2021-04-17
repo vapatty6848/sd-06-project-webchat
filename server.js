@@ -1,7 +1,6 @@
 const app = require('express')();
 const http = require('http').createServer(app);
 const dateFormat = require('dateformat');
-// const path = require('path');
 
 const cors = require('cors');
 
@@ -13,8 +12,6 @@ const io = require('socket.io')(http, {
 });
 const model = require('./models/message');
 const controller = require('./controller/controller');
-// const Users = require('./models/users');
-// const Messages = require('./models/message');
 
 app.use(cors());
 app.use('/', controller);
@@ -25,48 +22,7 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-// app.get('/', async (_req, res) => {
-//   const htmlPath = path.join(__dirname, '/views/index.ejs');
-//   const users = await Users.getAllUsers();
-//   const messages = await Messages.getAllMessages();
-//   res.render(htmlPath, { users, messages });
-// });
-
 const users = [];
-
-// const dateTime = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
-
-// const login = async (socket, nickname, ioConnection) => {
-//   await Users.create(socket.id, nickname);
-//   const users = await Users.getAllUsers();
-//   ioConnection.emit('usersConnected', users);
-// };
-
-// io.on('connection', (socket) => {
-//   socket.on('userLogin', async (nickname) => {
-//     await login(socket, nickname, io);
-//   });
-//   socket.on('updatedUser', async (user) => {
-//     await Users.updateUser(user);
-//     const users = await Users.getAllUsers();
-//     io.emit('usersConnected', users);
-//   });
-//   socket.on('message', async ({ nickname, chatMessage }) => {
-//     const msg = await Messages.createMessage(chatMessage, nickname, dateTime);
-//     io.emit('message', `${msg.dateTime} ${msg.nickname} ${msg.message}`);
-//   });
-//   socket.on('disconnect', async () => {
-//     await Users.removeUserById(socket.id);
-//     const users = await Users.getAllUsers();
-//     io.emit('usersConnected', users);
-//   });
-// });
-
-// const PORT = process.env.PORT || 3000;
-
-// http.listen(PORT, () => {
-//   console.log(`Rodando na porta ${PORT}!!`);
-// });
 
 const addNewUser = (socket, nickname) => {
   const newUser = {
