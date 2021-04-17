@@ -38,16 +38,24 @@ function fil(users, user) {
   return users.filter((connected) => user.nickname !== connected.nickname);
 }
 
+function newUser({ socket, user }) {
+  socket.emit('users', [user, ...connectedUsers]);
+  connectedUsers.push(user);
+  socket.broadcast.emit('newUser', user);
+}
+
+function disconnect({ socket, user }) {
+  connectedUsers = fil(connectedUsers, user);
+  socket.broadcast.emit('logout', user);
+}
+
 io.on('connection', (socket) => {
   const user = { nickname: '', id: uuid() };
 
   socket.on('newUser', (nickname) => {
     user.nickname = nickname;
 
-    socket.emit('users', [user, ...connectedUsers]);
-    connectedUsers.push(user);
-
-    socket.broadcast.emit('newUser', user);
+    newUser({ socket, user });
   });
 
   socket.on('newNickname', (newNickname) => {
@@ -59,10 +67,10 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('newNickname', user);
   });
 
-  socket.on('disconnect', () => { connectedUsers = fil(connectedUsers, user); });
+  socket.on('disconnect', () => disconnect({ user, socket }));
 
-  socket.on('message', async ({ chatMessage }) => {
-    const formattedMessage = await createMessage({ chatMessage, nickname: user.nickname });
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const formattedMessage = await createMessage({ chatMessage, nickname });
 
     io.emit('message', formattedMessage);
   });

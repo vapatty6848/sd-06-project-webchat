@@ -47,7 +47,6 @@ function addUser(userName) {
   const usersList = document.getElementById('online-users');
 
   const userContainer = document.createElement('li');
-  userContainer.classList.add('online-user');
 
   if (userName === nickname) {
     userContainer.setAttribute('data-testid', 'online-user');
@@ -125,6 +124,12 @@ socket.on('newNickname', (user) => {
 
     return user;
   });
+
+  renewUsers(connectedUsers);
+});
+
+socket.on('logout', (user) => {
+  connectedUsers = connectedUsers.filter(({ id }) => id !== user.id);
 
   renewUsers(connectedUsers);
 });
