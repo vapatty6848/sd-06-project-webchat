@@ -17,8 +17,7 @@ const io = require('socket.io')(http, {
 
 const { uuid } = require('uuidv4');
 
-const Message = require('./database/models/Message');
-const { formatMessage } = require('./utils/formatMessage');
+const { createMessage } = require('./utils/createMessage');
 
 app.use(express.static(`${__dirname}/public`));
 
@@ -35,6 +34,10 @@ app.use(appRoutes);
 
 let connectedUsers = [];
 
+function fil(users, user) {
+  return users.filter((connected) => user.nickname !== connected.nickname);
+}
+
 io.on('connection', (socket) => {
   const user = { nickname: '', id: uuid() };
 
@@ -49,30 +52,17 @@ io.on('connection', (socket) => {
 
   socket.on('newNickname', (newNickname) => {
     user.nickname = newNickname;
-    connectedUsers = connectedUsers.map((connected) => {
-      if (connected.id !== user.id) return connected;
 
-      const newNick = { ...connected, nickname: newNickname };
+    connectedUsers = connectedUsers.map((connected) =>
+      ({ ...connected, nickname: connected.id !== user.id ? connected.nickname : newNickname }));
 
-      return newNick;
-    });
     socket.broadcast.emit('newNickname', user);
   });
 
-  socket.on('disconnect', () => {
-    // socket.broadcast.emit('mensagemServer', { mensagem: `Client ID ${clientID} has left` });
-    connectedUsers = connectedUsers.filter((connected) => user.nickname !== connected.nickname);
-  });
+  socket.on('disconnect', () => { connectedUsers = fil(connectedUsers, user); });
 
-  socket.on('message', async (msg) => {
-    const { chatMessage, nickname } = msg;
-
-    const messageModel = new Message();
-    const timestamp = new Date(Date.now()).toISOString();
-
-    const createdMessage = await messageModel.create({ timestamp, chatMessage, nickname });
-
-    const formattedMessage = formatMessage(createdMessage);
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const formattedMessage = createMessage({ chatMessage, nickname });
 
     io.emit('message', formattedMessage);
   });

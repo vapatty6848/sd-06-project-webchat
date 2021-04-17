@@ -1,6 +1,5 @@
 const Message = require('../database/models/Message');
 
-const { formatDate } = require('../utils/formatDate');
 const { formatMessage } = require('../utils/formatMessage');
 
 class MessageController {
