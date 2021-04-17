@@ -1,4 +1,5 @@
 const express = require('express');
+// const cors = require('cors');
 
 const app = express();
 const httpServer = require('http').createServer(app);
@@ -11,6 +12,15 @@ app.set('views', './views');
 // Roda o socket io
 const io = require('socket.io')(httpServer);
 
+// app.use(cors());
+
+let quantity = 0;
+
+app.get('/', (_req, res) => {
+  res.render('home', { quantity });
+  quantity += 1;
+});
+
 const manageDate = () => {
   // const includeZero = (n) => {
   //   if (n <= 9) return `0${n}`;
@@ -21,9 +31,22 @@ const manageDate = () => {
   const dateAndHour = (`${date} ${hour}`).replace(/[/]/g, '-');
   return dateAndHour;
 };
+// 2
+function generatorNickname(lengthNickname) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < lengthNickname; i += 1) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+// 2
 
 io.on('connection', (socket) => {
-  console.log(`usuario novo conectado ${socket.id}`);
+  const newUser = generatorNickname(16);
+  console.log(`usuario novo conectado ${newUser}`);
+
+  socket.emit('newUser', newUser);
 
   socket.on('message', (message) => {
     const { chatMessage, nickname } = message;
@@ -32,13 +55,6 @@ io.on('connection', (socket) => {
     console.log(formattedMessage);
     io.emit('message', formattedMessage);
   });
-});
-
-let quantity = 0;
-
-app.get('/', (_req, res) => {
-  res.render('home', { quantity });
-  quantity += 1;
 });
 
 httpServer.listen(PORT, () => {
