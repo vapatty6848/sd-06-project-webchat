@@ -1,7 +1,7 @@
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 button {
@@ -16,22 +16,22 @@ button {
 }
 
 .chat-content {
-  flex: 1;
-  display: flex;
   align-items: stretch;
-  padding: 15px;
+  display: flex;
+  flex: 1;
   height: 85vh;
+  padding: 15px;
 }
 
 .chat-content aside {
-  width: 15%;
-  min-width: 200px;
+  border-radius: 5px;
+  border: 2px solid rgb(184, 184, 184);
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  border: 2px solid rgb(184, 184, 184);
-  border-radius: 5px;
   margin-right: 10px;
+  min-width: 200px;
+  padding: 10px;
+  width: 15%;
 }
 
 .connected-users {
@@ -41,84 +41,6 @@ button {
 .header-form {
   height: 50px;
   padding: 10px 0;
-}
-
-.header-form form {
-  height: 100%;
-  display: flex;
-}
-
-.header-form input {
-  width: 70%;
-  padding: 0 8px;
-}
-
-.header-form button {
-  flex: 1;
-  margin-left: 5px;
-  background-color: rgb(64, 155, 155);
-  border-radius: 5px;
-  outline: none;
-  border: none;
-  color: #fff;
-}
-
-.divider {
-  border-bottom: 2px solid rgb(184, 184, 184);
-  margin: 10px 0;
-}
-
-.connected-users h3 {
-  text-align: center;
-  text-transform: uppercase;
-  font-size: 1.2rem;
-}
-
-.connected-users ul {
-  margin-top: 20px;
-  padding: 0 20px;
-  list-style: none;
-  overflow-y: auto;
-  text-align: center;
-}
-
-ul li {
-  margin-bottom: 7px;
-}
-
-.chat-container {
-  padding: 10px 20px;
-  border: 2px solid rgb(184, 184, 184);
-  border-radius: 5px;
-  flex: 1;
-  overflow-y: auto;
-}
-
-
-.message {
-  padding: 4px 8px;
-  background-color: rgb(182, 242, 190);
-  max-width: 400px;
-  width: fit-content;
-  margin-top: 10px;
-  border-radius: 10px;
-  position: relative;
-}
-
-.message:before {
-  position: absolute;
-  background-color: rgb(182, 242, 190);
-  top: 50%;
-  transform: translateY(-50%);
-  left: -8px;
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 100%;
-}
-
-footer {
-  height: 40px;
 }
 
 footer form {
@@ -131,22 +53,100 @@ footer form, footer form input {
 }
 
 footer form input {
-  width: 90%;
   padding: 8px;
+  width: 90%;
 }
 
 footer form button {
-  border: none;
-  outline: none;
-  border-radius: 5px;
   background-color: rgb(102, 209, 102);
-  color: #fff;
-  font-weight: 500;
+  border-radius: 5px;
+  border: none;
+  color: white;
   flex: 1;
+  font-weight: 500;
   margin-left: 8px;
+  outline: none;
   transition: background-color 0.2s ease;
 }
 
 footer form button:hover {
   background-color: rgb(91, 189, 91);
+}
+
+.header-form form {
+  display: flex;
+  height: 100%;
+}
+
+.header-form input {
+  padding: 0 8px;
+  width: 70%;
+}
+
+.header-form button {
+  background-color: rgb(64, 155, 155);
+  border-radius: 5px;
+  border: none;
+  color: white;
+  flex: 1;
+  margin-left: 5px;
+  outline: none;
+}
+
+.divider {
+  border-bottom: 2px solid rgb(184, 184, 184);
+  margin: 10px 0;
+}
+
+.connected-users h3 {
+  text-align: center;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.connected-users ul {
+  list-style: none;
+  margin-top: 20px;
+  overflow-y: auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+ul li {
+  margin-bottom: 7px;
+}
+
+.chat-container {
+  border-radius: 5px;
+  border: 2px solid rgb(184, 184, 184);
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 20px;
+}
+
+
+.message {
+  background-color: rgb(182, 242, 190);
+  border-radius: 10px;
+  margin-top: 10px;
+  max-width: 400px;
+  padding: 4px 8px;
+  position: relative;
+  width: fit-content;
+}
+
+.message:before {
+  background-color: rgb(182, 242, 190);
+  border-radius: 100%;
+  content: '';
+  height: 5px;
+  left: -8px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+}
+
+footer {
+  height: 40px;
 }
