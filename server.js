@@ -12,7 +12,6 @@ const io = require('socket.io')(httpServer, {
   },
 });
 
-const { urlencoded } = require('express');
 const { historicModel } = require('./models');
 const { ChatController } = require('./controllers');
 const { ChatUtils } = require('./utils');
@@ -33,7 +32,7 @@ io.on('connection', (socket) => {
 console.log(`${socket.id}, Conectou`);
 
   socket.on('NewUser', (user) => {
-    users.unshift({ id: `${socket.id}`, name: user });
+    users.push({ id: `${socket.id}`, name: user });
     io.emit('usersNick', users);
 });
   socket.on('message', (message) => {

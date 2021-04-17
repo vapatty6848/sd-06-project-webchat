@@ -21,12 +21,12 @@
       <button data-testid="nickname-button" id="saveNick">Salvar</button>
     </div>
 
-    
 
-      <input data-testid="message-box" name="message" type="text" id='message'>
-      <button type="submit" data-testid="send-button" id="sendMessage" >Enviar</button>
 
-   
+    <input data-testid="message-box" name="message" type="text" id='message'>
+    <button type="submit" data-testid="send-button" id="sendMessage">Enviar</button>
+
+
 
     <h3>Mensagens</h3>
 
@@ -83,10 +83,14 @@
       });
 
       socket.on('usersNick', (users) => {
-        usersArray = users
         const elementUl = document.querySelector('#users');
-        while (elementUl.firstChild) elementUl.removeChild(elementUl.firstChild)
-        users.forEach(user => {
+        while (elementUl.firstChild) elementUl.removeChild(elementUl.firstChild);
+        const user = users.find((u) => u.id === socket.id);
+        const newUsers = users.filter((u) => u.id !== socket.id);
+        newUsers.unshift(user);
+        usersArray = users
+        console.log(newUsers)
+        newUsers.forEach(user => {
           const messageLI = document.createElement('li');
           messageLI.setAttribute('data-testid', 'online-user');
           messageLI.innerHTML = user.name;

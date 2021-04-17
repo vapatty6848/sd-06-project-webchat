@@ -4,9 +4,9 @@ const { ChatUtils } = require('../utils');
 
 const route = Router();
 
-route.post('/', async (req, res) => {
- console.log(req.body.message);
-});
+// route.post('/', async (req, res) => {
+//  console.log(req.body.message);
+// });
 
 route.get('/', async (_req, res) => {
   const Nickname = await ChatUtils.createNickname();
