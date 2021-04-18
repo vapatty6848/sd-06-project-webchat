@@ -10,33 +10,51 @@
 <body>
   <h1>Webchat</h1>
   <h2>Digite seu Nickname</h2>
-  <input type="text" placeholder="Insira seu nome aqui">
-  <button>Logar</button>
+  <input type="text" id="textNickname" placeholder="Insira seu nome aqui">
+  <button id="sendNickname">Logar</button>
+  
   <h2>Usuários</h2>
-  <ul>
-    <li>Usuário 1</li>
+  <ul id="displayNickname"> 
   </ul>
+  
   <h2>Chitchat</h2>
   <ul id='displayMessage'></ul>
-    <input type="text" id="textMessage" placeholder="Digite uma nova mensagem aqui">
-    <button id="sendMessage">Enviar</button>
+  
+  <input type="text" id="textMessage" placeholder="Digite uma nova mensagem aqui">
+  <button id="sendMessage">Enviar</button>
+  
   <script>
-    const socket = io();
+  const socket = io();
 
-   const buttonSendMsg = document.querySelector('#sendMessage');
-   const textMessage = document.querySelector('#textMessage');
-   const displayMessage = document.querySelector('#displayMessage');
+  const buttonSendMsg = document.querySelector('#sendMessage');
+  const textMessage = document.querySelector('#textMessage');
+  const displayMessage = document.querySelector('#displayMessage');
    
-   buttonSendMsg.addEventListener('click', (event) => {
-      event.preventDefault();
-      socket.emit('message', textMessage.value);
-    })
+  const buttonSendNick = document.querySelector('#sendNickname');   
+  const textNickname = document.querySelector('#textNickname');
+  const displayNickname =  document.querySelector('#displayNickname');
 
-    socket.on('toFrontMsg', (messageFromBack) => {
-      const msgItem = document.createElement('li');
-      msgItem.innerHTML = messageFromBack;
-      displayMessage.appendChild(msgItem);
-    });
+  buttonSendMsg.addEventListener('click', (event) => {
+    event.preventDefault();
+    socket.emit('message', textMessage.value);
+   })
+
+  buttonSendNick.addEventListener('click', (event) => {
+    event.preventDefault();
+    socket.emit('nickname', textNickname.value);
+   })
+
+  socket.on('toFrontMsg', (messageFromBack) => {
+    const msgItem = document.createElement('li');
+    msgItem.innerHTML = messageFromBack;
+    displayMessage.appendChild(msgItem);
+  });
+
+  socket.on('toFrontNick', (nickFromBack) => {
+    const nickItem = document.createElement('li');
+    nickItem.innerHTML = nickFromBack;
+    displayNickname.appendChild(nickItem); 
+  })
   </script>
 </body>
 </html>

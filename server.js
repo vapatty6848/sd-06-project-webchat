@@ -11,8 +11,11 @@ io.on('connection', (socket) => {
   console.log(`Novo usuário conectado: ${socket.id}`);
 
   socket.on('message', (message) => {
-    console.log(message);
     io.emit('toFrontMsg', message);
+  });
+
+  socket.on('nickname', (nickname) => {
+    io.emit('toFrontNick', nickname);
   });
 });
 
