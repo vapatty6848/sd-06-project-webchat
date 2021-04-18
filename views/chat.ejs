@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WEB CHAT</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 16px Helvetica, Arial;
+      padding: 15px;
+    }
+
+    #main-container {
+      display: flex;
+      flex-direction: row;
+      height: 400px;
+      margin: 10px 0 20px;
+    }
+
+    #info-container {
+      border: solid 1px blue;
+      padding: 10px;
+      width: 30%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #messages-container {
+      border: solid 1px blue;
+      margin-left: 15px;
+      padding: 10px;
+      width: 60%;
+    }
+
+    #messages-container li {
+      list-style-type: none;
+    }
+
+    #send-message-container {
+      width: 100%;
+    }
+
+    #users-container {
+      border: solid 1px blue;
+      margin-top: 15px;
+      padding: 10px;
+      width: 95%;
+      height: 80%;
+    }
+
+    #users li {
+      list-style-type: none;
+    }
+
+    #send-message-input {
+      height: 50px;
+      width: 60%;
+      padding: 5px;
+    }
+
+    #nickname-container input {
+      border: solid 1px blue;
+      padding: 5px;
+      width: 85%;
+    }
+
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+  <h1>BEM VINDO AO WEBCHAT</h1>
+  <div id="main-container">
+    <div id="info-container">
+      <div id="nickname-container">
+        <form id="nickname" action="">
+          <input type="text" name="nickname-input" data-testid="nickname-box" placeholder="Insira seu nickname">
+          <button id="send-nickname-btn" data-testid="nickname-button">Salvar</button>
+        </form>
+      </div>
+      <div id="users-container">
+        <ul id="users">
+        </ul>
+      </div>
+    </div>
+    <div id="messages-container">
+      <ul id="messages"></ul>
+    </div>
+  </div>
+  <div id="send-message-container">
+    <form id="send-message" action="">
+      <input type="text" id="send-message-input" data-testid="message-box" placeholder="Digite uma nova mensagem">
+      <button id="send-message-btn" data-testid="send-button">Enviar</button>
+    </form>
+  </div>
+  <script>
+    const socket = io('http://localhost:3000');
+    let userNickname = '';
+
+    // Send message
+    const sendMessageForm = document.querySelector('#send-message');
+    sendMessageForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const messageInput = document.querySelector('#send-message-input');
+      const message = messageInput.value;
+      console.log('Nickname que mandou mensagem: ', userNickname);
+      console.log('Mensagem', message);
+      socket.emit('message', { chatMessage: message, nickname: userNickname });
+      messageInput.value = '';
+      return false;
+    });
+
+    function showChatMessage(message) {
+      const messagesUl = document.querySelector('#messages');
+      const li = document.createElement('li');
+      li.innerText = message;
+      messagesUl.appendChild(li);
+    }
+
+    // First connection
+    socket.on('hello', (nickname) => {
+      userNickname = nickname;
+      console.log('Welcome, your nickname is: ', userNickname );
+    });
+
+    // Get messages from other users
+    socket.on('server.chatMessage', (message) => {
+      showChatMessage(message);
+    });
+
+    // Other client joins them chat
+    socket.on('updateUsersList', (users) => {
+      const usersLi = document.querySelector('#users');
+      usersLi.innerHTML = "";
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.innerText = user.nickname;
+        usersLi.appendChild(li);
+      });
+    });
+  </script>
+</body>
+
+</html>
