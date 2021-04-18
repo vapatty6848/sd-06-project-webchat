@@ -3,7 +3,13 @@ const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app);
-const io = require('socket.io')(httpServer);
+const cors = require('cors');
+const io = require('socket.io')(httpServer, {
+  cors: {
+    origin: 'https://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
 const dateFormater = require('./utils/dateFormat');
 
 const users = [];
@@ -28,6 +34,7 @@ io.on('connection', (socket) => {
   });
 });
 
+app.use(cors);
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
