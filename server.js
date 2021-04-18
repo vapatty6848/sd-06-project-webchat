@@ -9,6 +9,10 @@ const io = require('socket.io')(httpServer);
 
 io.on('connection', (socket) => {
   console.log(`Novo usuário conectado: ${socket.id}`);
+
+  socket.on('message', (message) => {
+    console.log(message);
+  });
 });
 
 app.set('view engine', 'ejs');
