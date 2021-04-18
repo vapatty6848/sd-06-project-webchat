@@ -47,6 +47,7 @@ function addUser(userName) {
   const usersList = document.getElementById('online-users');
 
   const userContainer = document.createElement('li');
+  userContainer.classList.add('user');
 
   if (userName === nickname) {
     userContainer.setAttribute('data-testid', 'online-user');
@@ -62,7 +63,7 @@ function addAllUsers(users) {
 }
 
 function clearUsers() {
-  const allUsers = document.querySelectorAll('.online-user');
+  const allUsers = document.querySelectorAll('.user');
 
   allUsers.forEach((user) => user.remove());
 }
