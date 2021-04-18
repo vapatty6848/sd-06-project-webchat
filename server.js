@@ -7,6 +7,10 @@ const PORT = process.env.PORT || 3000;
 
 const io = require('socket.io')(httpServer);
 
+io.on('connection', (socket) => {
+  console.log(`Novo usuário conectado: ${socket.id}`);
+});
+
 app.set('view engine', 'ejs');
 app.set('views', './view');
 
