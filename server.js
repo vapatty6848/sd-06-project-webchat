@@ -35,11 +35,9 @@ io.on('connection', (socket) => {
 });
 
 app.use(cors());
-app.set('view engine', 'ejs');
-app.set('views', './views');
 
 app.get('/', (_req, res) => {
-  res.render('home');
+  res.render(`${__dirname}/views/home.ejs`);
 });
 
 httpServer.listen(3000, () => {
