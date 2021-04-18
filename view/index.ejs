@@ -1,55 +1,119 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Socket.IO chat</title>
-  </head>
-  <body>
-    <span data-testid="online-user" id="online-user"></span>
-    <ul id="mensagens"></ul>
-    <form action="" class="form">
-      <input id="mensagemInput" autocomplete="off" data-testid="message-box"/><button data-testid="send-button">Send</button>
+
+<head>
+  <title>Socket.IO chat</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+</head>
+
+<body>
+  <section>
+    <span id="online-user"></span>
+    <form action="" id="userForm">
+      <input id="nickname-box" data-testid="nickname-box" />
+      <button data-testid="nickname-button">Save</button>
     </form>
-    <form action="" class="form2">
-      <input id="nickname-box" data-testid="nickname-box" /><button data-testid="nickname-button">Save</button>
+  </section>
+  <section>
+    <ul id="users"></ul>
+  </section>
+  <section>
+    <ul id="messages"></ul>
+    <form action="" id="chatForm">
+      <input id="message-box" autocomplete="off" data-testid="message-box" />
+      <button data-testid="send-button">Send</button>
     </form>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
-    <script>
-      const socket = io();
-      const form = document.querySelector('.form')
-      const form2 = document.querySelector('.form2')
-      const inputMessage = document.querySelector('#mensagemInput')
-      const inputName = document.querySelector('#nickname-box')
-      form.addEventListener('submit', (e) =>{
-        e.preventDefault();
-        socket.emit('mensagem', inputMessage.value);
-        inputMessage.value = ''
-        return false;
-      });
-        const createMessage = (message) => {
-        const messagesUl = document.querySelector('#mensagens');
-        console.log(message)
+  </section>
+
+  <script>
+    const socket = io();
+    const usersOnlineList = [];
+    const messages = JSON.parse('<%- messages %>');
+    const generateUser = () => {
+      const length = 16;
+      const randomChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < length; i += 1) {
+        result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+      } return result;
+    };
+
+    let currentUser = generateUser();
+    socket.emit('login', { user: currentUser });
+    const userElement = document.querySelector('#online-user');
+    userElement.innerText = currentUser;
+
+    const userForm = document.querySelector('#userForm')
+    const inputName = document.querySelector('#nickname-box')
+    userForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const prevUser = currentUser.slice();
+      currentUser = inputName.value;
+      userElement.innerText = currentUser;
+      socket.emit('login', { user: currentUser, prevUser });
+      inputName.value = '';
+      return false;
+    })
+
+    const chatForm = document.querySelector('#chatForm')
+    const inputMessage = document.querySelector('#message-box')
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const messageObject = { nickname: currentUser, chatMessage: inputMessage.value };
+      socket.emit('message', messageObject);
+      inputMessage.value = '';
+      return false;
+    });
+
+
+    const messagesUl = document.querySelector('#messages');
+
+    const printStoredMessages = ({ timestamp, nickname, message }) => {
+      const splitTimestamp = timestamp.split(/[-]|[ ]/g);
+      const [y, m, d, t] = splitTimestamp;
+      const invertTimestamp = `${d}-${m}-${y} ${t}`;
+      const li = document.createElement('li');
+      let testId = document.createAttribute('data-testid');
+      testId.value = 'message';
+      li.setAttributeNode(testId);
+      li.innerText = `${invertTimestamp} - ${nickname}: ${message}`;
+      messagesUl.appendChild(li);
+    };
+
+    const printMessage = (message) => {
+      const li = document.createElement('li');
+      let testId = document.createAttribute('data-testid');
+      testId.value = 'message';
+      li.setAttributeNode(testId);
+      li.innerText = message
+      messagesUl.appendChild(li);
+    };
+
+    messages.forEach((message) => printStoredMessages(message));
+    socket.on('message', (msg) => printMessage(msg));
+
+    const usersUl = document.querySelector('#users');
+    socket.on('onlineUsers', (users) => {
+      usersUl.innerHTML = '';
+      const userIndex = users.indexOf(currentUser);
+      const thisUser = users.splice(userIndex, 1);
+      const li = document.createElement('li');
+      let testId = document.createAttribute('data-testid');
+      testId.value = 'online-user';
+      li.setAttributeNode(testId);
+      li.innerText = currentUser;
+      usersUl.appendChild(li);
+      users.forEach((user) => {
         const li = document.createElement('li');
-        li.innerText = message;
-        let att = document.createAttribute('data-testid')
-        att.value = 'message';
-        li.setAttributeNode(att)
-        messagesUl.appendChild(li);
-      }
-      socket.on('mensagemServer', (mensagem) => createMessage(mensagem));
-
-
-      form2.addEventListener('submit', (e) =>{
-        e.preventDefault();
-        socket.emit('user', inputName.value);
-        return false;
+        let testId = document.createAttribute('data-testid');
+        testId.value = 'online-user';
+        li.setAttributeNode(testId);
+        li.innerText = user;
+        usersUl.appendChild(li);
       });
-        const setUser = (user) => {
-        const userSpan = document.querySelector('#online-user');
-        userSpan.innerText = user;
-      }
-      window.onload = () => socket.emit('user');
-      socket.on('userServer', (user) => setUser(user));
+    });
+  </script>
+</body>
 
-    </script>
-  </body>
 </html>

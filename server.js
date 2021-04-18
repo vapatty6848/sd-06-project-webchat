@@ -8,39 +8,58 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'], // Métodos aceitos pela url
   },
 });
+const router = require('./controllers');
+const chat = require('./controllers/chatController');
+const helper = require('./helpers');
 
 app.use(cors());
 
 app.set('view engine', 'ejs');
-
 app.set('views', './views');
 
-app.get('/', (_req, res) => {
-  res.render('../view/');
+app.use(router);
+
+const onlineUsers = [];
+
+const loginHandler = (socket) => {
+  let userName;
+  socket.on('login', async ({ user, prevUser = '' }) => {
+    const findUser = onlineUsers.indexOf(prevUser);
+    if (findUser >= 0) { onlineUsers.splice(findUser, 1); }
+    userName = user.slice();
+    onlineUsers.push(userName);
+    io.emit('onlineUsers', onlineUsers);
 });
 
-const users = [];
+socket.on('disconnect', () => {
+  const findUser = onlineUsers.indexOf(userName);
+  if (findUser >= 0) { onlineUsers.splice(findUser, 1); }
+  io.emit('onlineUsers', onlineUsers);
+});
+};
+
+const chatHandler = (socket) => {
+  socket.on('message', async (msg) => {
+    const date = new Date();
+    const dateANDtimeFront = `${helper.formatDate(date)} ${helper.formatTime(date)}`;
+    const chatMessageFront = helper.formatMessage(dateANDtimeFront, msg);
+
+    const dateANDtimeBack = `${helper.formatDate(date, 'back-end')} ${helper.formatTime(date)}`;
+    const chatMessageBack = {
+      timestamp: dateANDtimeBack,
+      nickname: msg.nickname,
+      message: msg.chatMessage,
+    };
+
+    await chat.create(chatMessageBack);
+  
+    io.emit('message', chatMessageFront);
+  });
+};
 
 io.on('connection', (socket) => {
-  const id = users.length;
-  let nickname = `12345678910111d${users.length}`;
-  if (nickname.length > 16) nickname = `2345678910111d${users.length}`;
-  users.push(nickname);
-  console.log(users);
-
-  socket.emit(nickname);
-
-  socket.on('mensagem', (msg) => {
-    const date = new Date();
-    const formatedDate = `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-    const formatedTime = `${date.getHours()}:${date.getMinutes()}`;
-    io.emit('mensagemServer', `${formatedDate} ${formatedTime} ${users[id]}: ${msg}`);
-  });
-
-  socket.on('user', (user) => {
-    users[id] = user || nickname;
-    io.emit('userServer', users[id]);
-  });
+  loginHandler(socket);
+  chatHandler(socket);
 });
 
 http.listen(3000, () => {
