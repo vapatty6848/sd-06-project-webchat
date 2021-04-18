@@ -25,15 +25,7 @@ function generateRandomNickname() {
   return nickname;
 }
 
-function getNickname() {
-  const nickname = generateRandomNickname();
-
-  nicknameInput.value = nickname;
-
-  return nickname;
-}
-
-let nickname = getNickname();
+let nickname = generateRandomNickname();
 
 function addUser(userName) {
   const usersList = document.getElementById('online-users');
