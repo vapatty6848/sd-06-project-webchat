@@ -47,6 +47,7 @@
 
     document.querySelector('#nickname-button').addEventListener('click', (e) => {
       const message = document.querySelector('#nickname-box').value;
+      realnick = message;
       const onlineUser = document.querySelector('#online-user');
       onlineUser.innerHTML =  message;
       socket.emit('changeNickname', message);

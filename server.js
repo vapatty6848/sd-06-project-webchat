@@ -35,12 +35,12 @@ io.on('connection', (socket) => {
     io.emit('updateUsers', users);
   });
 
-  socket.on('message', async (message) => {
-    const index = users.findIndex((element) => element.socketId === socket.id);
-    io.emit('message', `${generateDate()} ${users[index].nickname} ${message.chatMessage}`); // emite para tds os clients
+  socket.on('message', async ({ chatMessage: message, nickname }) => {
+    // const index = users.findIndex((element) => element.socketId === socket.id);
+    io.emit('message', `${generateDate()} ${nickname} ${message}`); // emite para tds os clients
     // socket.emit('canal', 'data'); // envia apenas para o msm client
     // socket.broadcast('canal', 'data'); // envia para todos menos para quem emitiu
-    await createMessage(message.chatMessage, users[index].nickname, generateDate());
+    await createMessage(message, nickname, generateDate());
   });
 
   socket.on('disconnect', () => { // disconnect canal padrao do socket.io
