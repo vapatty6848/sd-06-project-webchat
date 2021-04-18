@@ -14,6 +14,12 @@ const dateFormater = require('./utils/dateFormat');
 
 const users = [];
 
+app.use(cors());
+
+app.get('/', (_req, res) => {
+  res.render(`${__dirname}/views/home.ejs`);
+});
+
 io.on('connection', (socket) => {
   const guest = { id: socket.id, name: (`${socket.id}`).slice(0, 16) };
   users.push(guest);
@@ -32,12 +38,6 @@ io.on('connection', (socket) => {
     const message = `${brDate} - ${person.name}: ${chatMessage} `;
     io.emit('newMessage', message);
   });
-});
-
-app.use(cors());
-
-app.get('/', (_req, res) => {
-  res.render(`${__dirname}/views/home.ejs`);
 });
 
 httpServer.listen(3000, () => {
