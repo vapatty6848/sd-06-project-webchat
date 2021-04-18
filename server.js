@@ -11,7 +11,8 @@ const users = [];
 const dateTime = new Date().toLocaleString().replace(/\//g, '-');
 
 const onConnect = async (socket) => {
-  const randomNick = `User-${Math.random().toString(36).substr(2, 16)}`;
+  // const randomNick = `User-${Math.random().toString(36).substr(2, 16)}`;
+  const randomNick = `User-${socket.id.substr(2, 11)}`;
   users.push({ id: socket.id, nickName: randomNick });
   const messages = await Messages.getAllMessages();
   io.emit('nickNameUpdate', users);
