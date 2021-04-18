@@ -25,16 +25,8 @@ function generateRandomNickname() {
   return nickname;
 }
 
-function saveNickname(nickname) {
-  localStorage.setItem('nickname', nickname);
-}
-
 function getNickname() {
-  let nickname = localStorage.getItem('nickname');
-
-  if (!nickname) nickname = generateRandomNickname();
-
-  saveNickname(nickname);
+  const nickname = generateRandomNickname();
 
   nicknameInput.value = nickname;
 
@@ -49,9 +41,7 @@ function addUser(userName) {
   const userContainer = document.createElement('li');
   userContainer.classList.add('user');
 
-  if (userName === nickname) {
-    userContainer.setAttribute('data-testid', 'online-user');
-  }
+  userContainer.setAttribute('data-testid', 'online-user');
 
   userContainer.innerText = userName;
 
@@ -108,7 +98,6 @@ nicknameForm.addEventListener('submit', (e) => {
 
   if (newNickname) {
     nickname = newNickname;
-    saveNickname(newNickname);
 
     socket.emit('newNickname', newNickname);
 
