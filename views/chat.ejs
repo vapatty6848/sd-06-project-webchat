@@ -132,7 +132,7 @@
     });
 
     // Get messages from other users
-    socket.on('server.chatMessage', (message) => {
+    socket.on('message', (message) => {
       showChatMessage(message);
     });
 
