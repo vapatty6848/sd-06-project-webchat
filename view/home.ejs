@@ -17,9 +17,7 @@
     <li>Usuário 1</li>
   </ul>
   <h2>Chitchat</h2>
-  <ul>
-    <li>Mensagem 1</li>
-  </ul>
+  <ul id='displayMessage'></ul>
     <input type="text" id="textMessage" placeholder="Digite uma nova mensagem aqui">
     <button id="sendMessage">Enviar</button>
   <script>
@@ -27,12 +25,18 @@
 
    const buttonSendMsg = document.querySelector('#sendMessage');
    const textMessage = document.querySelector('#textMessage');
+   const displayMessage = document.querySelector('#displayMessage');
    
    buttonSendMsg.addEventListener('click', (event) => {
       event.preventDefault();
       socket.emit('message', textMessage.value);
     })
 
+    socket.on('toFrontMsg', (messageFromBack) => {
+      const msgItem = document.createElement('li');
+      msgItem.innerHTML = messageFromBack;
+      displayMessage.appendChild(msgItem);
+    });
   </script>
 </body>
 </html>
