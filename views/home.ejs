@@ -13,7 +13,7 @@
   <input type="text" data-testid="nickname-box" id="nickname-box" />
   <button type="button" data-testid="nickname-button" id="nickname-button">Mudar nickname</button>
   
-  <h1 data-testid="online-user" id="online-user"></h1>
+  <h1 id="online-user"></h1>
   <input type="text" id="message" data-testid="message-box" />
   <button id="sendMessage" data-testid="send-button">Enviar</button>
 
@@ -72,9 +72,9 @@
       users.forEach((element, index) => {
         const usersLI = document.createElement('li');
         usersLI.innerHTML = element.nickname;
-        if(index === 0) {
+        // if(index === 0) {
           usersLI.setAttribute('data-testid', 'online-user');
-        }
+        // }
         document.querySelector('#users').appendChild(usersLI);    
       });
     });
