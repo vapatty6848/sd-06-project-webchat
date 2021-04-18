@@ -6,7 +6,7 @@ const httpServer = require('http').createServer(app);
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
   cors: {
-    origin: 'https://localhost:3000',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
   },
 });
@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
   });
 });
 
-app.use(cors);
+app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
