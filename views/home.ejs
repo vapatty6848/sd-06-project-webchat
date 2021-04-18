@@ -75,10 +75,12 @@
       });
 
       socket.on('message', (message) => {
-        const newMessage = document.createElement('p');
-        newMessage.setAttribute('data-testid', 'message');
-        newMessage.innerHTML = message;
-        document.querySelector('#messages').appendChild(newMessage);
+        message.forEach((element) => {
+          const newMessage = document.createElement('p');
+          newMessage.setAttribute('data-testid', 'message');
+          newMessage.innerHTML = `${element.date} - ${element.nickname}: ${element.message}`;
+          document.querySelector('#messages').appendChild(newMessage);
+        });
       });
     </script>
   </body>
