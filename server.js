@@ -26,7 +26,7 @@ io.on('connection', async (socket) => {
   socket.on('message', (message) => {
     io.emit('message', `${dateTime} - ${message.nickname}: ${message.chatMessage}`);
   });
-  socket.on('disconnect', (socket) => {
+  socket.on('disconnect', () => {
     const currentUser = users.find((usr) => usr.id === socket.id);
     const userIndex = users.indexOf(currentUser);
     users.splice(userIndex, 1);
