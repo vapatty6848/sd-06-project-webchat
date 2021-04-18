@@ -13,7 +13,7 @@
   <input type="text" id="nickname" data-testid="nickname-box">
   <button id="sendNickname" data-testid="nickname-button">Entrar</button>
   <br>
-  <p>Quantidade de usuarios logados: <%= quantity %></p>
+  <p>Quantidade de usuarios logados: <span id="quantity">0</span></p>
   
   <ul id="online-user">
     <% nicknameMapFormat.forEach((nickname) => { %>
@@ -34,28 +34,54 @@
   
   <script>
     const socket = io();
-    // console.log("socket", socket);
-   
-     // 2
-    let newNikname = '';
-    socket.on('newUser', (newUser) => {
-      newNikname = newUser;
-      localStorage.setItem('nickname', newNikname);
+    // initializeUser usado connect
+    socket.emit('initializeUser');
+
+    socket.on('usersConnected', (usersConnected) => {
+      const userUL = document.querySelector('#online-user');
+      
+      usersConnected.forEach(user => {
+        const userLI = document.createElement('li');
+        userLI.innerHTML = user.nickname;
+        userLI.setAttribute('data-testid', 'online-user');
+        userUL.appendChild(userLI);
+      });
+
+      document.querySelector('#quantity').textContent = usersConnected.length;
+
+    });
+
+    // 2
+    let nicknameUser = '';
+    socket.on('addNewUser', (newUser) => {
+      const userUL = document.querySelector('#online-user');
+      
+      const userLI = document.createElement('li');
+      userLI.innerHTML = newUser.nickname;
+      userLI.setAttribute('data-testid', 'online-user');
+
+      if(socket.id === newUser.socketId) {
+        nicknameUser = newUser.nickname;
+        userUL.insertBefore(userLI, userUL.firstChild);
+      } else {
+        userUL.appendChild(userLI);
+      }
+
+      const quantity = Number(document.querySelector('#quantity').textContent);
+      document.querySelector('#quantity').textContent = quantity + 1;
     });
     // 2 
 
     // 1
     document.querySelector('#sendNickname').addEventListener('click', (e) => {
-      const nickname = document.querySelector('#nickname').value;
-      newNikname = nickname;
-      localStorage.setItem('nickname', nickname);
-      console.log("nickname", nickname);
-      // socket.emit('message', { chatMessage: message, nickname: socket.id });
+      const newNickname = document.querySelector('#nickname').value;
+      socket.emit('setNewNickname', nicknameUser, newNickname);
+      nicknameUser = newNickname;
     });
 
     document.querySelector('#sendMessage').addEventListener('click', (e) => {
       const message = document.querySelector('#message').value;
-      socket.emit('message', { chatMessage: message, nickname: newNikname });
+      socket.emit('message', { chatMessage: message, nickname: nicknameUser });
     });
 
     socket.on('message', (message) => {
@@ -66,15 +92,30 @@
     })
     // 1
 
-    // 2
-    socket.on('newUser', (newUser) => {
-      console.log("newUser", newUser);
-      const userLI = document.createElement('li');
-      userLI.innerHTML = newUser;
-      userLI.setAttribute('data-testid', 'online-user')
-      document.querySelector('#online-user').appendChild(userLI);
-    })
-    // 2
+    socket.on('updatedUserNickname', (updatedUser) => {
+      const userUL = document.querySelector('#online-user');
+
+      const userLIs = userUL.children;
+      for (let userLI of userLIs) {
+        if(userLI.textContent === updatedUser.oldNickname) {
+          userLI.textContent = updatedUser.newNickname;
+        }
+      }
+    });
+
+    socket.on('disconnectUser', (disconnetedUser) => {
+      const userUL = document.querySelector('#online-user');
+
+      const userLIs = userUL.children;
+      for (let userLI of userLIs) {
+        if(userLI.textContent === disconnetedUser.nickname) {
+          userUL.removeChild(userLI);
+        }
+      }
+
+      const quantity = Number(document.querySelector('#quantity').textContent);
+      document.querySelector('#quantity').textContent = quantity - 1;
+    });
   </script>
 </body>
 </html>
