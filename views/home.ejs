@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/socket.io/socket.io.js"></script>
+    <title>MTR</title>
+  </head>
+  <body>
+    <h1>Menssageiro do Tio RamireZ</h1>
+    <ul id='user'></ul>
+    <br /><br /><br />
+    <input type='text' id='message' data-testid='message-box' />
+    <button type='button' id='send' data-testid='send-button'>Enviar</button>
+    <br />
+    <ul id='chat'></ul>
+    <br />
+    <label>
+      Alterar Apelido:
+      <input type='text' id='nick' data-testid='nickname-box' />
+    </label>
+    <button type='button' id='nickChange' data-testid='nickname-button'>
+      Alterar
+    </button>
+    <script>
+      const socket = io('http://localhost:3000');
+
+      socket.on('updatedUserList', (users) => {
+        document.getElementById('user').innerHTML = '';
+        users.forEach((element) => {
+          const user = document.createElement('li');
+          user.innerHTML = element.name;
+          user.setAttribute('data-testid', 'online-user');
+          document.getElementById('user').appendChild(user);
+        });
+      });
+
+      document.getElementById('nickChange').addEventListener('click', () => {
+        const newName = document.getElementById('nick').value;
+
+        socket.emit('updateUser', { name: newName, id: socket.id });
+      });
+
+      document.getElementById('send').addEventListener('click', () => {
+        const chatMessage = document.getElementById('message').value;
+        let nickname = socket.id;
+
+        socket.emit('message', { chatMessage, nickname });
+      });
+
+      socket.on('newMessage', (message) => {
+        const chat = document.getElementById('chat');
+        const text = document.createElement('li');
+        text.innerHTML = message;
+        text.setAttribute('data-testid', 'message');
+        chat.appendChild(text);
+      });
+    </script>
+  </body>
+</html>
