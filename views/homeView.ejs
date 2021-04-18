@@ -38,8 +38,8 @@
       <div>
         <h3>Mensagens</h3>
         <ul id="message">
-          <% messages.forEach((message) => { %>
-            <li data-testid="message"><%= `${message.timestamp} ${message.nickname} ${message.chatMessage}` %></li>
+          <% messages.forEach((msg) => { %>
+            <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
           <% }) %>
         </ul>
       </div>
@@ -80,7 +80,7 @@
       const userLi = document.createElement('li');
       userLi.setAttribute('data-testid', 'online-user');
       userLi.setAttribute('id', user);
-      userLi.innerHTML = user;
+      userLi.innerText = user;
       document.querySelector('#online-user').appendChild(userLi);
     });
 
@@ -92,7 +92,7 @@
     socket.on('message', (message) => {
       const messageLi = document.createElement('li');
       messageLi.setAttribute('data-testid', 'message');
-      messageLi.innerHTML = message; 
+      messageLi.innerText = message;
       document.querySelector('#message').appendChild(messageLi);
     });
 
@@ -100,7 +100,7 @@
       const newNickname = document.querySelector('#nickname-box').value;
       if (newNickname !== '') {
         const oldNickname = document.querySelector(`#${nickname}`);
-        oldNickname.innerHTML = newNickname;
+        oldNickname.innerText = newNickname;
         oldNickname.setAttribute('id', newNickname);
         socket.emit('changeNickname', { nickname, newNickname });
         nickname = newNickname;
@@ -110,7 +110,7 @@
     socket.on('changeNickName', ({ nickname, newNickname }) => {
       const oldNickname = document.querySelector(`#${nickname}`);
       if (oldNickname) {
-        oldNickname.innerHTML = newNickname;
+        oldNickname.innerText = newNickname;
         oldNickname.setAttribute('id', newNickname);
       }
     });

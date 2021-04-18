@@ -37,11 +37,10 @@ const onChangeNickname = ({ nickname, newNickname }) => {
 };
 
 io.on('connection', (socket) => {
-  console.log(`Usuário novo conectado ${socket.id}`);
   socket.on('connectUser', ({ nickname }) => saveUser(nickname));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    const msg = await messageModel.create(nickname, chatMessage, timestamp);
+    const msg = await messageModel.create(chatMessage, nickname, timestamp);
     io.emit('message', `${msg.timestamp} ${msg.nickname} ${msg.message}`);
   });
 

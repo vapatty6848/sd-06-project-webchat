@@ -1,10 +1,10 @@
 const connection = require('./connection');
 
-const create = async (nickname, message, timestamp) => {
+const create = async (message, nickname, timestamp) => {
   const newMessage = await connection()
     .then((db) => db.collection('messages').insertOne({
-      nickname,
       message,
+      nickname,
       timestamp,
     }));
 
