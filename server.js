@@ -15,6 +15,7 @@ const {
   handleNewConnection,
   sendChatMessage,
   handleClientDisconnection,
+  handleNicknameChange,
 } = require('./utils');
 
 app.use(cors());
@@ -38,10 +39,16 @@ io.on('connection', (socket) => {
     sendChatMessage({ chatMessage, nickname, io });
   });
 
+  // Change nickname
+  socket.on('nickname.change', ({ socketId, newNickname }) => {
+    handleNicknameChange({ socket, socketId, newNickname, io });
+  });
+
   // Client disconects
   socket.on('disconnect', () => {
     handleClientDisconnection({ socket, users, io });
   });
 });
 
+module.exports.users = users;
 httpServer.listen(PORT, () => { console.log(`Ouvindo a porta ${PORT}`); });

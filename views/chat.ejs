@@ -81,8 +81,14 @@
   <div id="main-container">
     <div id="info-container">
       <div id="nickname-container">
-        <form id="nickname" action="">
-          <input type="text" name="nickname-input" data-testid="nickname-box" placeholder="Insira seu nickname">
+        <form id="change-nickname" action="">
+          <input
+            type="text"
+            id="nickname-input"
+            name="nickname-input"
+            data-testid="nickname-box"
+            placeholder="Insira seu nickname"
+          >
           <button id="send-nickname-btn" data-testid="nickname-button">Salvar</button>
         </form>
       </div>
@@ -118,9 +124,25 @@
       return false;
     });
 
+    // Change nickname
+    const nicknameForm = document.querySelector('#change-nickname');
+    nicknameForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const nicknameInput = document.querySelector('#nickname-input');
+      const newNickname = nicknameInput.value;
+      console.log(`${userNickname} mudou seu nickname para: ${newNickname}`);
+      console.log('Dados para server: id | novo nick', socket.id, newNickname);
+      const socketId = socket.id;
+      socket.emit('nickname.change', { socketId: socketId, newNickname: newNickname });
+      nicknameInput.value = '';
+      return false;
+    });
+
+
     function showChatMessage(message) {
       const messagesUl = document.querySelector('#messages');
       const li = document.createElement('li');
+      li.setAttribute("data-testid", "message");
       li.innerText = message;
       messagesUl.appendChild(li);
     }
@@ -128,7 +150,7 @@
     // First connection
     socket.on('hello', (nickname) => {
       userNickname = nickname;
-      console.log('Welcome, your nickname is: ', userNickname );
+      console.log(`Welcome, your id is ${socket.id}. Your nickname is ${userNickname}`);
     });
 
     // Get messages from other users
@@ -138,11 +160,17 @@
 
     // Other client joins them chat
     socket.on('updateUsersList', (users) => {
+      users.forEach((user) => {
+        if (socket.id === user.socketId) userNickname = user.nickname;
+      });
       const usersLi = document.querySelector('#users');
       usersLi.innerHTML = "";
       users.forEach((user) => {
         const li = document.createElement('li');
         li.innerText = user.nickname;
+        if (user.nickname === userNickname) {
+          li.setAttribute("data-testid", "online-user");
+        }
         usersLi.appendChild(li);
       });
     });
