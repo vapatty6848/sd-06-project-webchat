@@ -6,9 +6,7 @@ const io = require('socket.io')(httpServer);
 const MessageModel = require('./models/MessageModel');
 
 const users = [];
-// const messages = [];
-
-  // Source: https://attacomsian.com/blog/javascript-generate-random-string
+// Source: https://attacomsian.com/blog/javascript-generate-random-string
 const randomNicknameGenerator = (length = 16) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
@@ -49,11 +47,8 @@ io.on('connection', (socket) => {
   });
   
   socket.on('message', (message) => {
-    // console.log('message', message)
     const { today, now } = createDateString();
-    // const messageContent = `${today} ${now} -> ${message.nickname}: ${message.chatMessage}`;
-    // messages.push(messageContent);
-    io.emit('message', `${today} ${now} -> ${message.nickname}: ${message.chatMessage}`);
+    io.emit('message', `${today} ${now}: ${message.nickname}: ${message.chatMessage}`);
     MessageModel.createMessage({ nickname: message.nickname,
       message: message.chatMessage,
       timestamp: `${today} ${now}` });
@@ -63,8 +58,9 @@ io.on('connection', (socket) => {
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.get('/', (_req, res) => {
-  res.render('home');
+app.get('/', async (_req, res) => {
+  const messages = await MessageModel.findAllMessages();
+  res.render('home', { messages });
 });
 
 httpServer.listen('3000', () => console.log('Running on port 3000'));

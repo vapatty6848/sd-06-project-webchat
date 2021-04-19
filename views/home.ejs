@@ -20,7 +20,11 @@
     <input type="text" id="new-nickname" name="new-nickname" data-testid="nickname-box"/>
     <button id="change-nickname" data-testid="nickname-button">Change nickname</button>
     <h3>Chat</h3>
-    <ul id="messages-list"></ul>
+    <ul id="messages-list">
+        <% messages.forEach((message) => { %>
+            <li data-testid="message"><%= message.timestamp %> <%= message.nickname %>: <%= message.message %></li>
+        <% }) %>
+    </ul>
 
     <script>
         const socket = io();
@@ -32,7 +36,6 @@
             if (shouldClearNicknameList) {
                 document.querySelector('#user-names').innerHTML = ''
             }
-            // console.log('nickname: ', nicknamesFromServer);
             nicknamesFromServer.forEach(({ nickname }) => {
                 const newUser = document.createElement("LI")
                 newUser.innerText = nickname
@@ -43,16 +46,10 @@
         })
 
         socket.on('message', (messagesFromServer) => {
-            // document.querySelector('#messages-list').innerHTML = ''
-            // messages = messagesFromServer
-            // messages?.forEach((message) => {
-                // messagesFromServer.forEach((message) => {
-                const newMessageElement = document.createElement("LI")
-                newMessageElement.setAttribute("data-testid", "message");
-                newMessageElement.innerText = messagesFromServer
-                document.querySelector('#messages-list').appendChild(newMessageElement)
-            // })
-
+            const newMessageElement = document.createElement("LI")
+            newMessageElement.setAttribute("data-testid", "message");
+            newMessageElement.innerText = messagesFromServer
+            document.querySelector('#messages-list').appendChild(newMessageElement)
         })
 
         document.querySelector('#send-button').addEventListener('click', () => {
@@ -63,7 +60,6 @@
         });
 
         document.querySelector('#change-nickname').addEventListener('click', () => {
-            console.log('socket', socket.id)
             const typedNickname = document.querySelector('#new-nickname').value;
             socket.emit('change-nickname', typedNickname, socket.id);
         });
