@@ -35,7 +35,7 @@
 
   <script>
     const socket = io('http://localhost:3000'); //abre conexão no front-end com o socket
-    let thisUser = {};
+    let thisUser = {nickname: '', id: ''};
 
     socket.on('connect', () => {
     const nickname = socket.id.slice(0,16);
@@ -51,9 +51,18 @@
 
     document.querySelector('#set-nickname-btn').addEventListener('click', () => {
       const thisNickname = document.querySelector('#nickname').value;
+      if (thisNickname.length !== 0 ) {
+      // const nickname = !thisUser.nickname? socket.id.slice(0,16) : thisNickname;
       thisUser.nickname = thisNickname;
       thisUser.id = socket.id;
       socket.emit('updateUsers', thisUser)
+      }
+      if(thisNickname.length === 0 ) {
+      thisUser.nickname = socket.id.slice(0,16);
+      thisUser.id = socket.id;
+      socket.emit('updateUsers', thisUser)
+      }
+     
     });
 
     socket.on('message', (message) => {
@@ -65,7 +74,6 @@
 
 
     const createUserList = (user) => {
-      console.log(user.nickname, 'linha 68')
       const userLi = document.createElement('li');
       userLi.innerText = user.nickname;
       userLi.setAttribute('data-testid', 'online-user');
@@ -75,17 +83,13 @@
     const listAllUsers = (users) => {
       document.querySelector('#users').innerHTML = '';
       // Coloca o usuario na primeira posição da lista
-      console.log('linha 76', thisUser)
       createUserList(thisUser);
       users.filter(user => user.id !== thisUser.id).forEach(user => createUserList(user));
     }
 
     socket.on('onlineUsers', (users) => {
-      console.log('linha 84', thisUser)
       const nickname = !thisUser.nickname? socket.id.slice(0,16) : thisUser.nickname;
-      console.log('linha 86,', socket.id)
       thisUser.nickname = nickname
-      console.log('linha 87', thisUser)
       thisUser = users.find(user => user.nickname === thisUser.nickname);
       listAllUsers(users);
       // const userUl = document.querySelector('#users');
