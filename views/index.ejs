@@ -4,64 +4,66 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <title>WebChat</title>
 </head>
 <body>
   <h1>Welcome to FIX WebChat Project!</h1>
-  <div>
-    <input data-testid="nickname-box" id="nickname-box" />
-    <button data-testid="nickname-save" id="nickname-save">Save</button>
-    <ul id="users">
-      <li id="online-user" data-testid="online-user">
-        Visitante <%=numeros%>
-      </li>
-      <%Object.values(onlineUsers).forEach((user) =>{%>
-      <li id="<%=user.socketId%>"
-        data-testid="online-user"><%=user.nickname%>
-      </li>
-      <%})%>
-    </ul>
-  </div>
-  <div>
-    <input data-testid="message-box" id="message-box" />
-    <button data-testid="send-button" id="message-send-button">Enviar</button>
-  </div>
-  <ul id="chat-box">
-    <% messages.forEach(({date, nickname, chatMessage}) => { %>
-    <li data-testid="message">
-      <%=date%> - <%=nickname%>: <%=chatMessage%>
-    </li>
-    <%})%>
-  </ul>
+  <form class="chat">
+    <input
+    type="text"
+    name="nickname"
+    id="nickname-box"
+    data-testid="nickname-box"
+    placeholder="Type your nickname"
+  />
+    <div id="messages"></div>
+    <input
+    type="text"
+    id="message-box"
+    data-testid="message-box"
+    name="message"
+    placeholder="Type your msg"
+  />
+  <button type="button" id="send-button" data-testid="send-button">Send</button>
+  <button type="button" id="nickname-save" data-testid="nickname-save">Save nickname</button>
+  </form>
 </body>
-<script>
-  const socket = io('http://localhost:3000/');
-    const messageBox = document.getElementById('message-box');
-    const messageSendButton = document.getElementById('message-send-button');
-    const userMe = document.getElementById('userMe');
-    const userButtonSave = document.getElementById('nickname-save');
-    const userInputSave = document.getElementById('nickname-box');
-    const chatBox = document.getElementById('chat-box');
-    const onlineUsers = document.getElementById('online-user');
-    const listUsers = document.getElementById('users');
-    let nickname = 'Visitante' + '<%=numeros%>';
-    const myData = {
-      nickname,
-      socketId: socket.socketId,
-    };
-    userButtonSave.addEventListener('click', () => {
-      userMe.innerHTML = userInputSave.value;
+
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+  const socket = io('http://localhost:3000');
+  const renderMsgs = document.getElementById('messages');
+  const sendMsg = document.getElementById('send-button');
+  const userNick = document.getElementById('nickname-box');
+  const msgBox = document.getElementById('message-box');
+  const chat = document.getElementById('messages');
+
+  sendMsg.addEventListener('click', function () {
+    console.log('clicou aqui caraio')
+    const nickname = userNick.value;
+    const chatMessage = msgBox.value;
+    if (nickname.length && chatMessage.length) {
+      const msgObj = {
+        nickname,
+        chatMessage,
+      };
+      socket.emit('message', msgObj);
+    }
     });
-    messageSendButton.addEventListener('click', () => {
-      socket.emit('message', { chatMessage: messageBox.value, nickname });
-    });
-    socket.on('message', (stringNewMessage) => {
-      const message = document.createElement('li');
-      message.innerHTML = stringNewMessage;
-      message.setAttribute('data-testid', 'message');
-      chatBox.appendChild(message);
-      console.log('testando');
+    socket.on('history', renderMsgs);
+    const renderMsgs = (history) => {
+    $('#messages').append('<div data-testid="message">' + history + '</div>');
+  };
+    socket.on('online', renderConectados);
+    const renderConectados = (connected) => {
+    $('#onlineUser').append('<li data-testid="online-user">' + connected + '</li>');
+  };
+    socket.on('message', (message) => {
+      const p = document.createElement('p');
+      p.innerHTML = message;
+      p.setAttribute('data-testid', 'message');
+      chat.appendChild(p);
     });
 </script>
-
 </html>
