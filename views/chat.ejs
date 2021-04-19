@@ -24,7 +24,11 @@
   <br>
 
   <h3>Usuarios</h3>
-  <ul id='users'></ul>
+  <ul id='users'>
+    <% users.forEach((u) => { %>
+      <li data-testid="message"><%= `${u.nickname}` %></li>
+    <% }) %>
+  </ul>
 
   <h3>Mensagens</h3>
   <ul id='messages'>
@@ -58,7 +62,7 @@
 
     socket.on('message', (message) => {
       const messageLi = document.createElement('li');
-      messageLi.innerHTML = message;
+      messageLi.innerText = message;
       messageLi.setAttribute('data-testid', 'message')
       document.querySelector('#messages').appendChild(messageLi)
     })
@@ -68,7 +72,7 @@
       userUl.innerHTML = '';
       users.forEach((user) => { 
         const userLi = document.createElement('li');
-        userLi.innerHTML = user.nickname;
+        userLi.innerText = user.nickname;
         userLi.setAttribute('data-testid', 'online-user');
         userUl.appendChild(userLi)
       })

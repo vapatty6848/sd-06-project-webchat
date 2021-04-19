@@ -6,11 +6,9 @@ const getAll = async () => connection()
     .then((db) => db.collection(COLLECTION_NAME).find().toArray());
 
 const create = async (id, nickname) => {
-  const { insertedId } = await connection()
+  const newUser = await connection()
     .then((db) => db.collection(COLLECTION_NAME).insertOne({ id, nickname }));
-  return {
-    _id: insertedId,
-  };
+  return newUser.ops[0];
 };
 
 const update = async ({ id, nickname }) => {
