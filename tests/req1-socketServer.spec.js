@@ -10,13 +10,6 @@ describe('1 - Crie um back-end para conexão simultânea de clientes e troca de 
   let client2;
   let client3;
 
-  beforeEach(async (done) => {
-    client1 = io.connect(BASE_URL, { reconnection: false });
-    client2 = io.connect(BASE_URL, { reconnection: false });
-    client3 = io.connect(BASE_URL, { reconnection: false });
-    done();
-  });
-
   afterEach(async (done) => {
     client1.disconnect();
     client2.disconnect();
@@ -24,22 +17,11 @@ describe('1 - Crie um back-end para conexão simultânea de clientes e troca de 
     done();
   });
 
-  it('Será validado que vários clientes conseguem se conectar ao mesmo tempo', () => {
-    client1.on('connect', () => {
-      expect(client1.connected).toBeTruthy();
-      expect.assertions(1);
-    });
-    client2.on('connect', () => {
-      expect(client2.connected).toBeTruthy();
-      expect.assertions(2);
-    });
-    client3.on('connect', () => {
-      expect(client2.connected).toBeTruthy();
-      expect.assertions(3);
-    });
-  });
+  it('Será validado que todos os clientes que estão conectados ao chat recebem as mensagens enviadas', async (done) => {
+    client1 = io.connect(BASE_URL, { reconnection: false });
+    client2 = io.connect(BASE_URL, { reconnection: false });
+    client3 = io.connect(BASE_URL, { reconnection: false });
 
-  it('Será validado que todos os clientes que estão conectados ao chat recebem as mensagens enviadas', () => {
     client1.emit('message', { chatMessage, nickname });
 
     client1.on('message', (message) => {
@@ -55,12 +37,16 @@ describe('1 - Crie um back-end para conexão simultânea de clientes e troca de 
     client3.on('message', (message) => {
       expect(message.includes(chatMessage)).toBeTruthy();
       expect.assertions(3);
+      done();
     });
   });
 
-  it('Será validado que toda mensagem que um cliente recebe contém as informações acerca de quem a enviou, data-hora do envio e o conteúdo da mensagem em si', () => {
+  it('Será validado que toda mensagem que um cliente recebe contém as informações acerca de quem a enviou, data-hora do envio e o conteúdo da mensagem em si', async (done) => {
     const dateRegex = /\d{1,2}-\d{1,2}-\d{4}/gm;
     const timeRegex = /\d{1,2}:\d{1,2}(:\d{0,2})?/gm;
+
+    client1 = io.connect(BASE_URL, { reconnection: false });
+    client2 = io.connect(BASE_URL, { reconnection: false });
 
     client1.emit('message', { chatMessage, nickname });
 
@@ -75,6 +61,7 @@ describe('1 - Crie um back-end para conexão simultânea de clientes e troca de 
       expect(message.includes(nickname)).toBeTruthy();
       expect(message).toMatch(dateRegex);
       expect(message).toMatch(timeRegex);
+      done();
     });
   });
 });
