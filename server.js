@@ -1,42 +1,63 @@
-// Faça seu código aqui
-
 const express = require('express');
 
 const app = express();
-const http = require('http').createServer(app); // criar server pelo socket
-const cors = require('cors');
+const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer);
+const model = require('./models/messages');
+const { createTimestamp } = require('./utils/createTimestamp');
+const formatMessage = require('./utils/messageFormat');
 
-const io = require('socket.io')(http, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
-});
-
-const { addMessages } = require('./models/mesages');
-
-app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
+app.use(express.static(`${__dirname}/public/`));
+
+const port = process.env.PORT || 3000;
+let users = [];
+
+const sendNicknameListener = ({ nickname, socket }) => {
+  users.push({ id: socket.id, nickname });
+
+  io.emit('updateOnlineUsers', users);
+};
+
+const messageListener = async ({ nickname, chatMessage }) => {
+  const timestamp = createTimestamp();
+  const message = formatMessage({ nickname, chatMessage, timestamp });
+
+  await model.saveMessage({ nickname, chatMessage, timestamp });
+
+  io.emit('message', message);
+};
+
+const changeNicknameListener = ({ newNickname, socket }) => {
+  users.map((user) => {
+    if (user.id === socket.id) Object.assign(user, { id: user.id, nickname: newNickname });
+
+    return user;
+  });
+
+  io.emit('updateOnlineUsers', users);
+};
+
+const disconnectListener = (socket) => {
+  const onlineUsers = users.filter((user) => user.id !== socket.id);
+
+  users = onlineUsers;
+
+  io.emit('updateOnlineUsers', users);
+};
+
+io.on('connection', async (socket) => {  
+  socket.on('sendNickname', ({ nickname }) => sendNicknameListener({ nickname, socket }));
+  socket.on('message', ({ nickname, chatMessage }) => messageListener({ nickname, chatMessage }));
+  socket.on('changeNickname', (newNickname) => changeNicknameListener({ newNickname, socket }));
+  socket.on('disconnect', () => disconnectListener(socket));
+});
 
 app.get('/', async (_req, res) => {
-  res.render('../views/');
+  const previousMessages = await model.getAll();
+  const messagesToRender = previousMessages.map((message) => formatMessage(message));
+  return res.render('home', { messagesToRender });
 });
 
-io.on('connection', (socket) => {
-  // aquivaitodososlistener
-  socket.on('disconnect', () => {
-    console.log(`User ${socket.id} disconnected.`);
-  });
-
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    const messageTime = new Date();
-    await addMessages({ chatMessage, nickname, messageTime });
-    const result = `${messageTime} - ${nickname} - ${chatMessage}`;
-    io.emit('message', result);
-  });
-});
-
-http.listen(3000, () => {
-  console.log('listening...');
-});
+httpServer.listen(port, () => console.log(`Webchat server on port ${port}!`));
