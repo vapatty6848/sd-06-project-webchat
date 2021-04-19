@@ -5,7 +5,7 @@ const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer);
 const model = require('./models/messages');
 const { createTimestamp } = require('./utils/createTimestamp');
-const formatMessage = require('./utils/messageFormat');
+const messageFormat = require('./utils/messageFormat');
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
@@ -22,7 +22,7 @@ const sendNicknameListener = ({ nickname, socket }) => {
 
 const messageListener = async ({ nickname, chatMessage }) => {
   const timestamp = createTimestamp();
-  const message = formatMessage({ nickname, chatMessage, timestamp });
+  const message = messageFormat({ nickname, chatMessage, timestamp });
 
   await model.saveMessage({ nickname, chatMessage, timestamp });
 
@@ -56,7 +56,7 @@ io.on('connection', async (socket) => {
 
 app.get('/', async (_req, res) => {
   const previousMessages = await model.getAll();
-  const messagesToRender = previousMessages.map((message) => formatMessage(message));
+  const messagesToRender = previousMessages.map((message) => messageFormat(message));
   return res.render('home', { messagesToRender });
 });
 
