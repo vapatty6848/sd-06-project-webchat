@@ -26,11 +26,7 @@
   </div>
   <ul id="users"></ul>
   <hr>
-  <ul id="messages">
-    <% messages.map((message) => { %>
-      <li data-testid="message"><%= `${message.date} ${message.nickname} ${message.message}` %></li>
-    <% }) %>
-  </ul>
+  <ul id="messages"></ul>
   <div class='fixed-bottom'>
     <div class="input-group">
       <input id="messageInput" data-testid="message-box" type="text" class="form-control" autocomplete="off">
@@ -100,6 +96,22 @@
       currentUser = users.find(user => user.nickname === currentUser.nickname);
       listUsers(users);
     })
+
+    window.onload = async () => {
+      const messages = await fetch('http://localhost:3000/messages', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then((res) => res.json());
+      const messagesUl = document.querySelector('#messages');
+      messages.forEach((message) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerText = `${message.date} ${message.nickname} ${message.message}`;
+        messagesUl.appendChild(li);
+      });
+    };
 
     socket.on('message', (message) => createMessage(message));
   </script>

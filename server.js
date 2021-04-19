@@ -1,5 +1,5 @@
 // Faça seu código aqui
-// const express = require('express');
+const path = require('path');
 const app = require('express')();
 const http = require('http').createServer(app);
 const cors = require('cors');
@@ -14,16 +14,14 @@ const PORT = 3000;
 
 const Users = require('./models/Users');
 const Messages = require('./models/Messages');
+const controller = require('./controllers/Messages');
 
 app.use(cors());
+app.use('/', controller);
 
-app.set('view engine', 'ejs');
-app.set('views', './views');
-
-app.get('/', async (req, res) => {
-  const users = await Users.getAllUsers();
-  const messages = await Messages.getAllMessages();
-  res.render('index', { users, messages });
+app.get('/', (_req, res) => {
+  const pathname = path.join(__dirname, 'views', '/index.html');
+  res.sendFile(pathname);
 });
 
 const time = new Date();
