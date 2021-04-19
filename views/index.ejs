@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebChat Project</title>
+    <style></style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>WebChat</h1>
+    <h3>USERS</h3>
+    <ul id="users"></ul>
+    <form action="" id="nicknameForm">
+      <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-button">Salvar</button>
+    </form>
+    <h3>MESSAGES</h3>
+    <ul id="messages">
+      <% messages.forEach((msg) => { %>
+        <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
+      <% }) %>
+    </ul>
+    <form action="" id="messageForm">
+      <input data-testid="message-box" id="messageInput" autocomplete="off" /><button data-testid="send-button">Enviar</button>
+    </form>
+    <script>
+      const socket = io();
+      const userNickname = document.querySelector('#user-nickname')
+      const messageForm = document.querySelector('#messageForm');
+      const nicknameForm = document.querySelector('#nicknameForm');
+      const inputMessage = document.querySelector('#messageInput');
+      const inputNickname = document.querySelector('#nicknameInput');
+      let mainUser;
+      const getRandomString = (length) => {
+        const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i += 1) {
+          result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+        }
+        return result;
+      };
+      nicknameForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        mainUser.nickname = inputNickname.value;
+        console.log(mainUser);
+        socket.emit('updatedUser', mainUser);
+      })
+      
+      messageForm.addEventListener('submit', (e) =>{
+        e.preventDefault();
+        const { nickname } = mainUser;
+        socket.emit('message', { nickname, chatMessage: inputMessage.value });
+        inputMessage.value = '';
+        return false;
+      });
+      
+      const createMessage = (message) => {
+        const messagesUl = document.querySelector('#messages');
+        const li = document.createElement('li');
+        li.innerText = message;
+        li.setAttribute('data-testid', 'message');
+        messagesUl.appendChild(li);
+      }
+      
+      const createUserLiElement = (user) => {
+        const usersUl = document.querySelector('#users');
+        const li = document.createElement('li');
+        li.innerText = user.nickname;
+        li.setAttribute('data-testid', 'online-user');
+        usersUl.appendChild(li);
+      }
+      const listUsers = (users) => {
+        const usersUl = document.querySelector('#users');
+        usersUl.innerHTML = '';
+        createUserLiElement(mainUser);
+        users.filter(user => user.id !== mainUser.id).forEach(user => createUserLiElement(user));
+      }
+      socket.on('connect', () => {
+        const nickname = getRandomString(16);
+        mainUser = { nickname };
+        socket.emit('userLogin', nickname);
+      });
+      socket.on('usersConnected', (users) => {
+        mainUser = users.find(user => user.nickname === mainUser.nickname);
+        listUsers(users);
+      })
+      socket.on('message', (message) => createMessage(message));
+    </script>
+  </body>
+</html>

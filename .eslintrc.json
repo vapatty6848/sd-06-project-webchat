@@ -8,6 +8,7 @@
         "jest": true
     },
     "extends": "trybe-backend",
+    "parser": "babel-eslint",
     "parserOptions": { "ecmaVersion": 11 }
   }
   
