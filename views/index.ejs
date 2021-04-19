@@ -19,7 +19,7 @@
 <body>
   <h1>Welcome to The WebChat Project!</h1>
   <div class="containerNickName">
-    <h1 id="userNickName" data-testid="online-user"></h1>
+    <h1 id="userNickName"></h1>
     <label alt='nickNameInput'>
       <input type='text' id='nickNameInput' placeholder="Alan Turing" data-testid="nickname-box">
       <button id="changeNickNameButton" data-testid="nickname-button">Change Nickname</button>
@@ -53,7 +53,6 @@
     const newNickName = document.getElementById('nickNameInput').value;
     document.getElementById('userNickName').innerHTML = newNickName;
     socket.emit('nickNameChange', newNickName, oldNickName);
-    
   });
 
   sendMessageButton.addEventListener('click', () => {
@@ -69,7 +68,7 @@
   socket.on('userList', async (users) => {
     const userList = document.getElementById('usersLogged');
     userList.innerHTML = '';
-    usersOnline.forEach((user) => {
+    users.forEach((user) => {
       const newUser = document.createElement('li');
       newUser.setAttribute('data-testid', 'online-user');
       newUser.innerHTML = JSON.stringify(user.nickname).replace(/^"(.+)"$/,'$1');
