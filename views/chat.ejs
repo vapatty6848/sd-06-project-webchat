@@ -98,7 +98,12 @@
       </div>
     </div>
     <div id="messages-container">
-      <ul id="messages"></ul>
+      <ul id="messages">
+        <% messages.forEach(({ timestamp, nickname, message }) => { %>
+          <% const chatMessage = `${timestamp} - ${nickname}: ${message}`; %>
+          <li><%= chatMessage %></li>
+        <% }) %> 
+      </ul>
     </div>
   </div>
   <div id="send-message-container">

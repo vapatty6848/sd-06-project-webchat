@@ -11,6 +11,7 @@ const io = require('socket.io')(httpServer, {
     methods: ['GET', 'POST'],
   },
 });
+const Messages = require('./models/Messages');
 const {
   handleNewConnection,
   sendChatMessage,
@@ -26,7 +27,11 @@ app.set('views', './views');
 const LOCALHOST_PORT = 3000;
 const PORT = process.env.PORT || LOCALHOST_PORT;
 
-app.get('/', (request, response) => response.status(200).render('chat'));
+app.get('/', async (request, response) => {
+  const messages = await Messages.getAll();
+  console.log('Database messages:', messages);
+  return response.status(200).render('chat', { messages });
+});
 
 const users = [];
 
