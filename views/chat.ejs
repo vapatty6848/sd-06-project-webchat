@@ -24,11 +24,7 @@
   <br>
 
   <h3>Usuarios</h3>
-  <ul id='users'>
-    <% users.forEach((u) => { %>
-      <li data-testid="message"><%= `${u.nickname}` %></li>
-    <% }) %>
-  </ul>
+  <ul id='users'></ul>
 
   <h3>Mensagens</h3>
   <ul id='messages'>
@@ -67,15 +63,39 @@
       document.querySelector('#messages').appendChild(messageLi)
     })
 
+
+    const createUserList = (user) => {
+      console.log(user.nickname, 'linha 68')
+      const userLi = document.createElement('li');
+      userLi.innerText = user.nickname;
+      userLi.setAttribute('data-testid', 'online-user');
+      document.querySelector('#users').appendChild(userLi)
+    }
+
+    const listAllUsers = (users) => {
+      document.querySelector('#users').innerHTML = '';
+      // Coloca o usuario na primeira posição da lista
+      console.log('linha 76', thisUser)
+      createUserList(thisUser);
+      users.filter(user => user.id !== thisUser.id).forEach(user => createUserList(user));
+    }
+
     socket.on('onlineUsers', (users) => {
-      const userUl = document.querySelector('#users');
-      userUl.innerHTML = '';
-      users.forEach((user) => { 
-        const userLi = document.createElement('li');
-        userLi.innerText = user.nickname;
-        userLi.setAttribute('data-testid', 'online-user');
-        userUl.appendChild(userLi)
-      })
+      console.log('linha 84', thisUser)
+      const nickname = !thisUser.nickname? socket.id.slice(0,16) : thisUser.nickname;
+      console.log('linha 86,', socket.id)
+      thisUser.nickname = nickname
+      console.log('linha 87', thisUser)
+      thisUser = users.find(user => user.nickname === thisUser.nickname);
+      listAllUsers(users);
+      // const userUl = document.querySelector('#users');
+      // userUl.innerHTML = '';
+      // users.forEach((user) => { 
+      //   const userLi = document.createElement('li');
+      //   userLi.innerText = user.nickname;
+      //   userLi.setAttribute('data-testid', 'online-user');
+      //   userUl.appendChild(userLi)
+      // })
     })
 
   </script>
