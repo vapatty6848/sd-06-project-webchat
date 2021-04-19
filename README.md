@@ -251,7 +251,7 @@ DB_NAME=webchat                             // nome do database
 
 #### ⚠️ &nbsp; DICA: Para desenvolver esse requisito não é necessário se conectar ao banco de dados.
 
-#### ⚠️ &nbsp; DICA: Para facilitar armazenar e/ou recuperar o _nickname_ do cliente, lembre-se de usar o _localStorage_.
+#### ⚠️ &nbsp; DICA: Para facilitar armazenar e/ou recuperar o _nickname_ do cliente, lembre-se de usar o _sessionStorage_.
 
 - O front-end e o back-end têm que usar a mesma porta - `localhost:3000`;
 
@@ -284,8 +284,6 @@ DB_NAME=webchat                             // nome do database
 - Será validado que as mensagens são exibidas na ordem correta;
 
 - Será validado que o front-end tem um campo de texto para preencher e um botão para alterar o apelido _(nickname)_;
-
-- Será validado que o _nickname_ é alterado em todos os clientes conectados;
 
 - Será validado que é possível enviar mensagens após alterar o _nickname_.
 ```
