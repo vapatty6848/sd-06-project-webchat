@@ -39,12 +39,6 @@ const changeNickname = ({ newNickname, socket }) => {
   io.emit('updateOnlineUsers', allUsers);
 };
 
-const handleNickname = (nickname, socket) => {
-  const index = allUsers.findIndex((user) => user.id === socket.id);
-  allUsers[index].nickname = nickname;
-  console.log(allUsers);
-};
-
 const getTime = () => {
   const time = new Date();
   const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
@@ -52,15 +46,9 @@ const getTime = () => {
   return timeFormated;
 };
 
-const findNickname = (socket) => {
-  const index = allUsers.findIndex((user) => user.id === socket.id);
-  return allUsers[index].nickname;
-};
-
-const handleChatMessage = async ({ nickname, chatMessage }, socket) => {
-  handleNickname(nickname, socket);
+const handleChatMessage = async ({ nickname, chatMessage }) => {
   const timestamp = getTime();
-  const result = `${timestamp} ${findNickname(socket)} ${chatMessage}`;
+  const result = `${timestamp} ${nickname} ${chatMessage}`;
   await addMessages({ nickname, chatMessage, timestamp });
   io.emit('message', result);
 };
@@ -69,7 +57,7 @@ io.on('connection', async (socket) => {
   socket.on('newUser', ({ nickname }) => addNewUser({ nickname, socket }));
 
   socket.on('message', async ({ nickname, chatMessage }) =>
-    handleChatMessage({ nickname, chatMessage }, socket));
+    handleChatMessage({ nickname, chatMessage }));
 
     socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
 
