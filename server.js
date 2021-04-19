@@ -11,14 +11,23 @@ const { createTimestamp } = require('./utils/TimeStamp');
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+let users = [];
+
 // Socket Connection
 io.on('connection', (socket) => {
   console.log(`Id do usúario conectado: ${socket.id}`);
+  
+  const newUser = { id: socket.id, nickname: `user_${Math.random().toString().substr(2, 11)}` };
+  users.push(newUser);
+  io.emit('updateOnlineUsers', users);
 
   socket.on('message', ({ chatMessage, nickname }) => {
-    const timestamp = createTimestamp();
+    io.emit('message', `${createTimestamp()} - ${nickname} disse: ${chatMessage}`);
+  });
 
-    io.emit('message', `${timestamp} - ${nickname} disse: ${chatMessage}`);
+  socket.on('disconnet', () => {
+    users = users.filter((user) => user.id === socket.id);
+    io.emit('updateOnlineUsers', users);
   });
 });
 

@@ -14,13 +14,19 @@
     <div class="container-fluid">
       <a class="navbar-brand">WebChat Trybe</a>
       <form class="d-flex">
-        <input class="form-control me-2" type="text" placeholder="Mensagem" id="input-msg">
-        <button class="btn btn-outline-success" type="submit" id="send-button">Enviar</button>
+        <input class="form-control me-2" type="text" placeholder="Mensagem" id="message" data-testid="message-box">
+        <button class="btn btn-outline-success" type="submit" id="send-button" data-testid="send-button">Enviar</button>
       </form>
     </div>
   </nav>
-  <ul id="chat-messages">
-  </ul>
+  
+  <ul id="online-users"></ul>
+
+  <input id="change-nickname" data-testid="nickname-box">
+  <button id="change-nickname-button" data-testid="nickname-button">Change nickname</button>
+  
+  <ul id="chat-messages"></ul>
+
   <!-- <form class="input-group mb-3 fixed-bottom">
     <input id="input-msg" type= "text" class="form-control" placeholder="Digite a sua mensagem"></input>
     <div class="input-group-append">
@@ -32,26 +38,39 @@
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-  const socket = io();
-  let username;
+const socket = io();
+  let userNickname;
   
-  localStorage.setItem('username', username);
-
-  document.querySelector('form').addEventListener('submit', (e) => e.preventDefault());
-  
-  document.querySelector('#send-button').addEventListener('click', () => {
-    const newMessage = document.querySelector('#input-msg').value;
-    
-    if (!username) username = 'user_' + Math.random().toString().substr(2, 11);
-    
-    socket.emit('message', { chatMessage: newMessage, nickname: username });
-    document.querySelector('#input-msg').value = '';
+  socket.on('updateOnlineUsers', (onlineUsers) => {
+    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname;
+    document.querySelector('#online-users').innerHTML = '';
+    onlineUsers.forEach((user) => {
+      const userToRender = document.createElement('li');
+      userToRender.setAttribute('data-testid', 'online-user')
+      userToRender.innerHTML = user.nickname;
+      document.querySelector('#online-users').appendChild(userToRender);
+    })
   });
-
+  
   socket.on('message', (message) => {
     const messageToRender = document.createElement('li');
+    messageToRender.setAttribute('data-testid', 'message');
     messageToRender.innerHTML = message;
     document.querySelector('#chat-messages').appendChild(messageToRender);
+  });
+
+  document.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const chatMessage = document.querySelector('#message').value;
+    
+    socket.emit('message', { nickname: userNickname, chatMessage });
+    document.querySelector('#message').value = '';
+  });
+
+  document.querySelector('#change-nickname-button').addEventListener('click', () => {
+    const newNickname = document.querySelector('#change-nickname').value;
+    userNickname = newNickname;
+    document.querySelector('#change-nickname').value = '';
   })
   
 </script>
