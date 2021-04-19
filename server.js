@@ -1,41 +1,72 @@
 const express = require('express');
+const path = require('path');
+const cors = require('cors');
+const dateFormat = require('dateformat');
 
 const app = express();
-const httpServer = require('http').createServer(app);
-const { format } = require('date-fns');
+const port = 3000;
+const http = require('http').createServer(app);
 
-const cors = require('cors');
-
-const io = require('socket.io')(httpServer, {
+const io = require('socket.io')(http, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: `http://localhost:${port}`,
     methods: ['GET', 'POST'],
   },
 });
 
-const PORT = parseInt(process.env.PORT, 10) || 3000;
+const Users = require('./models/Users');
+const Messages = require('./models/Messages');
+
+app.use(cors());
+
+/**
+ * @see - https://www.youtube.com/watch?v=-jXfKDYJJvo
+ */
+app.use(express.static(path.join(__dirname, 'views')));
+app.set('views', path.join(__dirname, 'views'));
+app.engine('html', require('ejs').renderFile);
+
+app.set('view engine', 'html');
+
+app.get('/', async (req, res) => { 
+  const users = await Users.getAll();
+  const messages = await Messages.getAll();
+  res.render('home.html', { users, messages });
+});
+
+const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
+
+const login = async (socket, nickname, ioConnection) => {
+  await Users.create(socket.id, nickname);
+  const users = await Users.getAll();
+  ioConnection.emit('usersConnected', users);
+};
 
 io.on('connection', (socket) => {
-  socket.on('message', (message) => {
-    const { chatMessage, nickname } = message;
-    const formattedDate = format(new Date(), 'dd-MM-yyyy KK:mm:ss aa');
-    const formattedMessage = `${formattedDate} - ${nickname}: ${chatMessage}`;
-    io.emit('serverMessage', formattedMessage);
+  socket.on('userLogin', async (nickname) => {
+    await login(socket, nickname, io);
+  });
+
+  socket.on('updatedUser', async (user) => {
+    await Users.update(user);
+    const users = await Users.getAll();
+    io.emit('usersConnected', users);
+  });
+
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    const msg = await Messages.create(chatMessage, nickname, dateTimeStamp);
+    io.emit('message', `${msg.timestamp} ${msg.nickname} ${msg.message}`);
+  });
+
+  socket.on('disconnect', async () => {
+    await Users.removeById(socket.id);
+    const users = await Users.getAll();
+    io.emit('usersConnected', users);
   });
 });
 
-/**
- * io.emit manda pra todos
- * socket.emit manda para um específico
- * broadcast.emit manda para todos menos para que enviou
- */
+const PORT = process.env.PORT || port;
 
-app.set('view engine', 'ejs');
-app.set('views', './views');
-app.use(cors());
-
-app.get('/', (_req, res) => {
-  res.render('home');
+http.listen(PORT, () => {
+  console.log(`Running server on port ${PORT}`);
 });
-
-httpServer.listen(PORT, () => console.log(`escutando a porta ${PORT}!`));
