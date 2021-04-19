@@ -8,39 +8,95 @@
   <title>WebChat</title>
 </head>
 <body>
-  <h1>WEBCHAT</h1>
-  <input type="text" id='message'>
-  <button id='sendMessage'>Enviar</button>
-  <h2>Mensagens</h2>
-  <ul id="webMsgs"></ul>
-  <h2>Usuários</h2>
-  <ul id="nickNames"></ul>
+  <div>
+    <div>
+      <h1>WebChat</h1>
+    </div>
+
+    <div>
+      <div>
+        <div>
+          <input
+            type="text"
+            data-testid="nickname-box"
+            id="nickname-box"
+            placeholder="Informe seu nickname"
+          >
+          <button
+            type="button"
+            data-testid="nickname-button"
+            id="nickname-button"
+          >
+            Salvar
+          </button>
+        </div>
+        <div>
+          <h2>Usuários</h2>
+          <ul id="online-users"></ul>
+        </div>
+      </div>
+      <div>
+        <h2>Mensagens</h2>
+        <ul id="message">  
+         <%= listAll[0].chatMessage%>
+        </ul> 
+      </div>
+    </div>
+    <div>
+      <input
+        type="text"
+        data-testid="message-box"
+        id="message-box"
+        placeholder="Digite sua mensagem aqui"
+      >
+      <button
+        ype="button"
+        data-testid="send-button"
+        id="send-button"
+      >
+        Enviar
+      </button>
+    </div>
+  </div>
 
   <script>
     const socket = io('http://localhost:3000');
-    socket.emit('newUser', `Guest_${socket.id}`);
-    document.querySelector('#sendMessage').addEventListener('click', (e) => {
-      const message = document.querySelector('#message').value;
-      socket.emit('message', message)
-    })
-
-    socket.on('newMessage', (message) => {
-      const messageLi = document.createElement('li');
-      messageLi.innerHTML = message;
-      document.querySelector('#webMsgs').appendChild(messageLi);  
-    })
+    
+    let nickname = '';
+    socket.on('connect', () => {
+      const randonUser = `user_${Math.random().toString().substr(2, 11)}`;
+      socket.emit('connectUser', {randonUser})})
 
     socket.on('updateUsers', (users) => {
-      const listUsers = document.querySelector('#nickNames')
+      const listUsers = document.querySelector('#online-users');
       listUsers.innerHTML = '';
       users.forEach((user) => {
-        console.log(user.socketId);
-        const userLI = document.createElement('li');
-        userLI.innerHTML = socketId;
-        listUsers.appendChild(userLI); 
-       });
+        if (user.socketId === socket.id) nickname = user.nickname;
+        const userLi = document.createElement('li');
+        userLi.setAttribute('data-testid', 'online-user');
+        userLi.innerHTML = user.nickname;
+        listUsers.appendChild(userLi);
       });
-  </script>
+    });//inicia o usuario e forma a lista
 
+    document.querySelector('#send-button').addEventListener('click', () => {
+      const chatMessage = document.querySelector('#message-box').value;
+      socket.emit('message', { chatMessage, nickname });
+    }); // coleta a msg
+
+    document.querySelector('#nickname-button').addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box').value;
+       nickname = newNickname;
+       socket.emit('updateNickname', nickname);
+    }); // mudar o nickname ?
+
+    socket.on('message', (message) => {
+      const msgLi = document.createElement('li');
+      msgLi.setAttribute('data-testid', 'message');
+      msgLi.innerHTML = message;
+      document.querySelector('#message').appendChild(msgLi);
+    })//  forma a lista das msgs 
+  </script>
 </body>
 </html>
+// quando recarrega a pagina tem que colocar o nickname e as msgs
