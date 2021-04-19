@@ -44,7 +44,7 @@ const messageProcess = (socket) => {
   });
 };
 
-const onDisconnect = async (socket) => {
+const onDisconnect = (socket) => {
   socket.on('disconnect', () => {
     const currentUser = users.find((usr) => usr.id === socket.id);
     const userIndex = users.indexOf(currentUser);
@@ -52,11 +52,11 @@ const onDisconnect = async (socket) => {
     io.emit('nickNameUpdateFront', users);
   });
 };
-io.on('connection', async (socket) => {
-  await onConnect(socket);
-  await nickUpdate(socket);
-  await messageProcess(socket);
-  await onDisconnect(socket);
+io.on('connection', (socket) => {
+  onConnect(socket);
+  nickUpdate(socket);
+  messageProcess(socket);
+  onDisconnect(socket);
 });
 
 httpServer.listen('3000');
