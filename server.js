@@ -52,11 +52,11 @@ const onDisconnect = async (socket) => {
     io.emit('nickNameUpdateFront', users);
   });
 };
-io.on('connection', (socket) => {
-  onConnect(socket);
-  nickUpdate(socket);
-  messageProcess(socket);
-  onDisconnect(socket);
+io.on('connection', async (socket) => {
+  await onConnect(socket);
+  await nickUpdate(socket);
+  await messageProcess(socket);
+  await onDisconnect(socket);
 });
 
 httpServer.listen('3000');

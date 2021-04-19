@@ -51,7 +51,6 @@
       });
 
       socket.on('nickNameUpdateFront', (users) => {
-        console.log(users);
         const ulUsers = document.querySelector('#onlineUsers');
         while (ulUsers.firstChild) {
           ulUsers.removeChild(ulUsers.firstChild);
