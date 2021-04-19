@@ -83,9 +83,10 @@
       });
 
       socket.on('message', (message) => {
+        const { dateTime, nickname, chatMessage } = message;
         const newMessage = document.createElement('p');
         newMessage.setAttribute('data-testid', 'message');
-        newMessage.innerHTML = message;
+        newMessage.innerHTML = `${dateTime} - ${nickname}: ${chatMessage}`;
         document.querySelector('#messages').appendChild(newMessage);
       });
     </script>

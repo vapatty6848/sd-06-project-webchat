@@ -22,8 +22,10 @@ const onConnect = async (socket) => {
 
   io.emit('nickNameUpdateFront', users);
   const messages = await Messages.getAllMessages();
-  messages.forEach((element) => socket.emit('message',
-   `${element.date} - ${element.nickname}: ${element.message}`)); 
+  messages.forEach((element) => {
+  const { date, nickname, message } = element; 
+  socket.emit('message', { dateTime: date, nickname, chatMessage: message }); 
+}); 
 };
 
 const nickUpdate = (socket) => {
@@ -39,7 +41,7 @@ const messageProcess = (socket) => {
   socket.on('message', async (message) => {
     const { nickname, chatMessage } = message;
     await Messages.createMessage(nickname, chatMessage, dateTime);
-    io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
+    io.emit('message', { dateTime, nickname, chatMessage });
   });
 };
 
