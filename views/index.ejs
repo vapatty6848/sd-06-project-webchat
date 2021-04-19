@@ -1,69 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-  <title>WebChat</title>
-</head>
-<body>
-  <h1>Welcome to FIX WebChat Project!</h1>
-  <form class="chat">
-    <input
-    type="text"
-    name="nickname"
-    id="nickname-box"
-    data-testid="nickname-box"
-    placeholder="Type your nickname"
-  />
-    <div id="messages"></div>
-    <input
-    type="text"
-    id="message-box"
-    data-testid="message-box"
-    name="message"
-    placeholder="Type your msg"
-  />
-  <button type="button" id="send-button" data-testid="send-button">Send</button>
-  <button type="button" id="nickname-save" data-testid="nickname-save">Save nickname</button>
-  </form>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>Welcome to FIX WebChat Project!</h1>
+    <form class="chat">
+      <input
+      type="text"
+      name="nickname"
+      id="nickname-box"
+      data-testid="nickname-box"
+      placeholder="Type your nickname"
+    />
+      <div id="messages"></div>
+      <input
+      type="text"
+      id="message-box"
+      data-testid="message-box"
+      name="message"
+      placeholder="Type your msg"
+    />
+      <button type="button" id="send-button" data-testid="send-button">Send</button>
+      <button type="button" id="nickname-save" data-testid="nickname-button">Save nickname</button>
+    </form>
+    <ul id="allUsers"></ul>
+    <ul id="allMessages"></ul>
+  </body>
 
-<script src="http://localhost:3000/socket.io/socket.io.js"></script>
-<script type="text/javascript">
-  const socket = io('http://localhost:3000');
-  const renderMsgs = document.getElementById('messages');
-  const sendMsg = document.getElementById('send-button');
-  const userNick = document.getElementById('nickname-box');
-  const msgBox = document.getElementById('message-box');
-  const chat = document.getElementById('messages');
+  <script>
+    const socket = io();
+    let nickname = '';
 
-  sendMsg.addEventListener('click', function () {
-    console.log('clicou aqui caraio')
-    const nickname = userNick.value;
-    const chatMessage = msgBox.value;
-    if (nickname.length && chatMessage.length) {
-      const msgObj = {
-        nickname,
-        chatMessage,
-      };
-      socket.emit('message', msgObj);
+    const addUser = (nickname) => {
+      const listUsers = document.querySelector('#allUsers');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = nickname;
+      listUsers.appendChild(li);
     }
+
+    const createMessage = (response) => {
+      const allMessages = document.querySelector('#allMessages');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerText = response;
+      allMessages.appendChild(li);
+    }
+
+    const button = document.querySelector('#send-button');
+    button.addEventListener('click', () => {
+      const inputMessage = document.querySelector('#message-box');
+      socket.emit('message', { chatMessage: inputMessage.value, nickname });
+      inputMessage.value = '';
+      return false;
     });
-    socket.on('history', renderMsgs);
-    const renderMsgs = (history) => {
-    $('#messages').append('<div data-testid="message">' + history + '</div>');
-  };
-    socket.on('online', renderConectados);
-    const renderConectados = (connected) => {
-    $('#onlineUser').append('<li data-testid="online-user">' + connected + '</li>');
-  };
-    socket.on('message', (message) => {
-      const p = document.createElement('p');
-      p.innerHTML = message;
-      p.setAttribute('data-testid', 'message');
-      chat.appendChild(p);
+
+    const changeNickname = (users) => {
+      const allUsers = document.querySelector('#allUsers');
+      allUsers.innerHTML = '';
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerText = user.nickname;
+        allUsers.appendChild(li);
+      })
+    }
+    
+    const buttonNickname = document.querySelector('#nickname-save');
+
+    buttonNickname.addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box');
+      socket.emit('changeNickname', { newNickname: newNickname.value });
+      nickname = newNickname.value;
+      newNickname.value = '';
     });
-</script>
+
+    socket.on('connected', (nicknameGenerated) => {
+      nickname = nicknameGenerated;
+      addUser(nicknameGenerated);
+    });
+
+    socket.on('message', (message) => createMessage(message));
+
+    socket.on('changeNickname', (user) => changeNickname(user));
+  </script>
 </html>

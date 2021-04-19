@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const bodyParser = require('body-parser');
 
 const app = express();
 const http = require('http').createServer(app);
@@ -13,66 +12,72 @@ const io = require('socket.io')(http, {
   },
 });
 
-app.use(bodyParser.json());
-app.use(
-  cors({
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  }),
-);
+app.use(cors());
 
 const { addMessages, getAllMsgs } = require('./models/messages');
-
-app.use(express.static(path.join(__dirname, 'views')));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-const allUsers = {};
+app.get('/', (_req, res) => {
+  res.render('index');
+});
+
+const allUsers = [];
+
+const addNewUser = (socket) => {
+  const newUser = {
+    id: socket.id,
+  };
+  allUsers.push(newUser);
+};
+
+const handleNickname = (nickname, socket) => {
+  const index = allUsers.findIndex((user) => user.id === socket.id);
+  allUsers[index].nickname = nickname;
+};
+
+const getTime = () => {
+  const time = new Date();
+  const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
+    .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+  return timeFormated;
+};
+
+const findNickname = (socket) => {
+  const index = allUsers.findIndex((user) => user.id === socket.id);
+  return allUsers[index].nickname;
+};
+
+const getRandomString = () => {
+  const length = 16;
+  const random = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    result += random.charAt(Math.floor(Math.random() * random.length));
+  }
+  return result;
+};
 
 io.on('connection', (socket) => {
-  const userId = socket.id;
-  console.log(`User ${userId} connected.`);
+  console.log(`${socket.id} connected`);
+  addNewUser(socket);
+  io.emit('connected', getRandomString());
 
-  const allMsgs = getAllMsgs();
-  const saveMessages = [];
-
-  allMsgs.map((msg) => {
-    const { chatMessage, nickname, date } = msg;
-    return saveMessages.push(`${date} - ${nickname} - ${chatMessage}`);
-  });
-  io.emit('history', saveMessages);
-
-  socket.on('message', async ({ nickname, chatMessage }) => {
-    const date = new Date();
-    await addMessages(nickname, chatMessage, date);
-    const newMessage = `${date} - ${nickname}: ${chatMessage}`;
-    io.emit('message', newMessage);
+  socket.on('message', ({ chatMessage, nickname }) => {
+    handleNickname(nickname, socket);
+    const result = `${getTime()} ${findNickname(socket)} ${chatMessage}`;
+    io.emit('message', result);
   });
 
-  socket.on('changeName', async ({ nickname }) => {
-    io.emit('changeName', nickname);
-  });
-
-  socket.on('changeName', async ({ nickname }) => {
-    allUsers.push(nickname);
-    io.emit('online', allUsers);
+  socket.on('changeNickname', ({ newNickname }) => {
+    handleNickname(newNickname, socket);
+    io.emit('changeNickname', allUsers);
   });
 
   socket.on('disconnect', () => {
-    delete allUsers[socket.id];
-    io.emit('online', allUsers);
+    console.log('disconnect');
   });
-});
-
-app.get('/', async (_req, res) => {
-  const messages = await getAllMsgs();
-  res.status(200).render('index', { messages });
-});
-
-app.get('/chat', async (_req, res) => {
-  const messages = await getAllMsgs();
-  res.status(200).json(messages);
 });
 
 http.listen(3000, () => {
