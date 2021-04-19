@@ -14,7 +14,7 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
-const { addMessages, getAllMsgs } = require('./models/messages');
+// const { addMessages, getAllMsgs } = require('./models/messages');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
