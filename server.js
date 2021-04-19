@@ -15,6 +15,7 @@ app.set('view engine', 'ejs');
 app.get('/', (_req, res) => res.render('home'));
 
 const onConnect = async (socket) => {
+  console.log('entrei no onConnect');
   const { id } = socket;
   const randomNick = `User-${id.substr(2, 11)}`;
   users.push({ id, nickName: randomNick });
@@ -22,10 +23,8 @@ const onConnect = async (socket) => {
 
   io.emit('nickNameUpdateFront', users);
   const messages = await Messages.getAllMessages();
-  messages.forEach((element) => {
-  const { date, nickname, message } = element; 
-  socket.emit('message', { dateTime: date, nickname, chatMessage: message }); 
-}); 
+  messages.forEach((element) => socket.emit('message',
+   `${element.date} - ${element.nickname}: ${element.message}`)); 
 };
 
 const nickUpdate = (socket) => {
@@ -41,7 +40,7 @@ const messageProcess = (socket) => {
   socket.on('message', async (message) => {
     const { nickname, chatMessage } = message;
     await Messages.createMessage(nickname, chatMessage, dateTime);
-    io.emit('message', { dateTime, nickname, chatMessage });
+    io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
   });
 };
 
