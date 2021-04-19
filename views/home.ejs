@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Webchat</title>
+  <script src="socket.io/socket.io.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>  -->
+</head>
+<body>
+  <h1>WebChat!</h1>
+  <input type="text" id="nickname" data-testid="nickname-box">
+  <button id="sendNickname" data-testid="nickname-button">Entrar</button>
+  <br>
+  <p>Quantidade de usuarios logados: <span id="quantity">0</span></p>
+  
+  <ul id="online-user">
+    <% nicknameMapFormat.forEach((nickname) => { %>
+      <li data-testid="online-user"><%= nickname %></li>
+    <% }); %>
+  </ul>
+  
+  <input type="text" id="message" data-testid="message-box">
+  <button id="sendMessage" data-testid="send-button">Enviar</button>
+
+  <h3>Mensagens</h3>
+
+  <ul id="messages">
+    <% messagesMapFormat.forEach((message) => { %>
+      <li data-testid="message"><%= message %></li>
+    <% }); %>
+  </ul>
+  
+  <script>
+    const socket = io();
+    // initializeUser usado connect
+    socket.emit('initializeUser');
+    socket.on('usersConnected', (usersConnected) => {
+      const userUL = document.querySelector('#online-user');
+      
+      usersConnected.forEach(user => {
+        const userLI = document.createElement('li');
+        userLI.innerHTML = user.nickname;
+        userLI.setAttribute('data-testid', 'online-user');
+        userUL.appendChild(userLI);
+      });
+      document.querySelector('#quantity').textContent = usersConnected.length;
+    });
+    // 2
+    let nicknameUser = '';
+    socket.on('addNewUser', (newUser) => {
+      const userUL = document.querySelector('#online-user');
+      
+      const userLI = document.createElement('li');
+      userLI.innerHTML = newUser.nickname;
+      userLI.setAttribute('data-testid', 'online-user');
+      if(socket.id === newUser.socketId) {
+        nicknameUser = newUser.nickname;
+        userUL.insertBefore(userLI, userUL.firstChild);
+      } else {
+        userUL.appendChild(userLI);
+      }
+      const quantity = Number(document.querySelector('#quantity').textContent);
+      document.querySelector('#quantity').textContent = quantity + 1;
+    });
+    // 2 
+    // 1
+    document.querySelector('#sendNickname').addEventListener('click', (e) => {
+      const newNickname = document.querySelector('#nickname').value;
+      socket.emit('setNewNickname', nicknameUser, newNickname);
+      nicknameUser = newNickname;
+    });
+    document.querySelector('#sendMessage').addEventListener('click', (e) => {
+      const message = document.querySelector('#message').value;
+      socket.emit('message', { chatMessage: message, nickname: nicknameUser });
+    });
+    socket.on('message', (message) => {
+      const messageLI = document.createElement('li');
+      messageLI.innerHTML = message;
+      messageLI.setAttribute('data-testid', 'message');
+      document.querySelector('#messages').appendChild(messageLI);
+    })
+    // 1
+    socket.on('updatedUserNickname', (updatedUser) => {
+      const userUL = document.querySelector('#online-user');
+      const userLIs = userUL.children;
+      for (let userLI of userLIs) {
+        if(userLI.textContent === updatedUser.oldNickname) {
+          userLI.textContent = updatedUser.newNickname;
+        }
+      }
+    });
+    socket.on('disconnectUser', (disconnetedUser) => {
+      const userUL = document.querySelector('#online-user');
+      const userLIs = userUL.children;
+      for (let userLI of userLIs) {
+        if(userLI.textContent === disconnetedUser.nickname) {
+          userUL.removeChild(userLI);
+        }
+      }
+      const quantity = Number(document.querySelector('#quantity').textContent);
+      document.querySelector('#quantity').textContent = quantity - 1;
+    });
+  </script>
+</body>
+</html>
