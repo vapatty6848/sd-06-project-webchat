@@ -27,7 +27,11 @@
   <ul id='users'></ul>
 
   <h3>Mensagens</h3>
-  <ul id='messages'></ul>
+  <ul id='messages'>
+    <% messages.forEach((msg) => { %>
+      <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
+    <% }) %>
+  </ul>
 
   <script>
     const socket = io('http://localhost:3000'); //abre conexão no front-end com o socket
