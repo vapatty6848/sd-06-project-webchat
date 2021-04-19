@@ -13,7 +13,7 @@ const create = async (id, nickname) => {
   };
 };
 
-const update = async (id, nickname) => {
+const update = async ({ id, nickname }) => {
   const userUpdated = await connection()
     .then((db) => db.collection(COLLECTION_NAME).findOneAndUpdate(
         { id },

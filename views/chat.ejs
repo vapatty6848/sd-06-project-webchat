@@ -10,17 +10,17 @@
 <body>
   <h1>Socket.io</h1>
 
-  <!-- <label>Digite seu nickname:
-    <input type="text" id="nickname">
+  <label>Digite seu nickname:
+    <input data-testid="nickname-box" type="text" id="nickname">
   </label>
-  <button id="set-nickname-btn">Enviar</button>
+  <button data-testid="nickname-button" id="set-nickname-btn">Enviar</button>
 
-  <br> -->
+  <br>
 
   <label>Digite sua mensagem:
-  <input type="text" id="message">
+  <input type="text "data-testid="message-box" id="message">
   </label>
-  <button id="send-message-btn">Enviar</button>
+  <button data-testid="send-button" id="send-message-btn">Enviar</button>
   <br>
 
   <h3>Usuarios</h3>
@@ -31,32 +31,41 @@
 
   <script>
     const socket = io('http://localhost:3000'); //abre conexão no front-end com o socket
+    let thisUser = {};
 
     socket.on('connect', () => {
     const nickname = socket.id.slice(0,16);
-    socket.emit('newUser', nickname)
+    socket.emit('login', nickname)
     });
 
     document.querySelector('#send-message-btn').addEventListener('click', () => {
+      const nickname = !thisUser.nickname? socket.id.slice(0,16) : thisUser.nickname;
       const mensagem = document.querySelector('#message').value;
-      const message = {chatMessage: mensagem, nickname: socket.id.slice(0,16)}
+      const message = {chatMessage: mensagem, nickname}
       socket.emit('message', message)
     });
 
+    document.querySelector('#set-nickname-btn').addEventListener('click', () => {
+      const thisNickname = document.querySelector('#nickname').value;
+      thisUser.nickname = thisNickname;
+      thisUser.id = socket.id;
+      socket.emit('updateUsers', thisUser)
+    });
+
     socket.on('message', (message) => {
-      console.log(message)
       const messageLi = document.createElement('li');
-      messageLi.innerHTML = `${message.timestamp} - ${message.nickname}: ${message.chatMessage}`;
+      messageLi.innerHTML = message;
+      messageLi.setAttribute('data-testid', 'message')
       document.querySelector('#messages').appendChild(messageLi)
     })
 
-    socket.on('updateUsers', ({users}) => {
+    socket.on('onlineUsers', (users) => {
       const userUl = document.querySelector('#users');
-      console.log('lista dos usuarios: ', users)
       userUl.innerHTML = '';
       users.forEach((user) => { 
         const userLi = document.createElement('li');
         userLi.innerHTML = user.nickname;
+        userLi.setAttribute('data-testid', 'online-user');
         userUl.appendChild(userLi)
       })
     })
