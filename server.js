@@ -19,18 +19,28 @@ const { addMessages, getAllMsgs } = require('./models/messages');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-const allUsers = [];
+let allUsers = [];
 
-const addNewUser = (socket) => {
-  const newUser = {
-    id: socket.id,
-  };
-  allUsers.push(newUser);
+const addNewUser = ({ nickname, socket }) => {
+  allUsers.push({ id: socket.id, nickname });
+
+  io.emit('updateOnlineUsers', allUsers);
+};
+
+const changeNickname = ({ newNickname, socket }) => {
+  allUsers.map((user) => {
+    if (user.id === socket.id) Object.assign(user, { id: user.id, nickname: newNickname });
+
+    return user;
+  });
+
+  io.emit('updateOnlineUsers', allUsers);
 };
 
 const handleNickname = (nickname, socket) => {
   const index = allUsers.findIndex((user) => user.id === socket.id);
   allUsers[index].nickname = nickname;
+  console.log(allUsers);
 };
 
 const getTime = () => {
@@ -45,36 +55,26 @@ const findNickname = (socket) => {
   return allUsers[index].nickname;
 };
 
-const getRandomString = () => {
-  const length = 16;
-  const random = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < length; i += 1) {
-    result += random.charAt(Math.floor(Math.random() * random.length));
-  }
-  return result;
+const handleChatMessage = async ({ nickname, chatMessage }, socket) => {
+  handleNickname(nickname, socket);
+  const timestamp = getTime();
+  const result = `${timestamp} ${findNickname(socket)} ${chatMessage}`;
+  await addMessages({ nickname, chatMessage, timestamp });
+  io.emit('message', result);
 };
 
 io.on('connection', async (socket) => {
-  console.log(`${socket.id} connected`);
-  addNewUser(socket);
-  io.emit('connected', getRandomString());
+  socket.on('newUser', ({ nickname }) => addNewUser({ nickname, socket }));
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    handleNickname(nickname, socket);
-    const timestamp = getTime();
-    const result = `${timestamp} ${findNickname(socket)} ${chatMessage}`;
-    await addMessages({ nickname, chatMessage, timestamp });
-    io.emit('message', result);
-  });
+  socket.on('message', async ({ nickname, chatMessage }) =>
+    handleChatMessage({ nickname, chatMessage }, socket));
 
-  socket.on('changeNickname', ({ newNickname }) => {
-    handleNickname(newNickname, socket);
-    io.emit('changeNickname', allUsers);
-  });
+    socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
 
   socket.on('disconnect', () => {
-    console.log('disconnect');
+    const onlineUsers = allUsers.filter((user) => user.id !== socket.id);
+    allUsers = onlineUsers;
+    io.emit('updateOnlineUsers', allUsers);
   });
 });
 

@@ -64,9 +64,19 @@
       return false;
     });
 
-    const changeNickname = (users) => {
+    const getRandomString = () => {
+      const length = 16;
+      const random = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < length; i += 1) {
+        result += random.charAt(Math.floor(Math.random() * random.length));
+      }
+      return result;
+    };
+
+    const updateNickname = (users) => {
       const allUsers = document.querySelector('#allUsers');
-      allUsers.innerHTML = '';
+      // allUsers.innerHTML = '';
       users.forEach((user) => {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'online-user');
@@ -84,14 +94,28 @@
       newNickname.value = '';
     });
 
-    socket.on('connected', (nicknameGenerated, msgs) => {
-      nickname = nicknameGenerated;
-      addUser(nicknameGenerated);
-      console.log(msgs);
+    socket.on('connect', () => {
+      nickname = getRandomString();
+      socket.emit('newUser', { nickname });
     });
 
     socket.on('message', (message) => createMessage(message));
 
-    socket.on('changeNickname', (user) => changeNickname(user));
+    socket.on('updateOnlineUsers', (allUsers) => {
+      const notOnline =  allUsers.filter((user) => user.id !== socket.id);
+      const firstUser = allUsers.filter((user) => user.id === socket.id);
+      const concatUsers = firstUser.concat(notOnline);
+      nickname = allUsers.find((user) => user.id === socket.id).nickname
+      
+      const onlineUsersList = document.querySelector('#allUsers');
+      while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
+      concatUsers.forEach((user) => {
+        const renderUsers = document.createElement('li');
+    
+        renderUsers.setAttribute('data-testid', 'online-user');
+        renderUsers.innerHTML = user.nickname;
+        document.querySelector('#allUsers').appendChild(renderUsers);
+      });
+    });
   </script>
 </html>
