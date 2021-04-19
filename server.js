@@ -18,11 +18,13 @@ const { addMessages, getAllMsgs } = require('./models/messages');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(`${__dirname}/views/`));
 
 let allUsers = [];
 
 const addNewUser = ({ nickname, socket }) => {
   allUsers.push({ id: socket.id, nickname });
+  console.log(allUsers);
 
   io.emit('updateOnlineUsers', allUsers);
 };

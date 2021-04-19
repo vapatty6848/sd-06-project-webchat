@@ -89,7 +89,7 @@
 
     buttonNickname.addEventListener('click', () => {
       const newNickname = document.querySelector('#nickname-box');
-      socket.emit('changeNickname', { newNickname: newNickname.value });
+      socket.emit('changeNickname', newNickname.value);
       nickname = newNickname.value;
       newNickname.value = '';
     });
