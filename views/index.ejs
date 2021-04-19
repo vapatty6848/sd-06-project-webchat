@@ -29,7 +29,11 @@
       <button type="button" id="nickname-save" data-testid="nickname-button">Save nickname</button>
     </form>
     <ul id="allUsers"></ul>
-    <ul id="allMessages"></ul>
+    <ul id="allMessages">
+      <% renderMsgs.forEach((message) => { %>
+        <li data-testid="message"><%= message %></li>
+      <% }); %>
+    </ul>
   </body>
 
   <script>
@@ -80,9 +84,10 @@
       newNickname.value = '';
     });
 
-    socket.on('connected', (nicknameGenerated) => {
+    socket.on('connected', (nicknameGenerated, msgs) => {
       nickname = nicknameGenerated;
       addUser(nicknameGenerated);
+      console.log(msgs);
     });
 
     socket.on('message', (message) => createMessage(message));

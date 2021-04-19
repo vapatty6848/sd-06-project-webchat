@@ -14,14 +14,10 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
-// const { addMessages, getAllMsgs } = require('./models/messages');
+const { addMessages, getAllMsgs } = require('./models/messages');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-app.get('/', (_req, res) => {
-  res.render('index');
-});
 
 const allUsers = [];
 
@@ -59,14 +55,16 @@ const getRandomString = () => {
   return result;
 };
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   console.log(`${socket.id} connected`);
   addNewUser(socket);
   io.emit('connected', getRandomString());
 
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', async ({ chatMessage, nickname }) => {
     handleNickname(nickname, socket);
-    const result = `${getTime()} ${findNickname(socket)} ${chatMessage}`;
+    const timestamp = getTime();
+    const result = `${timestamp} ${findNickname(socket)} ${chatMessage}`;
+    await addMessages({ nickname, chatMessage, timestamp });
     io.emit('message', result);
   });
 
@@ -78,6 +76,13 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('disconnect');
   });
+});
+
+app.get('/', async (_req, res) => {
+  const msgs = await getAllMsgs();
+  const renderMsgs = msgs.map((message) => 
+    `${message.timestamp} ${message.nickname} ${message.chatMessage}`);
+  return res.render('index', { renderMsgs });
 });
 
 http.listen(3000, () => {
