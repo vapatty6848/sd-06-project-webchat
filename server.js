@@ -10,12 +10,18 @@ const users = [];
 
 const dateTime = new Date().toLocaleString().replace(/\//g, '-');
 
+app.set('view engine', 'ejs');
+
+app.get('/', (_req, res) => res.render('home'));
+
 const onConnect = async (socket) => {
-  // const randomNick = `User-${Math.random().toString(36).substr(2, 16)}`;
-  const randomNick = `User-${socket.id.substr(2, 11)}`;
-  users.push({ id: socket.id, nickName: randomNick });
+  const { id } = socket;
+  const randomNick = `User-${id.substr(2, 11)}`;
+  users.push({ id, nickName: randomNick });
+  console.log('users: ', users);
+
+  io.emit('nickNameUpdateFront', users);
   const messages = await Messages.getAllMessages();
-  io.emit('nickNameUpdate', users);
   messages.forEach((element) => socket.emit('message',
    `${element.date} - ${element.nickname}: ${element.message}`)); 
 };
@@ -25,11 +31,11 @@ const nickUpdate = (socket) => {
   const currentUser = users.find((usr) => usr.id === socket.id);
   const userIndex = users.indexOf(currentUser);
   users.splice(userIndex, 1, { id: socket.id, nickName });
-  io.emit('nickNameUpdate', users);
+  io.emit('nickNameUpdateFront', users);
   }); 
 };
 
-const messageProcess = async (socket) => {
+const messageProcess = (socket) => {
   socket.on('message', async (message) => {
     const { nickname, chatMessage } = message;
     await Messages.createMessage(nickname, chatMessage, dateTime);
@@ -42,18 +48,14 @@ const onDisconnect = async (socket) => {
     const currentUser = users.find((usr) => usr.id === socket.id);
     const userIndex = users.indexOf(currentUser);
     users.splice(userIndex, 1);
-    io.emit('nickNameUpdate', users);
+    io.emit('nickNameUpdateFront', users);
   });
 };
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
   onConnect(socket);
   nickUpdate(socket);
   messageProcess(socket);
   onDisconnect(socket);
 });
-
-app.set('view engine', 'ejs');
-
-app.get('/', (_req, res) => res.render('home'));
 
 httpServer.listen('3000');

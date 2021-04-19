@@ -5,12 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebChat</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
+      integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
     <header>
       <h1>WebChat</h1>
     </header>
-    <aside>
+    <span>
       <input
         type="text"
         id="nickName"
@@ -22,7 +27,7 @@
       </button>
       <h3 id="onlineUsersLabel">Usuários Online</h3>
       <ul id="onlineUsers"></ul>
-    </aside>
+    </span>
     <main id="messages"></main>
     <footer>
       <input
@@ -42,9 +47,11 @@
       document.querySelector('#sendNickName').addEventListener('click', (e) => {
         nickName = document.querySelector('#nickName').value;
         socket.emit('nickNameUpdate', nickName);
+        document.querySelector('#nickName').value = '';
       });
 
-      socket.on('nickNameUpdate', (users) => {
+      socket.on('nickNameUpdateFront', (users) => {
+        console.log(users);
         const ulUsers = document.querySelector('#onlineUsers');
         while (ulUsers.firstChild) {
           ulUsers.removeChild(ulUsers.firstChild);
@@ -72,6 +79,7 @@
         message.chatMessage = document.querySelector('#message').value;
         message.nickname = nickName;
         socket.emit('message', message);
+        document.querySelector('#message').value = '';
       });
 
       socket.on('message', (message) => {
