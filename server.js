@@ -1,5 +1,7 @@
 const express = require('express');
 const moment = require('moment');
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const httpServer = require('http').createServer(app);
@@ -11,38 +13,36 @@ const io = require('socket.io')(httpServer, {
     },
 });
 
-const users = [];
-
-io.on('connection', (socket) => {
-  socket.on('newUser', (user) => {
-    users.push({ socketId: socket.id, name: user });
-    io.emit('updateUsers', users);
-  });
-
-  socket.on('message', (message) => {
-    const { chatMessage, nickname } = message;
-    const time = moment(new Date()).format('DD-MM-yyyy h:mm:ss A');
-    io.emit('newMessage', `${time} - ${nickname}: ${chatMessage}`); // envia pra todos
-    socket.emit('privateMessage', 'Apenas quem enviou recebe');
-    socket.broadcast.emit('broadcastMessage', 'Todos recebem, menos quem enviou');
-  });
-
-  socket.on('disconnect', () => {
-    const index = users.findIndex((e) => e.socketId === socket.id);
-    if (index > 0) {
-      users.splice(index, 1);
-      io.emit('updateUsers', users);
-    }
-  });
-});
-
-app.set('view engine', 'ejs');
-app.set('views', './views');
+const Users = require('./models/Users');
+const Messages = require('./models/Messages');
 
 app.get('/', async (_req, res) => {
-  res.render('chat');
+    const url = path.join(__dirname, '/views/chat.ejs');
+    const users = await Users.getAll();
+    const messages = await Messages.getAll();
+    res.render(url, { users, messages });
 });
 
-const port = 3000;
+io.on('connect', (socket) => {
+  socket.on('newUser', async (nickname) => {
+    const user = await Users.create(socket.id, nickname);
+    const users = await Users.getAll();
+    const messages = await Messages.getAll();
+    socket.emit('updateUsers', { user, users, messages });
+  });
 
-httpServer.listen(port, () => console.log(`Socket executando na porta ${port}`));
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    const timestamp = moment(new Date()).format('DD-MM-yyyy h:mm:ss A');
+    await Messages.create(chatMessage, nickname, timestamp);
+    const message = { chatMessage, nickname, timestamp };
+    io.emit('message', message);
+  });
+
+  socket.on('disconnect', async () => {
+    await Users.removeById(socket.id);
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+
+httpServer.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
