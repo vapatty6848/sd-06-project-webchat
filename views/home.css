@@ -16,7 +16,7 @@
   justify-content: space-around;
 }
 
-.title p{
+.title p {
   font-size: 1.5rem;
 }
 
@@ -28,8 +28,8 @@
 .content {
   background: lightcyan;
   display: flex;
-  height: 77vh;
   flex-direction: row;
+  height: 77vh;
   width: 100vw;
 }
 
