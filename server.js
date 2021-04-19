@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const moment= require('moment');
+const moment = require('moment');
+
 const app = express();
 const http = require('http').createServer(app);
 
@@ -39,7 +40,6 @@ const changeNickname = ({ newNickname, socket }) => {
   io.emit('updateOnlineUsers', onlineUsers);
 };
 
-
 const handleChatMessage = async ({ nickname, chatMessage }) => {
   const timestamp = moment().format('DD-MM-YYYY hh:mm:ss A');
   const result = `${timestamp} ${nickname} ${chatMessage}`;
@@ -56,8 +56,8 @@ io.on('connection', async (socket) => {
     socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
 
   socket.on('disconnect', () => {
-    const onlineUsers = onlineUsers.filter((user) => user.id !== socket.id);
-    onlineUsers = onlineUsers;
+    const users = onlineUsers.filter((user) => user.id !== socket.id);
+    onlineUsers = users;
     io.emit('updateOnlineUsers', onlineUsers);
   });
 });
