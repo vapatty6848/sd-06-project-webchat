@@ -56,67 +56,77 @@
     <h1>WebChat</h1>
     <div>
       <Span>Nickname:</Span>
-      <input type="text" id="nickname" placeholder="Insira seu nickname" autocomplete="off" />
-      <button type="button" id="btn-nickname">Salvar</button>
+      <input type="text" id="nickname" data-testid="nickname-box" placeholder="Insira seu nickname" autocomplete="off" />
+      <button type="button" id="btn-nickname" data-testid="nickname-button">Salvar</button>
     </div>
     <section>
-      <ul id="onlineUsers"></ul>
+      <ul id="onlineUsers" data-testid="online-user"></ul>
     </section>
-    <div>
+    <section>
       <ul id="chat">
-        <li id="message">
-        </li>
+        <% messages.forEach((message) => { %>
+          <li data-testid="message"><%= message %></li>
+        <% }) %>
       </ul>
-    </div>
+    </section>
     
 
     <form>      
-      <input type="text" id="mensagemInput" autocomplete="off" /><button>Enviar</button>
+      <input type="text" id="mensagemInput" data-testid="message-box" autocomplete="off" />
+      <button id="sendBtn" data-testid="send-button">Enviar</button>
     </form>
 
     <script>
       const id = Math.floor(
-        Math.random() * (99999 - 99999) + 99999
+        Math.random() * (99999999999 - 9999999999) + 9999999999
       );
       const socket = io();
 
+      // Exibindo novo usuario que entrou com Id aleatório
       socket.emit("newUser", `user_${id}`);
-      document.getElementById("btn-nickname").addEventListener("click", (e) => {
-        const newNickname = document.getElementById("nickname").value;
-        console.log(newNickname);
-        socket.emit("changeUser", newNickname);
-        document.getElementById("nickname").value = "";
-      });
 
-      const form = document.querySelector('form')
-      
-      form.addEventListener('submit', (e) =>{
-        e.preventDefault();
+      document.getElementById("sendBtn").addEventListener("click", (e) => {
         const chatMessage = document.getElementById("mensagemInput").value;
         const user = document.getElementById(`${socket.id}`);
 
         socket.emit("message", {
           chatMessage,
-          nickname: user ? user.innerText : "User",
+          nickname: user ? user.innerText : "user",
         });
 
         document.getElementById("mensagemInput").value = "";
-        return false;
       });
 
+      
       // cria uma `li` e coloca dentro da `ul` com `id` mensagens
-      const createMessage = (message) => {
-        const messagesUl = document.querySelector('#chat');
-        const li = document.createElement('li');
-        li.innerText = message.chatMessage;
-        messagesUl.appendChild(li);
-      }
-
       // Recebendo a mensagem do servidor e exibindo no cliente
-      socket.on('message', (message) => createMessage(message));
+      socket.on("message", (message) => {
+        const li = document.createElement("li");
+        li.innerHTML = message;
+        li.setAttribute("data-testid", "message");
+        document.getElementById("chat").appendChild(li);
+      });
+      
 
-      // Aqui o evento é recebido da mesma maneira do último, mas este não é recebido pelo cliente que enviou o mesmo
-      socket.on('serverMessage', ({ message }) => createMessage(message));
+      // Atualizar usuario
+      socket.on("updateUsers", (users) => {
+        const index = users.findIndex((u) => u.socketId === socket.id);
+        const filteredUSer = users.find((u) => u.socketId === socket.id);
+        if (index !== -1) users.splice(index, 1);
+        users.unshift(filteredUSer);
+
+        document.getElementById("onlineUsers").innerHTML = `
+        ${users.map((user) => `
+          <li id=${user.socketId} data-testid="online-user">${user.userName}</li>`).join('')}`;
+      });
+
+      
+      document.getElementById("btn-nickname").addEventListener("click", (e) => {
+        const newNickname = document.getElementById("nickname").value;
+        socket.emit("changeUser", newNickname);
+        document.getElementById("nickname").value = "";
+      });
+      
     </script>
 
   </body>

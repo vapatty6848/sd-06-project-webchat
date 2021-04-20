@@ -1,6 +1,7 @@
 const express = require('express');
 
 const app = express();
+const { urlencoded } = require('express');
 const httpServer = require('http').createServer(app);
 const moment = require('moment');
 const io = require('socket.io')(httpServer, {
@@ -12,8 +13,15 @@ const io = require('socket.io')(httpServer, {
 
 const { createMessage } = require('./models/messageModel');
 const { changeUser, sendMsg } = require('./services/services');
+const messageController = require('./controllers/messageController');
+
+app.set('view engine', 'ejs');
+app.set('views', './views');
+
+app.use('/', messageController);
 
 app.use(express.json());
+app.use(urlencoded({ extended: false }));
 
 const users = [];
 
@@ -38,12 +46,6 @@ io.on('connection', (socket) => {
     users.push({ socketId: socket.id, userName: newNickname });
     io.emit('updateUsers', users);
   });
-});
-
-app.set('view engine', 'ejs');
-
-app.get('/', (req, res) => {
-  res.render('index');
 });
 
 httpServer.listen(3000, () => {

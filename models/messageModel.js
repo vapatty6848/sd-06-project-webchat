@@ -1,16 +1,12 @@
 const connection = require('./connection');
 
 const createMessage = async (message) => {
-  const newMessage = await connection()
-    .then((db) => db.collection('messages').insertOne(message));
-
-  return newMessage;
+  const newMsg = await connection().then((db) => db.collection('messages').insertOne(message));
+  return newMsg;
 };
 
 const getAllMessages = async () => {
-  const messages = await connection()
-    .then((db) => db.collection('messages').find().toArray());
-
+  const messages = await connection().then((db) => db.collection('messages').find().toArray());
   return messages;
 };
 
