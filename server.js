@@ -90,7 +90,6 @@ io.on('connection', (socket) => {
 const chatController = require('./controllers/chatController');
 const usersController = require('./controllers/usersController');
 
-
 app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(express.static(path.join(__dirname, '/views/')));
