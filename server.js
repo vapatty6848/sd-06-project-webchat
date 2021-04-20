@@ -19,7 +19,6 @@ app.get('/', (_req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('Conectado');
   socket.on('disconnect', () => {
     socket.broadcast.emit(
       'serverMessage',
