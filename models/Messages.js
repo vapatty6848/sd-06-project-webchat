@@ -2,9 +2,11 @@ const connection = require('./connection');
 
 async function create(message, nickname, timestamp) {
   const db = await connection();
-  await db
+  const newMessage = await db
     .collection('messages')
     .insertOne({ message, nickname, timestamp });
+  
+  return newMessage;
 }
 
 async function getAll() {

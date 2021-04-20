@@ -1,12 +1,12 @@
-function handleClientDisconnection({ socket, users, io }) {
-  const clientIndex = users.findIndex((user) => (
+const usersList = require('../server.js');
+
+function handleClientDisconnection({ socket, io }) {
+  const clientIndex = usersList.users.findIndex((user) => (
     user.socketId === socket.id
   ));
-  const disconnectedClient = users[clientIndex];
-  console.log(`${disconnectedClient.nickname}(Id: ${disconnectedClient.socketId}) disconnected`);
-  users.splice(clientIndex, 1);
-  console.log('Remaining users', users);
-  io.emit('updateUsersList', users);
+  usersList.users.splice(clientIndex, 1);
+  console.log('Remaining users', usersList.users);
+  io.emit('usersUpdate', usersList.users);
 }
 
 module.exports = handleClientDisconnection;

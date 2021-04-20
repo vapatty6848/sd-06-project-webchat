@@ -1,12 +1,8 @@
-const generateNickname = require('./generateNickname');
+const usersList = require('../server.js');
 
-function handleNewConnection({ socket, users, io }) {
-  const userNickname = generateNickname(16);
-  console.log(`CONNECTION: Usuário ${socket.id} conectado. Nickname: ${userNickname}`);
-  socket.emit('hello', userNickname);
-  users.push({ socketId: socket.id, nickname: userNickname });
-  console.log('Users:', users);
-  io.emit('updateUsersList', users);
+function handleNewConnection({ userNickname, socket }) {
+  usersList.users.push({ socketId: socket.id, nickname: userNickname });
+  console.log('Usuário conectado, lista de usuários: ', usersList.users);
 }
 
 module.exports = handleNewConnection;

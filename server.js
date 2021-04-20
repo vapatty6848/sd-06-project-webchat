@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const moment = require('moment');
 
 const app = express();
 const httpServer = require('http').createServer(app);
@@ -13,10 +14,9 @@ const io = require('socket.io')(httpServer, {
 });
 const Messages = require('./models/Messages');
 const {
-  handleNewConnection,
-  sendChatMessage,
   handleClientDisconnection,
   handleNicknameChange,
+  formatChatMessage,
 } = require('./utils');
 
 app.use(cors());
@@ -28,8 +28,12 @@ const LOCALHOST_PORT = 3000;
 const PORT = process.env.PORT || LOCALHOST_PORT;
 
 app.get('/', async (request, response) => {
-  const messages = await Messages.getAll();
+  const retrievedMessages = await Messages.getAll();
+  const messages = retrievedMessages.map(({ message, nickname, timestamp }) => (
+    `${timestamp} - ${nickname}: ${message}`
+  ));
   console.log('Database messages:', messages);
+
   return response.status(200).render('chat', { messages });
 });
 
@@ -37,11 +41,19 @@ const users = [];
 
 io.on('connection', (socket) => {
   // Client connection
-  handleNewConnection({ socket, users, io });
+  socket.on('newConnection', (userNickname) => {
+    users.push({ socketId: socket.id, nickname: userNickname });
+    console.log('Usuário conectado, lista de usuários: ', users);
+    io.emit('usersUpdate', users);
+  });
 
   // Get message sent from client
-  socket.on('message', ({ chatMessage, nickname }) => {
-    sendChatMessage({ chatMessage, nickname, io });
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const timestamp = moment().format('DD-MM-YYYY HH:mm:ss');
+    const formattedMessage = formatChatMessage({ chatMessage, nickname, timestamp });
+    await Messages.create(chatMessage, nickname, timestamp);
+    // await saveChatMeesage({ chatMessage, nickname, timestamp });
+    io.emit('message', formattedMessage);
   });
 
   // Change nickname
@@ -51,7 +63,7 @@ io.on('connection', (socket) => {
 
   // Client disconects
   socket.on('disconnect', () => {
-    handleClientDisconnection({ socket, users, io });
+    handleClientDisconnection({ socket, io });
   });
 });
 
