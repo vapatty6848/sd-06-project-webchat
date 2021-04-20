@@ -38,7 +38,6 @@
       <div>
         <h2>Mensagens</h2>
         <ul id="message">  
-         <%= listAll[0].chatMessage%>
         </ul> 
       </div>
     </div>
@@ -63,9 +62,6 @@
     const socket = io('http://localhost:3000');
     
     let nickname = '';
-    socket.on('connect', () => {
-      const randonUser = `user_${Math.random().toString().substr(2, 11)}`;
-      socket.emit('connectUser', {randonUser})})
 
     socket.on('updateUsers', (users) => {
       const listUsers = document.querySelector('#online-users');

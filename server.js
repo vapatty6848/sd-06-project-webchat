@@ -21,8 +21,19 @@ function userDate() {
   return timeFormated;
 }
 let users = [];
+ function newUserNickname({ newNickname, socket }) {
+  const userNick = users.map((user) => { 
+    if (user.socketId === socket.id) {
+      return { ...user, nickname: newNickname };
+    }
+    return user;      
+   }); 
+    users = userNick;
+    io.emit('updateUsers', { users });
+ }
 
-function newUserFunc(randonUser, socket) {
+io.on('connection', (socket) => {
+  const randonUser = `user_${Math.random().toString().substr(2, 11)}`;
   const newUser = { socketId: socket.id, nickname: randonUser };
   users.push(newUser);
   io.emit('updateUsers', users);
@@ -32,22 +43,8 @@ function newUserFunc(randonUser, socket) {
     const message = `${times} ${nickname} ${chatMessage}`;
     io.emit('message', message);
   });
-}
-
-io.on('connection', (socket) => {
-  socket.on('connectUser', ({ randonUser }) => {
-    newUserFunc(randonUser, socket);
-  });
-
   socket.on('updateNickname', (newNickname) => {
-    const userNick = users.map((user) => { 
-      if (user.socketId === socket.id) {
-        return { ...user, nickname: newNickname };
-      }
-      return user;      
-     }); 
-      users = userNick;
-      io.emit('updateUsers', users);     
+    newUserNickname({ newNickname, socket }); 
     }); 
 
   socket.on('disconnect', () => {
@@ -62,6 +59,7 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
+  
   res.render('home', { listAll });
 }); 
 
