@@ -9,15 +9,12 @@
   <title>WebChat</title>
 </head>
 <body>
-  <ul data-testid="online-user" id="online-user"></ul>
+  <ul data-testid="online-user" id="online-user" class="ul-users"></ul>
   <div class="username-div">
     <form>
       <input data-testid="nickname-box" id="nickname-input" placeholder="username" />
       <button type="submit" id="button-nickname" data-testid="nickname-button">Salvar</button>
     </form>
-  </div>
-  <div class="users">
-    <ul class="ul-container"></ul>
   </div>
   <div class="messages">
     <ul id="message-list">
@@ -42,12 +39,7 @@
     const inputNickname = document.querySelector('#nickname-input');
     const messageUl = document.querySelector('#message-list');
     const onlineUser = document.querySelector('#online-user');
-
-/*     socket.on('connect', () => {
-      let nickname = generateRandomNickname(16);
-      io.emit('user', nickname);
-    })
- */
+    let currentUser;
 
     const generateRandomNickname = (length) => {
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -58,33 +50,55 @@
       return str;
     }
 
-/*     const createUserList = (arr) => {
+    // Assim que o user conecta, gero um nome aleatório e atribuo o nickname a currentUser
+      socket.on('connect', () => {
+      const nickname = generateRandomNickname(16);
+      currentUser = [{ nickname }];
+      console.log('linha 57', currentUser);
+      createUser(currentUser[0]);
+      // Envio ao backend o nickname no canal onConnection
+      socket.emit('onConnection', nickname);
+    });
+
+    // Recebe do backend um array com os usuários conectados
+    socket.on('connectedUsers', (users) => {
+      // console.log('array users', users);
+      currentUser = users.filter(user => user.nickname === currentUser[0].nickname);
+      console.log('linha 66', currentUser);
+      createUserList(users);
+    });
+
+    // Recebe do backend um objeto contendo os dados do user para renderizar a msg
+    socket.on('message', (objUser) => createMessage(objUser));
+
+    const createUser = (user) => {
       const li = document.createElement('li');
-
-      arr.map((user) => {
-        li.innerText = user;
-        onlineUser.appendChild(li);
-      });
-    } */
-
-    const createUser = () => {
-      const li = document.createElement('li');
-      li.setAttribute('id', 'user-nickname');
-      let newUser = generateRandomNickname(16);
-
-      socket.emit('user', newUser);
-      li.innerText = newUser;
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = user.nickname;
       onlineUser.appendChild(li);
     }
 
+    const createUserList = (arrayUsers) => {
+      onlineUser.innerHTML = '';
+      // console.log('usuario corrente', currentUser);
+      // createUser(currentUser);
+      arrayUsers
+        .filter(user => user.id !== currentUser.nickname)
+        .forEach((user) => {
+        // console.log('usuário', user);
+        createUser(user);
+        // const li = document.createElement('li');
+        // li.innerText = user.userNickname;
+        // onlineUser.appendChild(li);
+        });
+    }
+    // socket.on('updateNickname', (users) => createUserList(users));
+
     saveNickname.addEventListener('click', (e) => {
       e.preventDefault();
-      let userNickname = inputNickname.value;
-      // io.on('user', (arrayUser) => createUserList(arrayUser));
-      let li = document.querySelector('#user-nickname');
-      localStorage.setItem('currentUser', userNickname);
-      socket.emit('updateNickname', userNickname);
-      li.innerText = userNickname;
+      const newNickname = inputNickname.value;
+      currentUser[0].nickname = newNickname
+      socket.emit('updateNickname', currentUser);
       inputNickname.value = "";
       return;
     });
@@ -92,7 +106,10 @@
     sendMessage.addEventListener('click', (e) => {
       e.preventDefault();
       let chatMessage = inputMessage.value;
-      const nickname = localStorage.getItem('currentUser');
+      console.log('usuário corrente', currentUser);
+      const [{ nickname }] = currentUser;
+      console.log('linha 110', currentUser);
+    
       socket.emit('message', { chatMessage, nickname });
       inputMessage.value = '';
       return;
@@ -104,9 +121,7 @@
       li.innerText = message;
       messageUl.appendChild(li);
     }
-    socket.on('message', (objUser) => createMessage(objUser));
 
-    window.onload = createUser;
   </script>
 </body>
 </html>
