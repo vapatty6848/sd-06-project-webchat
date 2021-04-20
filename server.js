@@ -29,8 +29,8 @@ io.on('connection', (socket) => {
   // { mensagem: `${socket.id} acabou de sair` });
   // });
 
-  socket.on('message', (msg) => {
-    io.emit('message', `${currDate} ${socket.id}: ${msg}`);
+  socket.on('message', ({ chatMessage, nickname }) => {
+    io.emit('message', `${currDate} ${nickname}: ${chatMessage}`);
   });
 });
 
