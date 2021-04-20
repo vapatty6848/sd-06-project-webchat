@@ -32,6 +32,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    changeUser(socket, users);
     io.emit('updateUsers', users);
   });
 

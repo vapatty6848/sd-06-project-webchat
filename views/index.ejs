@@ -79,6 +79,7 @@
     </section>
 
     <script>
+      // Gerando id aleatóriopara colocar no nickname
       const id = Math.floor(
         Math.random() * (99999999999 - 9999999999) + 9999999999
       );
@@ -100,8 +101,7 @@
       });
 
       
-      // cria uma `li` e coloca dentro da `ul` com `id` mensagens
-      // Recebendo a mensagem do servidor e exibindo no cliente
+      // Cria uma `li` e coloca dentro da `ul` com `id` chatMessages
       socket.on("message", (message) => {
         const li = document.createElement("li");
         li.innerHTML = message;
@@ -110,7 +110,7 @@
       });
       
 
-      // Atualizar usuario
+      // Atualizar lista de usuario online
       socket.on("updateUsers", (users) => {
         const index = users.findIndex((u) => u.socketId === socket.id);
         const filterUser = users.find((u) => u.socketId === socket.id);
@@ -122,7 +122,7 @@
           <li id=${user.socketId} data-testid="online-user">${user.userName}</li>`).join('')}`;
       });
 
-      
+      // Altera o nickname do usuário
       document.getElementById("nickname-button").addEventListener("click", (e) => {
         const newNickname = document.getElementById("nickname-box").value;
         socket.emit("changeUser", newNickname);
