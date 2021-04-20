@@ -54,16 +54,18 @@
   </head>
   <body>
     <h1>WebChat</h1>
-    <div>
-      <Span>Nickname:</Span>
-      <input type="text" id="nickname" data-testid="nickname-box" placeholder="Insira seu nickname" autocomplete="off" />
-      <button type="button" id="btn-nickname" data-testid="nickname-button">Salvar</button>
-    </div>
     <section>
-      <ul id="onlineUsers" data-testid="online-user"></ul>
+      <Span>Nickname:</Span>
+      <input type="text" id="nickname-box" data-testid="nickname-box" />
+      <button type="button" id="nickname-button" data-testid="nickname-button">
+        Salvar
+      </button>
     </section>
     <section>
-      <ul id="chat">
+      <ul id="onlineUsers"></ul>
+    </section>
+    <section>
+      <ul id="chatMessages">
         <% messages.forEach((message) => { %>
           <li data-testid="message"><%= message %></li>
         <% }) %>
@@ -71,10 +73,10 @@
     </section>
     
 
-    <form>      
+    <section>      
       <input type="text" id="mensagemInput" data-testid="message-box" autocomplete="off" />
-      <button id="sendBtn" data-testid="send-button">Enviar</button>
-    </form>
+      <button type="submit" id="sendBtn" data-testid="send-button">Enviar</button>
+    </section>
 
     <script>
       const id = Math.floor(
@@ -104,16 +106,16 @@
         const li = document.createElement("li");
         li.innerHTML = message;
         li.setAttribute("data-testid", "message");
-        document.getElementById("chat").appendChild(li);
+        document.getElementById("chatMessages").appendChild(li);
       });
       
 
       // Atualizar usuario
       socket.on("updateUsers", (users) => {
         const index = users.findIndex((u) => u.socketId === socket.id);
-        const filteredUSer = users.find((u) => u.socketId === socket.id);
+        const filterUser = users.find((u) => u.socketId === socket.id);
         if (index !== -1) users.splice(index, 1);
-        users.unshift(filteredUSer);
+        users.unshift(filterUser);
 
         document.getElementById("onlineUsers").innerHTML = `
         ${users.map((user) => `
@@ -121,10 +123,10 @@
       });
 
       
-      document.getElementById("btn-nickname").addEventListener("click", (e) => {
-        const newNickname = document.getElementById("nickname").value;
+      document.getElementById("nickname-button").addEventListener("click", (e) => {
+        const newNickname = document.getElementById("nickname-box").value;
         socket.emit("changeUser", newNickname);
-        document.getElementById("nickname").value = "";
+        document.getElementById("nickname-box").value = "";
       });
       
     </script>
