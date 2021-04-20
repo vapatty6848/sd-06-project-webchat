@@ -4,7 +4,6 @@ const registerUser = async (id, nickname) => {
   const insertedUser = await connection().then((db) => {
     db.collection('users').insertOne({ id, nickname });
   });
-  console.log('usuário inserido', insertedUser);
   return insertedUser;
 };
 
