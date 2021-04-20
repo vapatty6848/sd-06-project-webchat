@@ -5,22 +5,16 @@ const cors = require('cors');
 const app = express();
 const http = require('http').createServer(app);
 
-const io = require('socket.io')(http, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
-});
-const getDate = require('./utils/getMessagePrefix');
+const io = require('socket.io')(http);
+const { sendMessage } = require('./socketHandler/socketHandler');
+// const getDate = require('./utils/getMessagePrefix');
 
 const publicPath = path.join(__dirname, '/public');
 
 io.on('connection', (socket) => {
   console.log('connected');
 
-  socket.on('message', (message) => {
-    console.log(message);
-  });
+  socket.on('message', (messagePayload) => sendMessage(messagePayload, io));
 });
 
 app.set('view engine', 'ejs');

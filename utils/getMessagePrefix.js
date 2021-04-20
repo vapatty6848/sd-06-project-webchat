@@ -11,4 +11,10 @@ const getDate = () => {
   return date;
 };
 
-module.exports = getDate;
+const getPrefix = (nickname) => {
+  const date = getDate();
+  const prefix = `${date} - ${nickname}: `;
+  return prefix;
+};
+
+module.exports = getPrefix;

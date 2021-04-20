@@ -1,7 +1,4 @@
-// const io = window.io('http://localhost:3000');
-// import randomName from 'random-name';
-
-const socket = io();
+const io = window.io('http://localhost:3000');
 
 const generateRandomName = (length) => {
   let name = '';
@@ -18,8 +15,8 @@ const button = document.querySelector('#sendButton');
 
 button.addEventListener('click', () => {
   const textBox = document.querySelector('#messageInput');
-  const messageContent = textBox.value;
-  socket.emit('message', { messageContent, nickname });
+  const chatMessage = textBox.value;
+  io.emit('message', { chatMessage, nickname });
   textBox.value = '';
   return false;
 });

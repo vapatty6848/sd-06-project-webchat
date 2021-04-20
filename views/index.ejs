@@ -5,12 +5,19 @@
   </head>
   <body>
     <h1>WebChat</h1>
-    <input id="messageInput" data-testid="message-box" autocomplete="off" />
-    <button id="sendButton" data-testid="send-button" type="button">Send message!</button>
+    <div>
+      <input id="messageInput" data-testid="message-box" autocomplete="off" />
+      <button id="sendButton" data-testid="send-button" type="button">Send message!</button>
+    </div>
+    <div>
+      <input id="nicknameInput" data-testid="nickname-box" autocomplete="off" />
+      <button id="nicknameButton" data-testid="nickname-button" type="button">Save nickname!</button>
+    </div>
 
   </body>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/sendMessage.js"></script>
+
 
 </html>
