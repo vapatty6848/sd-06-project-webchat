@@ -1,4 +1,5 @@
 const app = require('express')();
+const express = require('express');
 const httpServer = require('http').createServer(app);
 const cors = require('cors');
 const dateFormat = require('dateformat');
@@ -13,6 +14,7 @@ const io = require('socket.io')(httpServer, {
 const port = 3000;
 
 app.use(cors());
+app.use(express.static(`${__dirname}/assets/`)); 
 
 const Message = require('./models/MessagesModel');
 const Users = require('./models/UsersModel');
