@@ -56,7 +56,7 @@
       messageToRender.innerHTML = message;
       document.querySelector('#chat-messages').appendChild(messageToRender);
     });
-    
+    // send message
     document.querySelector('form').addEventListener('submit', (e) => {
       e.preventDefault();
       const chatMessage = document.querySelector('#message').value;
@@ -64,7 +64,7 @@
       socket.emit('message', { nickname: userNickname, chatMessage });
       document.querySelector('#message').value = '';
     });
-    
+    // change nickname
     document.querySelector('#change-nickname-button').addEventListener('click', () => {
       const newNickname = document.querySelector('#change-nickname').value;
       userNickname = newNickname;
@@ -72,4 +72,4 @@
       socket.emit('changeNickname', userNickname);
     });
   </script>
-</html>
+</html> 

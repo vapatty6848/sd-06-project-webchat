@@ -1,17 +1,15 @@
 const connection = require('./connection');
 
-const collectionName = 'messages';
+const coll = 'messages';
 
 const saveMessage = async ({ chatMessage, nickname, timestamp }) => (
-  connection().then((db) => db.collection(collectionName)
-  .insertOne({ chatMessage, nickname, timestamp }))
+  connection().then((db) => db.collection(coll).insertOne({ chatMessage, nickname, timestamp }))
 );
 
 const getAll = async () => {
-  const allMessages = await connection()
-  .then((db) => db.collection(collectionName).find().toArray());
+  const allMessages = await connection().then((db) => db.collection(coll).find().toArray());
 
   return allMessages;
 };
 
-module.exports = { saveMessage, getAll }; 
+module.exports = { saveMessage, getAll };

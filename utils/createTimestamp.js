@@ -17,4 +17,4 @@ const createTimestamp = () => {
   return `${formattedDate} ${formattedTime}`;
 };
 
-module.exports = { createTimestamp };
+module.exports = { createTimestamp }; 
