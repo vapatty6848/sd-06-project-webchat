@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
 
 const chatController = require('./controllers/chatController');
 const usersController = require('./controllers/usersController');
-// const { update } = require('lodash');
+
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
@@ -98,4 +98,4 @@ app.use(express.static(path.join(__dirname, '/views/')));
 app.use('/', chatController);
 app.use('/users', usersController);
 
-http.listen(process.env.PORT, () => console.log('Server open...'));
+http.listen(process.env.PORT || 3000, () => console.log('Server open...'));
