@@ -1,10 +1,11 @@
 const app = require('express')();
 const dayjs = require('dayjs');
+
 const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer);
-const randomUserNickname = require('./utils/randomUserNickname');
 
-let msgsArray = [];
+const { MessagesController, saveMessage } = require('./controllers/MessagesController');
+const randomUserNickname = require('./utils/randomUserNickname');
 
 io.on('connection', (socket) => {
   console.log(`Novo usuário! ${socket.id}`);
@@ -13,23 +14,26 @@ io.on('connection', (socket) => {
   socket.emit('userLogin', nickname);
 
   socket.on('message', (data) => {
-    console.log(data);
-
-    msgsArray = [...msgsArray, data.chatMessage];
     const date = dayjs().format('DD-MM-YYYY hh:mm:ss A');
 
     const message = `<li data-testid='message'>
-      <strong>${date} - ${data.nickname}</strong>: ${data.chatMessage}
+    <strong>${date} - ${data.nickname}</strong>: ${data.chatMessage}
     </li>`;
 
+    const savingMsg = {
+      ...data,
+      timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      date,
+      liMsg: message,
+    };
+
+    saveMessage(savingMsg);
     io.emit('message', message);
   });
 });
 
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
-  res.render('home');
-});
+app.use(MessagesController);
 
 httpServer.listen('3000');
