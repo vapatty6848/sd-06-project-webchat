@@ -168,17 +168,19 @@
           const newUser = document.createElement('li');
   
           newUser.innerText = onlineUser.nick;
-          if (index === 0) newUser.setAttribute('data-testid', 'online-user')
+          newUser.setAttribute('data-testid', 'online-user')
           usersList.appendChild(newUser);
         })
       }
 
-      const userStatusMsg = (nick, status) => {
+      const userStatusMsg = (nick, users, status) => {
         const messagesList = document.querySelector('#messages');
         const userMsg = document.createElement('li');
 
         userMsg.innerText = status === 'on' ? `Usuário ${nick} entrou` : `Usuário ${nick} saiu`;
         messagesList.appendChild(userMsg);
+
+        setOnlineUsers(users);
       }
 
       const updateNickname = () => {
@@ -197,8 +199,8 @@
       socket.emit('newUser', generateRandomNickname() )
 
       socket.on('message', (message) => createNewMessage(message));
-      socket.on('userConnected', (nick) => userStatusMsg(nick, "on"));
-      socket.on('userDisconnected', (nick) => userStatusMsg(nick, "off"));
+      socket.on('userConnected', ({ nick, users }) => userStatusMsg(nick, users, "on"));
+      socket.on('userDisconnected', ({ nick, users }) => userStatusMsg(nick,users,  "off"));
       socket.on('setOnlineUsers', (onlineUsers) => setOnlineUsers(onlineUsers));
       socket.on('setOtherUsersOnline', (onlineUsers) => setOnlineUsers(onlineUsers));
       socket.on('updateUserNick', (onlineUsers) => setOnlineUsers(onlineUsers));

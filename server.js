@@ -22,9 +22,9 @@ let users = [];
 
 const setNewOnlineUser = (socket) => {
   const userLogin = (newUser) => {
-    socket.broadcast.emit('userConnected', newUser);
     socket.emit('setOnlineUsers', [{ id: socket.id, nick: newUser }, ...users]);
     users.push({ id: socket.id, nick: newUser });
+    socket.broadcast.emit('userConnected', { nick: newUser, users });
     socket.broadcast.emit('setOtherUsersOnline', users);
   };
 
@@ -61,8 +61,8 @@ const logOff = (socket) => {
   const disconnectUser = () => {
     const userOff = users.find((user) => user.id === socket.id);
     if (userOff) {
-      socket.broadcast.emit('userDisconnected', userOff.nick);
       users = users.filter((user) => user !== userOff);
+      socket.broadcast.emit('userDisconnected', { nick: userOff.nick, users });
     }
   };
 
