@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Web-chat</title>
+  </head>
+  <body>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .left-container {
+        padding: 1.5%;
+        width: 50%;
+        height: 85vh;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+
+      .left-container input {
+        width: 70%;
+        height: 10%;
+        outline: none;
+        padding-left: 15px;
+      }
+      .left-container button {
+        width: 20%;
+        height: 10%;
+        cursor: pointer;
+      }
+
+      .left-container ul {
+        width: 100%;
+        height: 80%;
+        font-size: 24pt;
+        text-align: center;
+        list-style-type: none;
+        padding-top: 35px;
+      }
+
+      .left-container li {
+        padding: 10px 0;
+      }
+
+      .right-container {
+        width: 50%;
+        height: 85vh;
+      }
+
+      .right-container ul {
+        width: calc(100% - 25px);
+        margin-left: 25px;
+        height: 80%;
+        font-size: 24pt;
+        list-style-type: none;
+        padding-top: 35px;
+      }
+
+      .right-container li {
+        padding: 10px 0;
+      }
+
+      .hero-container {
+        width: 100%;
+        height: 15vh;
+        display: flex;
+      }
+
+      .hero-container input {
+        height: 100%;
+        width: 75%;
+        outline: none;
+        font-size: 2rem;
+        padding-left: 15px;
+      }
+
+      .hero-container button {
+        height: 100%;
+        width: 25%;
+        cursor: pointer;
+      }
+
+    </style>
+   <div class="container">
+      <div class="left-container">
+        <input data-testid="nickname-box" id="nickname" type="text" placeholder="Insira seu nickname"/>
+        <button data-testid="nickname-button" id="saveNickname" onclick="changeNickname()">Salvar</button>
+        <ul id="users_list">
+        </ul>
+      </div>
+      <div class="right-container">
+        <ul id="message_list">
+          <% messages.forEach(msg => { %>
+          <li data-testid="message"><%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %></li>
+          <%})%>
+        </ul>
+      </div>
+      <div class="hero-container">
+        <input placeholder="Digite uma nova mensagem aqui" id="input" type="text" data-testid="message-box" />
+        <button onclick="send()" data-testid="send-button">Enviar</button>
+      </div>
+   </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script>
+      let nickname = randomName(16);
+      const input =  document.getElementById('input')
+      const socket = io();
+      const send = () => {
+        socket.emit('message', { chatMessage: input.value, nickname })
+        input.value = '';
+      }; // manda para o socket
+      socket.on('message', (msg) => { // socket responde com a mensagem para todos
+        const messagesUl = document.querySelector('#message_list');
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerText = msg;
+        messagesUl.appendChild(li);
+      });
+
+      function randomName(length) {
+          var result = [];
+          var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          var charactersLength = characters.length;
+          for ( var i = 0; i < length; i++ ) {
+            result.push(characters.charAt(Math.floor(Math.random() * 
+            charactersLength)));
+        }
+        return result.join('');
+      }
+      socket.emit('user', nickname)
+      socket.on('usersList', (user) => {
+        const usersList = document.getElementById('users_list');
+        usersList.innerHTML = '';
+        user.forEach(user => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerText = user;
+        usersList.appendChild(li);
+        })
+      })
+      const changeNickname = () => {
+        const nicknameD = document.getElementById('nickname').value;
+        nickname = nicknameD;
+        socket.emit('change-nick', nicknameD)
+      }
+    </script>
+  </body>
+</html>
