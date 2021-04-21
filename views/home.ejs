@@ -11,7 +11,7 @@
   <h1>Webchat</h1>
   <ul id="online-users" class="list-group"></ul>
   <input id="change-nickname" data-testid="nickname-box">
-  <button id="change-nickname-button" data-testid="nickname-button">Change nickname</button>
+  <button id="change-nickname-button" data-testid="nickname-button" disabled>Change nickname</button>
   <ul id="chat-messages" class="list-group">
     <% messagesToRender.forEach((message) => { %>
       <li data-testid="message" class="list-group-item"><%= message %></li>
@@ -20,7 +20,7 @@
   <form class="input-group mb-3 fixed-bottom">
     <input id="message" data-testid="message-box" type= "text" class="form-control" placeholder="Digite a sua mensagem">
     <div class="input-group-append">
-      <button id="send-button" data-testid="send-button" class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+      <button id="send-button" disabled data-testid="send-button" class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
     </div>
   </form>
 </body>
@@ -28,6 +28,13 @@
 <script>
   const socket = io();
   let userNickname;
+  const onlineUsersList = document.querySelector('#online-users');
+  const changeNicknameInput = document.querySelector('#change-nickname');
+  const changeNicknameButton = document.querySelector('#change-nickname-button');
+  const chatMessages = document.querySelector('#chat-messages');
+  const messageInputArea = document.querySelector('#message');
+  const messageForm = document.querySelector('form');
+  const sendMessageButton = document.querySelector('#send-button');
 
   socket.on('connect', () => { 
     userNickname = `user_${Math.random().toString().substr(2, 11)}`;
@@ -38,7 +45,6 @@
     const otherUsers =  onlineUsers.filter((user) => user.id !== socket.id);
     const firstUser = onlineUsers.filter((user) => user.id === socket.id);
     const orderedUsers = firstUser.concat(otherUsers);
-    const onlineUsersList = document.querySelector('#online-users');
     
     userNickname = onlineUsers.find((user) => user.id === socket.id).nickname
     
@@ -55,7 +61,6 @@
   
   socket.on('message', (message) => {
     const messageToRender = document.createElement('li');
-    const chatMessages = document.querySelector('#chat-messages');
 
     messageToRender.setAttribute('data-testid', 'message');
     messageToRender.setAttribute('class', 'list-group-item');
@@ -63,23 +68,28 @@
     chatMessages.appendChild(messageToRender);
   });
 
-  document.querySelector('form').addEventListener('submit', (e) => {
+  messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const messageInputArea = document.querySelector('#message');
     const chatMessage = messageInputArea.value;
     messageInputArea.value = '';
     
     socket.emit('message', { nickname: userNickname, chatMessage });
   });
 
-  document.querySelector('#change-nickname-button').addEventListener('click', () => {
-    const nicknameInputArea = document.querySelector('#change-nickname')
-    const newNickname = nicknameInputArea.value;
+  messageInputArea.addEventListener('input', (e) => {
+    if(e.target.value.length > 0) sendMessageButton.removeAttribute('disabled');
+    else sendMessageButton.setAttribute('disabled', '');
+  })
 
-    userNickname = newNickname;
-    nicknameInputArea.value = '';
+  changeNicknameInput.addEventListener('input', (e) => {
+    if(e.target.value.length > 0) changeNicknameButton.removeAttribute('disabled');
+    else changeNicknameButton.setAttribute('disabled', '');
+  });
 
+  changeNicknameButton.addEventListener('click', () => {
+    userNickname = changeNicknameInput.value;
+    changeNicknameInput.value = '';
     socket.emit('changeNickname', userNickname);
   });
 </script>
