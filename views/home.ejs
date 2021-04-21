@@ -30,23 +30,42 @@
         document.getElementById('user').innerHTML = '';
         users.forEach((element) => {
           const user = document.createElement('li');
+          socket.name = element.name;
           user.innerHTML = element.name;
           user.setAttribute('data-testid', 'online-user');
           document.getElementById('user').appendChild(user);
         });
       });
 
-      document.getElementById('nickChange').addEventListener('click', () => {
-        const newName = document.getElementById('nick').value;
+      socket.on('user', (guest) => {
+        let username = guest.name;
 
-        socket.emit('updateUser', { name: newName, id: socket.id });
+        document.getElementById('nickChange').addEventListener('click', () => {
+          const newName = document.getElementById('nick').value;
+
+          username = newName;
+
+          socket.emit('updateUser', { name: newName, id: socket.id });
+        });
+
+        document.getElementById('send').addEventListener('click', () => {
+          const chatMessage = document.getElementById('message').value;
+          let nickname = username;
+
+          socket.emit('message', { chatMessage, nickname });
+        });
       });
 
-      document.getElementById('send').addEventListener('click', () => {
-        const chatMessage = document.getElementById('message').value;
-        let nickname = socket.id;
-
-        socket.emit('message', { chatMessage, nickname });
+      socket.on('oldChat', async (oldMessages) => {
+        if (oldMessages !== []) {
+          oldMessages.forEach((element) => {
+            const chat = document.getElementById('chat');
+            const text = document.createElement('li');
+            text.innerHTML = `${element.timestamp} - ${element.nickname}: ${element.message}`;
+            text.setAttribute('data-testid', 'message');
+            chat.appendChild(text);
+          });
+        }
       });
 
       socket.on('newMessage', (message) => {
