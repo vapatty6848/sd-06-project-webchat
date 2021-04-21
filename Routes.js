@@ -3,6 +3,6 @@ const controller = require('./controllers');
 
 const Routes = Router();
 
-Routes.use('/', controller.messageController);
+Routes.use('/testando', controller.messageController);
 
 module.exports = Routes;
