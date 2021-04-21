@@ -12,6 +12,8 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
+const Messages = require('./models/messageModel');
+
 app.get('/', (_req, res) => {
   res.sendFile(`${__dirname}/index.html`);
 });
@@ -21,16 +23,20 @@ const currDate = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
 io.on('connection', (socket) => {
   console.log('Conectado');
 
-  socket.on('userLogin', (nickname) => {
+  socket.on('userLogin', async (nickname) => {
     io.emit('users', nickname);
+    const allMsgs = await Messages.getAll();
+    allMsgs.forEach((msg) => {
+      socket.emit('message', `${msg.timestamp} ${msg.nickname}: ${msg.message}`);
+    });
   });
 
-  socket.on('message', ({ chatMessage, nickname }) => {
-    io.emit('message', `${currDate} ${nickname}: ${chatMessage}`);
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const dbMsg = await Messages.create(chatMessage, nickname, currDate);
+    io.emit('message', `${dbMsg.timestamp} ${dbMsg.nickname}: ${dbMsg.message}`);
   });
 
-  socket.on('users', (user) => {
-    console.log(user);
+  socket.on('users', async (user) => {
     io.emit('users', user);
   });
 });
