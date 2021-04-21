@@ -59,7 +59,16 @@
       </div>
     </form>
       <div class="container">
-        <ul class="list-group" id="chat-body"></ul>
+        <ul class="list-group" id="chat-body">
+          <% messages.forEach((message) => { %>
+            <li
+              class='list-group-item'
+              data-testid='message'
+            >
+            <%=`${helpers.dateFormater(message.timestamp)} ${message.nickname} - ${message.message}`%>
+            </li>
+          <% }) %>
+        </ul>
       </div>
   </div>
 

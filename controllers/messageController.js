@@ -1,19 +1,14 @@
 const { Router } = require('express');
-const MessageModel = require('../models/messagesModel');
+const MessagesModel = require('../models/messagesModel');
+const helpers = require('../helpers');
 require('../models/connection');
 
 const controller = Router();
-const SUCCESS = 200;
+// const SUCCESS = 200;
 
 controller.get('/', async (_req, res) => {
-  res.render('webchat/chat');
-});
-
-controller.get('/messages', async (_req, res, _next) => {
-    MessageModel.find((err, messages) => {
-      if (err) console.log(err);
-      return res.status(SUCCESS).json(messages);
-    });
+  MessagesModel.getAll()
+  .then((messages) => res.render('webchat/chat', { messages, helpers }));
 });
 
 module.exports = controller;

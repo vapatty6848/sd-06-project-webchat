@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const socketIo = require('socket.io');
 const Helpers = require('./helpers');
+const MessageModel = require('./models/messagesModel');
 
 require('dotenv/config');
 const Routes = require('./Routes');
@@ -20,11 +21,11 @@ const io = new socketIo.Server(server);
 io.on('connection', (socket) => {
   console.log('Usuário Conectado:', socket.id);
 
-  socket.on('message', ({ chatMessage, nickname }) => {
+  socket.on('message', async ({ chatMessage, nickname }) => {
     console.log(chatMessage);
     const date = Helpers.dateGenerator();
     const formatedMessage = Helpers.formatMessage({ date, nickname, chatMessage });
-
+    MessageModel.create(chatMessage, nickname, date);
     io.emit('message', formatedMessage);
   });
 });
