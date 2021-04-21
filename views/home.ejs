@@ -25,7 +25,11 @@
   <input id="change-nickname" data-testid="nickname-box">
   <button id="change-nickname-button" data-testid="nickname-button">Change nickname</button>
   
-  <ul id="chat-messages"></ul>
+  <ul id="chat-messages">
+    <% messagesToRender.forEach((message) => { %>
+      <li data-testid="message"><%= message %></li>
+    <% }); %>
+  </ul>
 
   <!-- <form class="input-group mb-3 fixed-bottom">
     <input id="input-msg" type= "text" class="form-control" placeholder="Digite a sua mensagem"></input>
@@ -42,20 +46,26 @@ const socket = io();
   let userNickname;
   
   socket.on('updateOnlineUsers', (onlineUsers) => {
-    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname;
-    document.querySelector('#online-users').innerHTML = '';
+    userNickname = onlineUsers.find((user) => user.id === socket.id)
+      ? onlineUsers.find((user) => user.id === socket.id).nickname
+      : userNickname;
+    const onlineUsersList = document.querySelector('#online-users');
+    while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
     onlineUsers.forEach((user) => {
       const userToRender = document.createElement('li');
+      
       userToRender.setAttribute('data-testid', 'online-user')
       userToRender.innerHTML = user.nickname;
       document.querySelector('#online-users').appendChild(userToRender);
-    })
+    });
   });
   
   socket.on('message', (message) => {
     const messageToRender = document.createElement('li');
+    
     messageToRender.setAttribute('data-testid', 'message');
     messageToRender.innerHTML = message;
+    
     document.querySelector('#chat-messages').appendChild(messageToRender);
   });
 
@@ -69,8 +79,12 @@ const socket = io();
 
   document.querySelector('#change-nickname-button').addEventListener('click', () => {
     const newNickname = document.querySelector('#change-nickname').value;
+
     userNickname = newNickname;
+
     document.querySelector('#change-nickname').value = '';
+    
+    socket.emit('changeNickname', userNickname);
   })
   
 </script>
