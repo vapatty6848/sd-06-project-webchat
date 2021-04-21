@@ -12,7 +12,6 @@
     <div>
       <h1>WebChat</h1>
     </div>
-    
     <div>
       <div>
         <div>
@@ -32,12 +31,12 @@
         </div>
         <div>
           <h3>Usuários</h3>
-          <ul id="online-user"></ul>
+          <ul id="onlineUserli"></ul>
         </div>
       </div>
       <div>
         <h3>Mensagens</h3>
-        <ul id="message">
+        <ul id="messageUl">
           <% messages.forEach((msg) => { %>
             <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
           <% }) %>
@@ -72,29 +71,29 @@
       let charactersLength = characters.length;
       for ( let i = 0; i < length; i++ ) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      }
+      };
       return result;
-    }
+    };
 
-    socket.on('randomNickname', (user) => {
+    const createUser = (user) => {
       const userLi = document.createElement('li');
       userLi.setAttribute('data-testid', 'online-user');
       userLi.setAttribute('id', user);
       userLi.innerText = user;
-      document.querySelector('#online-user').appendChild(userLi);
-    });
+      document.querySelector('#onlineUserli').appendChild(userLi);
+    };
 
     document.querySelector('#send-button').addEventListener('click', () => {
       const chatMessage = document.querySelector('#message-box').value;
       socket.emit('message', { chatMessage, nickname });
     });
 
-    socket.on('message', (message) => {
+    const createNewMessage = (message) => {
       const messageLi = document.createElement('li');
       messageLi.setAttribute('data-testid', 'message');
       messageLi.innerText = message;
-      document.querySelector('#message').appendChild(messageLi);
-    });
+      document.querySelector('#messageUl').appendChild(messageLi);
+    };
 
     document.querySelector('#nickname-button'). addEventListener('click', () => {
       const newNickname = document.querySelector('#nickname-box').value;
@@ -107,18 +106,22 @@
       };
     });
 
+    socket.on('connect', () => {
+      const randomNick = generateNickName(16);
+      nickname = randomNick
+      socket.emit('connectUser', { nickname });
+    });
+    
+    socket.on('message', (message) => createNewMessage(message));
+    
+    socket.on('updateUsers', (user) => createUser(user));
+
     socket.on('changeNickName', ({ nickname, newNickname }) => {
       const oldNickname = document.querySelector(`#${nickname}`);
       if (oldNickname) {
         oldNickname.innerText = newNickname;
         oldNickname.setAttribute('id', newNickname);
       }
-    });
-
-    socket.on('connect', () => {
-      const randomNick = generateNickName(16);
-      nickname = randomNick
-      socket.emit('connectUser', { nickname });
     });
   </script>
 </body>

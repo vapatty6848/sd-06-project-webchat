@@ -24,7 +24,7 @@ ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
 const saveUser = (nickname) => {
   users.push(nickname);
-  io.emit('randomNickname', nickname);
+  io.emit('updateUsers', nickname);
 };
 
 const onChangeNickname = ({ nickname, newNickname }) => {
