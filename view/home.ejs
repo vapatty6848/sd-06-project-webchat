@@ -6,12 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SocketIO - teste</title>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment-with-locales.min.js"></script>
 </head>
 <body>
   <h1>Webchat</h1>
   <h2>Digite seu Nickname</h2>
-  <input type="text" id="textNickname" placeholder="Insira seu nome aqui">
-  <button id="sendNickname">Logar</button>
+  <input
+    data-testid="nickname-box"
+    type="text"
+    id="textNickname"
+    placeholder="Insira seu nome aqui"
+  >
+  <button id="sendNickname" data-testid="nickname-button">
+    Logar
+  </button>
   
   <h2>Usuários</h2>
   <ul id="displayNickname"> 
@@ -20,8 +28,15 @@
   <h2>Chitchat</h2>
   <ul id='displayMessage'></ul>
   
-  <input type="text" id="textMessage" placeholder="Digite uma nova mensagem aqui">
-  <button id="sendMessage">Enviar</button>
+  <input
+    data-testid="message-box"
+    type="text"
+    id="textMessage"
+    placeholder="Digite uma nova mensagem aqui"
+  >
+  <button id="sendMessage" data-testid="send-button">
+    Enviar
+  </button>
   
   <script>
   const socket = io();
@@ -34,27 +49,43 @@
   const textNickname = document.querySelector('#textNickname');
   const displayNickname =  document.querySelector('#displayNickname');
 
+  const renderMessages = (message) => {
+    const msgItem = document.createElement('li');
+    msgItem.innerHTML = `${message.timeSend} - ${message.nickname} disse: ${message.chatMessage}`;
+    msgItem.setAttribute('data-testid','message');
+    displayMessage.append(msgItem);
+  }
+
   buttonSendMsg.addEventListener('click', (event) => {
     event.preventDefault();
-    socket.emit('message', textMessage.value);
-   })
+    const chatMessage = textMessage.value;
+    const nickname = textNickname.value;
+    const timeSend = moment().format('DD-MM-YYYY HH:mm:ss A');
+    let messageObject = { chatMessage, nickname, timeSend };
+
+    renderMessages(messageObject);
+
+    socket.emit('toBackMsg', messageObject);
+    textMessage.value = '';
+    textNickname.value = '';
+  });
 
   buttonSendNick.addEventListener('click', (event) => {
     event.preventDefault();
-    socket.emit('nickname', textNickname.value);
-   })
+    const nickname = textNickname.value;
+
+    socket.emit('nickname', nickname);
+  });
 
   socket.on('toFrontMsg', (messageFromBack) => {
-    const msgItem = document.createElement('li');
-    msgItem.innerHTML = messageFromBack;
-    displayMessage.appendChild(msgItem);
+    renderMessages(messageFromBack);
   });
 
   socket.on('toFrontNick', (nickFromBack) => {
     const nickItem = document.createElement('li');
     nickItem.innerHTML = nickFromBack;
     displayNickname.appendChild(nickItem); 
-  })
+  });
   </script>
 </body>
 </html>
