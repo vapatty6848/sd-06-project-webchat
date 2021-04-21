@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Projeto - Webchat</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      h2 {
+        text-align: center;
+        margin-top: 20px;
+      }
+      .pageContainer {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 10px;
+      }
+      .pageContainer > div:first-child {
+        width: 100%;
+        height: 90vh;
+        margin-bottom: 10px;
+        display: flex;
+      }
+      .leftBoard {
+        width: 40%;
+        height: 100%;
+        margin-right: 10px;
+      }
+      .leftBoard > div:first-child {
+        height: 10%;
+      }
+      .leftBoard > div > div {
+        display: flex;
+      }
+      .leftBoard > div:last-child {
+        border: 2px solid gray;
+        height: 90%;
+      }
+      .leftBoard input {
+        border: 2px solid gray;
+        padding: 10px;
+        width: 78%;
+      }
+      .leftBoard button {
+        min-width: 50px;
+        width: 20%;
+        background: rgb(44, 206, 72);
+        border: none;
+        padding: 10px;
+        margin: 0 1%;
+        cursor: pointer;
+      }
+      .leftBoard > div > h2 {
+        margin-bottom: 10px;
+      }
+      #onlineUsers {
+        text-align: center;
+        list-style-type: none;
+      }
+      #onlineUsers li {
+        margin-bottom: 5px;
+      }
+      .rightBoard {
+        border: 2px solid gray;
+        width: 60%;
+        height: 100%;
+        padding-left: 30px;
+      }
+      .rightBoard h2 {
+        margin-bottom: 20px;
+      }
+      .sendMessageContainer {
+        display: flex;
+        width: 100%;
+        max-width: 800px;
+      }
+      .sendMessageContainer input {
+        border: 2px solid gray;
+        padding: 10px;
+        width: 90%;
+      }
+      .sendMessageContainer button {
+        width: 10%;
+        background: rgb(44, 206, 72);
+        border: none;
+        padding: 10px;
+        margin-left: 0.5%;
+        cursor: pointer;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="pageContainer">
+      <div>
+        <div class="leftBoard">
+          <div>
+            <div>
+              <input id="nicknameInput" data-testid="nickname-box" placeholder="Insira seu apelido">
+              <button id="nicknameButton" data-testid="nickname-button">Salvar</button>
+            </div>
+          </div>
+          <div>
+            <h2>Usuários online:</h2>
+            <ul id="onlineUsers"></ul>
+          </div>
+        </div>
+        <div class="rightBoard">
+          <h2>Mensagens:</h2>
+          <ul id="messages"></ul>
+        </div>
+      </div>
+      <div class="sendMessageContainer">
+        <input id="messageInput" data-testid="message-box" autocomplete="off" />
+        <button id="sendButton" data-testid="send-button">Enviar</button>
+      </div>
+    </div>
+
+    <script>
+      const socket = io();
+      const messageInput = document.querySelector('#messageInput');
+      const nicknameInput = document.querySelector('#nicknameInput');
+      const sendButton = document.querySelector('#sendButton');
+      const nicknameButton = document.querySelector('#nicknameButton');
+      
+      const createNewMessage = (message) => {
+        const messagesList = document.querySelector('#messages');
+        const newMessage = document.createElement('li');
+
+        newMessage.innerText = message;
+        newMessage.setAttribute('data-testid', 'message')
+        messagesList.appendChild(newMessage);
+        messageInput.value = '';
+      }
+
+      const getRandomHex = size => {
+        let result = [];
+        let hexRef = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+
+        for (let n = 0; n < size; n++) {
+          const ramdomHex = hexRef[Math.floor(Math.random() * 16)];
+          result.push(ramdomHex);
+        }
+        return result.join('');
+      }
+
+      const generateRandomNickname = () => {
+        const randomnickname = 'guest_' + getRandomHex(10);
+
+        return randomnickname;
+      }
+
+      const setOnlineUsers = (onlineUsers) => {
+        const usersList = document.querySelector('#onlineUsers');
+
+        while (usersList.firstChild) {
+          usersList.removeChild(usersList.firstChild);
+        }
+
+        onlineUsers.forEach((onlineUser, index) => {
+          const newUser = document.createElement('li');
+  
+          newUser.innerText = onlineUser.nick;
+          if (index === 0) newUser.setAttribute('data-testid', 'online-user')
+          usersList.appendChild(newUser);
+        })
+      }
+
+      const userStatusMsg = (nick, status) => {
+        const messagesList = document.querySelector('#messages');
+        const userMsg = document.createElement('li');
+
+        userMsg.innerText = status === 'on' ? `Usuário ${nick} entrou` : `Usuário ${nick} saiu`;
+        messagesList.appendChild(userMsg);
+      }
+
+      const updateNickname = () => {
+        sessionStorage.setItem('nickname', nicknameInput.value)
+        return;
+      }
+
+      sendButton.addEventListener('click', () => {
+        socket.emit('message', { chatMessage: messageInput.value });
+      })
+
+      nicknameButton.addEventListener('click', () => {
+        updateNickname();
+        socket.emit('updateUserNick', nicknameInput.value)
+      })
+      socket.emit('newUser', generateRandomNickname() )
+
+      socket.on('message', (message) => createNewMessage(message));
+      socket.on('userConnected', (nick) => userStatusMsg(nick, "on"));
+      socket.on('userDisconnected', (nick) => userStatusMsg(nick, "off"));
+      socket.on('setOnlineUsers', (onlineUsers) => setOnlineUsers(onlineUsers));
+      socket.on('setOtherUsersOnline', (onlineUsers) => setOnlineUsers(onlineUsers));
+      socket.on('updateUserNick', (onlineUsers) => setOnlineUsers(onlineUsers));
+      socket.on('updateUserNickToOthers', (onlineUsers) => setOnlineUsers(onlineUsers));
+    </script>
+  </body>
+</html>
