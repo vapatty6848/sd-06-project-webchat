@@ -11,7 +11,7 @@
 
 <body>
   <nav class="navbar navbar-light bg-light">
-    <div class="container-fluid">
+    <div class="container-fluid p-2" style="background-color: rgba(7, 22, 1, 0.1)">
       <a class="navbar-brand">WebChat Trybe</a>
       <form class="d-flex">
         <input class="form-control me-2" type="text" placeholder="Mensagem" id="message" data-testid="message-box">
@@ -20,23 +20,33 @@
     </div>
   </nav>
   
-  <ul id="online-users"></ul>
+  <div class="container-lg mt-3">
+    <div class="row align-items-start">
+      <div class="col-4 align-self-start">
+        <div class="d-flex">
+          <input class="col-6 form-control me-2" id="change-nickname" data-testid="nickname-box">
+          <button class="col-6 btn btn-dark" id="change-nickname-button" data-testid="nickname-button">Mudar nome</button>
+        </div>
 
-  <input id="change-nickname" data-testid="nickname-box">
-  <button id="change-nickname-button" data-testid="nickname-button">Change nickname</button>
-  
-  <ul id="chat-messages">
-    <% messagesToRender.forEach((message) => { %>
-      <li data-testid="message"><%= message %></li>
-    <% }); %>
-  </ul>
-
-  <!-- <form class="input-group mb-3 fixed-bottom">
-    <input id="input-msg" type= "text" class="form-control" placeholder="Digite a sua mensagem"></input>
-    <div class="input-group-append">
-      <button id="send-button" class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+        <ul class="list-group" id="online-users"></ul>
+      </div>
+      <div class="col-8 align-self-end">
+        <ul class="list-group col-12 d-inline-block" id="chat-messages">
+          <% messagesToRender.forEach((message) => { %>
+            <li
+              data-testid="message"
+              class="list-group-item list-group-item-info"
+            >
+              <%= message %>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
     </div>
-  </form> -->
+  </div>
+
+
+  
 </body>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -45,16 +55,24 @@
 const socket = io();
   let userNickname;
   
+  socket.on('connect', () => { 
+      userNickname = `user_${Math.random().toString().substr(2, 11)}`;
+      socket.emit('sendNickname', { nickname: userNickname });
+  })
+
   socket.on('updateOnlineUsers', (onlineUsers) => {
-    userNickname = onlineUsers.find((user) => user.id === socket.id)
-      ? onlineUsers.find((user) => user.id === socket.id).nickname
-      : userNickname;
+    const otherUsers =  onlineUsers.filter((user) => user.id !== socket.id);
+    const firstUser = onlineUsers.filter((user) => user.id === socket.id);
+    const orderedUsers = firstUser.concat(otherUsers);
+    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname;
+ 
     const onlineUsersList = document.querySelector('#online-users');
     while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
-    onlineUsers.forEach((user) => {
+    orderedUsers.forEach((user) => {
       const userToRender = document.createElement('li');
       
-      userToRender.setAttribute('data-testid', 'online-user')
+      userToRender.setAttribute('data-testid', 'online-user');
+      // userToRender.setAttribute('class', 'list-group-item list-group-item-secondary');
       userToRender.innerHTML = user.nickname;
       document.querySelector('#online-users').appendChild(userToRender);
     });
@@ -64,6 +82,7 @@ const socket = io();
     const messageToRender = document.createElement('li');
     
     messageToRender.setAttribute('data-testid', 'message');
+    messageToRender.setAttribute('class', 'list-group-item list-group-item-info');
     messageToRender.innerHTML = message;
     
     document.querySelector('#chat-messages').appendChild(messageToRender);

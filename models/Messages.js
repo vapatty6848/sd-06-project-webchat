@@ -1,6 +1,6 @@
 const connection = require('./connection');
 
-const saveMessage = async ({ chatMessage, nickname, timestamp }) => (
+const save = async ({ chatMessage, nickname, timestamp }) => (
   connection().then((db) => db.collection('messages')
     .insertOne({ chatMessage, nickname, timestamp }))
 );
@@ -13,6 +13,6 @@ const getAll = async () => {
 };
 
 module.exports = {
-  saveMessage,
+  save,
   getAll,
 };
