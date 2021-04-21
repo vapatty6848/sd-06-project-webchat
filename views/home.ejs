@@ -17,7 +17,7 @@
       <ul id="users"></ul>
       <li id="firstUser" data-testid="online-user"></li>
     </section>
-    <section class="S2" id="messages" data-testid="message">
+    <section class="S2" id="messages" >
       <h2>Mensagens</h2>
     </section>
     <section class="S3">
@@ -59,7 +59,9 @@
       console.log('msg', message);
       const msgP = document.createElement('p');
       msgP.innerHTML = message;
+      msgP.dataset.testid = "message"
       document.querySelector('#messages').appendChild(msgP);
+      
     });
 
     socket.on('updateUsers', (users) => {
