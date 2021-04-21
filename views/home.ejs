@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/style.css" rel="stylesheet" type="text/css">
+  <title>Pagina com socket.io</title>
+  <script src="/socket.io/socket.io.js"></script> 
+</head>
+<body>
+  <main class="main">
+    <section class="S1">
+      <h2>Usuários</h2>
+      <input placeholder="digite seu nick name" id="nick-name">
+      <button type="button" id="btn_nick">Entrar</button>
+      <ul id="users"></ul>
+    </section>
+    <section class="S2" id="messages">
+      <h2>Mensagens</h2>
+    </section>
+    <section class="S3">
+      <input
+      type="text"
+      id="inputMsg"
+      >
+      <button
+        type="button"
+        id="btn_msg"
+      >
+        Enviar
+      </button>
+    </section>
+  </main>
+  <script>
+    const socket = io('http://localhost:3000');
+
+    document.querySelector('#btn_nick').addEventListener('click', (e) => {
+      const nick = document.querySelector('#nick-name').value
+      console.log('html', nick);
+      socket.emit('nickName', nick)
+    });
+    socket.on('yourNick', (nickname) => {
+      document.querySelector('#btn_msg').addEventListener('click', (e) => {
+      const msg = document.querySelector('#inputMsg').value;
+      const name = nickname;
+      const message = {chatMessage: msg, nickname: name }
+      socket.emit('message', message)
+    });
+    })
+    
+
+    socket.on('message', (message) => {
+      console.log('msg', message);
+      const msgP = document.createElement('p');
+      msgP.innerHTML = message;
+      document.querySelector('#messages').appendChild(msgP);
+    });
+
+    socket.on('updateUsers', (users) => {
+      document.querySelector('#users').innerHTML='';
+      users.forEach((user) => {
+        const userLi = document.createElement('li');
+        userLi.innerHTML = user.name;
+        document.querySelector('#users').appendChild(userLi);
+      })
+    });
+  </script>
+  <footer>Leonardo Cavachini Bendto</footer>
+</body>
+</html>
