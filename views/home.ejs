@@ -9,12 +9,12 @@
 </head>
 <body>
   <h1>Webchat</h1>
-  <ul id="online-users"></ul>
+  <ul id="online-users" class="list-group"></ul>
   <input id="change-nickname" data-testid="nickname-box">
   <button id="change-nickname-button" data-testid="nickname-button">Change nickname</button>
-  <ul id="chat-messages">
+  <ul id="chat-messages" class="list-group">
     <% messagesToRender.forEach((message) => { %>
-      <li data-testid="message"><%= message %></li>
+      <li data-testid="message" class="list-group-item"><%= message %></li>
     <% }); %>
   </ul>
   <form class="input-group mb-3 fixed-bottom">
@@ -34,54 +34,51 @@
     socket.emit('sendNickname', { nickname: userNickname });
   })
 
-  
   socket.on('updateOnlineUsers', (onlineUsers) => {
     const otherUsers =  onlineUsers.filter((user) => user.id !== socket.id);
     const firstUser = onlineUsers.filter((user) => user.id === socket.id);
     const orderedUsers = firstUser.concat(otherUsers);
-
+    const onlineUsersList = document.querySelector('#online-users');
+    
     userNickname = onlineUsers.find((user) => user.id === socket.id).nickname
     
-    const onlineUsersList = document.querySelector('#online-users');
-
     while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
-
+    
     orderedUsers.forEach((user) => {
       const userToRender = document.createElement('li');
-  
+      
       userToRender.setAttribute('data-testid', 'online-user');
       userToRender.innerHTML = user.nickname;
-      document.querySelector('#online-users').appendChild(userToRender);
+      onlineUsersList.appendChild(userToRender);
     });
   });
   
   socket.on('message', (message) => {
     const messageToRender = document.createElement('li');
+    const chatMessages = document.querySelector('#chat-messages');
 
     messageToRender.setAttribute('data-testid', 'message');
+    messageToRender.setAttribute('class', 'list-group-item');
     messageToRender.innerHTML = message;
-
-    document.querySelector('#chat-messages').appendChild(messageToRender);
+    chatMessages.appendChild(messageToRender);
   });
 
-  // send message
   document.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const chatMessage = document.querySelector('#message').value;
+    const messageInputArea = document.querySelector('#message');
+    const chatMessage = messageInputArea.value;
+    messageInputArea.value = '';
     
     socket.emit('message', { nickname: userNickname, chatMessage });
-
-    document.querySelector('#message').value = '';
   });
 
-  // change nickname
   document.querySelector('#change-nickname-button').addEventListener('click', () => {
-    const newNickname = document.querySelector('#change-nickname').value;
+    const nicknameInputArea = document.querySelector('#change-nickname')
+    const newNickname = nicknameInputArea.value;
 
     userNickname = newNickname;
-
-    document.querySelector('#change-nickname').value = '';
+    nicknameInputArea.value = '';
 
     socket.emit('changeNickname', userNickname);
   });
