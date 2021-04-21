@@ -72,22 +72,25 @@
     const socket = io();
 
     document.querySelector('form').addEventListener('submit', (e) => e.preventDefault());
+    let usersOnline;
 
     const generateNick = () => {
-      const user = localStorage.getItem('nickname')
-      if (!user) {
-        const randomName = `user_${Math.random().toString().substr(2, 11)}`;
-        localStorage.setItem('nickname', randomName);
-        return randomName;
-      }
-      return user;
+      const randomName = `user_${Math.random().toString().substr(2, 11)}`;
+      localStorage.setItem('nickname', randomName);
+      return randomName;
     };
     socket.emit('newUser', generateNick());
 
     socket.on('usersList', (users) => {
-      users.forEach((user) => {
+      const usersList = document.querySelector('#users');
+      while (usersList.firstChild) usersList.removeChild(usersList.firstChild);
+      const user = users.find((u) => u.socketid === socket.id);
+      const filteredUsers = users.filter((u) => u.socketid !== socket.id);
+      filteredUsers.unshift(user);
+      usersOnline = users;
+      filteredUsers.forEach((u) => {
         const onlineUser = document.createElement('li');
-        onlineUser.innerHTML = user.nickname;
+        onlineUser.innerHTML = u.nickname;
         onlineUser.setAttribute('data-testid', 'online-user');
         document.querySelector('#users').appendChild(onlineUser);
       });
@@ -108,8 +111,10 @@
 
     document.querySelector('#nickname-button').addEventListener('click', (e) => {
       const newNick = document.querySelector('#nickname-box').value;
+      const user = usersOnline.find((u) => u.socketid === socket.id);
       localStorage.setItem('nickname', newNick);
-      socket.emit('newUser', newNick);
+      user.nickname = newNick;
+      socket.emit('changeNick', user);
     });
   </script>
 </body>

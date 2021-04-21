@@ -1,4 +1,6 @@
-const app = require('express')();
+const express = require('express');
+
+const app = express();
 const http = require('http').createServer(app);
 const cors = require('cors');
 const io = require('socket.io')(http, {
@@ -11,7 +13,9 @@ const io = require('socket.io')(http, {
 const model = require('./models/webchat');
 
 app.use(cors());
+app.use(express.json());
 app.set('view engine', 'ejs');
+app.set('views', './views');
 
 app.get('/', async (req, res) => {
   const messages = await model.getAll();
@@ -21,6 +25,7 @@ app.get('/', async (req, res) => {
 // app.use('/', webchatController);
 
 const users = [];
+
 const formatedTimestamp = () => {
   const date = new Date();
   const formatedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
@@ -31,23 +36,25 @@ const formatedTimestamp = () => {
 };
 
 io.on('connection', (socket) => {
-  console.log('Usuario conectado');
-
   socket.on('newUser', (user) => {
     users.push({ socketid: socket.id, nickname: user });
     io.emit('usersList', users);
   });
 
   socket.on('message', async ({ nickname, chatMessage }) => {
-    console.log(chatMessage);
     await model.postMessages(chatMessage, nickname, formatedTimestamp());
     io.emit('message', `${formatedTimestamp()} - ${nickname}: ${chatMessage}`);
   });
 
+  socket.on('changeNick', (user) => {
+    const index = users.findIndex((prev) => prev.socketid === user.socketid);
+    if (index !== -1) users[index] = user;
+    io.emit('usersList', users);
+  });
+
   socket.on('disconnect', () => {
-    console.log('Usuario desconectado');
     const index = users.findIndex((user) => user.socketid === socket.id);
-    users.splice(index, 1);
+    if (index !== -1) users.splice(index, 1);
     io.emit('usersList', users);
   });
 });
