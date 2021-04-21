@@ -7,7 +7,7 @@ const Helpers = require('./helpers');
 require('dotenv/config');
 const Routes = require('./Routes');
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(bodyParser.json());
