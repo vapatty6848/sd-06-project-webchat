@@ -19,35 +19,45 @@ app.set('views', './views');
 app.get('/', ChatController);
 
 let usrList = [];
-// eslint-disable-next-line max-lines-per-function
+
+const newConnection = (socket, userT) => {
+  usrList.push(userT);
+  socket.broadcast.emit('usersList', usrList);
+  const filtered = usrList.filter((el) => el !== userT);
+  socket.emit('usersList', [userT, ...filtered]);
+};
+
+const sendMessage = async (msg) => {
+  const date = new Date().toLocaleString().replace(/[/]/g, '-');
+  await createMessage({ nickname: msg.nickname, chatMessage: msg.chatMessage, timestamp: date });
+  io.emit('message', `${date} - ${msg.nickname}: ${msg.chatMessage}`);
+};
+
 io.on('connection', (socket) => {
+  let userT;
   socket.on('user', (usr) => {
-    socket.nickname = usr;
-    // const onlyOne = usrList.unshift(usr);
-    usrList.push(socket.nickname);
-    socket.broadcast.emit('usersList', usrList);
-    const filtered = usrList.filter((el) => el !== socket.nickname);
-    socket.emit('usersList', [socket.nickname, ...filtered]);
-    // io.emit('usersList', usrList);
+    userT = usr;
+    newConnection(socket, userT);
   });
 
   socket.on('disconnect', () => {
-    const newList = usrList.filter((el) => el !== socket.nickname);
+    const newList = usrList.filter((el) => el !== userT);
     usrList = newList;
     io.emit('usersList', newList);
   });
-  socket.on('message', async (msg) => {
-    const date = new Date().toLocaleString().replace(/[\/]/g, '-');
-    await createMessage({ nickname: msg.nickname, chatMessage: msg.chatMessage, timestamp: date });
-    io.emit('message', `${date} - ${msg.nickname}: ${msg.chatMessage}`);
-  });
 
   socket.on('change-nick', (nick) => {
-    const idx = usrList.indexOf(socket.nickname);
+    const idx = usrList.indexOf(userT);
     usrList[idx] = nick;
-    socket.nickname = nick;
+    userT = nick;
     io.emit('usersList', usrList);
   });
+});
+
+io.on('connection', (socket) => {
+  socket.on('message', async (msg) => {
+    sendMessage(msg);
   });
+});
 
 http.listen(3000);
