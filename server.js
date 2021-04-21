@@ -21,16 +21,17 @@ const currDate = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
 io.on('connection', (socket) => {
   console.log('Conectado');
 
-  // socket.broadcast.emit('mensagemServer', 
-  // { mensagem: `${socket.id} acabou de entrar` });
-
-  // socket.on('disconnect', () => {
-  //   socket.broadcast.emit('mensagemServer', 
-  // { mensagem: `${socket.id} acabou de sair` });
-  // });
+  socket.on('userLogin', (nickname) => {
+    io.emit('users', nickname);
+  });
 
   socket.on('message', ({ chatMessage, nickname }) => {
     io.emit('message', `${currDate} ${nickname}: ${chatMessage}`);
+  });
+
+  socket.on('users', (user) => {
+    console.log(user);
+    io.emit('users', user);
   });
 });
 
