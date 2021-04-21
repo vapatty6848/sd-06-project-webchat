@@ -25,7 +25,6 @@ const setNewOnlineUser = (socket) => {
     socket.emit('setOnlineUsers', [{ id: socket.id, nick: newUser }, ...users]);
     users.push({ id: socket.id, nick: newUser });
     socket.broadcast.emit('userConnected', { nick: newUser, users });
-    socket.broadcast.emit('setOtherUsersOnline', users);
   };
 
   socket.on('newUser', userLogin);

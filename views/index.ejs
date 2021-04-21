@@ -202,7 +202,6 @@
       socket.on('userConnected', ({ nick, users }) => userStatusMsg(nick, users, "on"));
       socket.on('userDisconnected', ({ nick, users }) => userStatusMsg(nick,users,  "off"));
       socket.on('setOnlineUsers', (onlineUsers) => setOnlineUsers(onlineUsers));
-      socket.on('setOtherUsersOnline', (onlineUsers) => setOnlineUsers(onlineUsers));
       socket.on('updateUserNick', (onlineUsers) => setOnlineUsers(onlineUsers));
       socket.on('updateUserNickToOthers', (onlineUsers) => setOnlineUsers(onlineUsers));
     </script>
