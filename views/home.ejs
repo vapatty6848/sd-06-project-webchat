@@ -12,21 +12,24 @@
   <main class="main">
     <section class="S1">
       <h2>Usuários</h2>
-      <input placeholder="digite seu nick name" id="nick-name">
-      <button type="button" id="btn_nick">Entrar</button>
+      <input placeholder="digite seu nick name" id="nick-name" data-testid="nickname-box">
+      <button type="button" id="btn_nick" data-testid="nickname-button">Entrar</button>
       <ul id="users"></ul>
+      <li id="firstUser" data-testid="online-user"></li>
     </section>
-    <section class="S2" id="messages">
+    <section class="S2" id="messages" data-testid="message">
       <h2>Mensagens</h2>
     </section>
     <section class="S3">
       <input
+      data-testid="message-box"
       type="text"
-      id="inputMsg"
+      id="message-box"
       >
       <button
+        data-testid="send-button"
         type="button"
-        id="btn_msg"
+        id="send-button"
       >
         Enviar
       </button>
@@ -34,6 +37,8 @@
   </main>
   <script>
     const socket = io('http://localhost:3000');
+    
+    document.querySelector('#firstUser').innerHTML = (Math.random().toString(36)+'00000000000000000').slice(2, 16+2);
 
     document.querySelector('#btn_nick').addEventListener('click', (e) => {
       const nick = document.querySelector('#nick-name').value
@@ -41,8 +46,8 @@
       socket.emit('nickName', nick)
     });
     socket.on('yourNick', (nickname) => {
-      document.querySelector('#btn_msg').addEventListener('click', (e) => {
-      const msg = document.querySelector('#inputMsg').value;
+      document.querySelector('#send-button').addEventListener('click', (e) => {
+      const msg = document.querySelector('#message-box').value;
       const name = nickname;
       const message = {chatMessage: msg, nickname: name }
       socket.emit('message', message)
