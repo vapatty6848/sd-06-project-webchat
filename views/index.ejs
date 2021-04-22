@@ -36,6 +36,9 @@
   </div>
   <div>
     <ul id="chatList">
+      <% users.forEach((user) => { %>
+        <li data-testid="online-user"><%=user.nickname%></li>
+      <% }) %>
     </ul>
   </div>
 </body>
