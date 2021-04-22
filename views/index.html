@@ -35,7 +35,7 @@
       </div>
     </div>
   </div>
-
+​
   <script>
     const socket = io();
     const randomNickname = `user_${Math.random().toString().substr(2, 11)}`;
@@ -44,13 +44,13 @@
     const userInput = document.querySelector('#userInput');
     const messageInput = document.querySelector('#messageInput');
     let currentUser;
+    let lastUser;
 
     userButton.addEventListener('click', () => {
       currentUser.nickname = userInput.value;
       socket.emit('userUpdate', currentUser);
       return false;
     });
-
     messageButton.addEventListener('click', () => {
       const { nickname } = currentUser;
       socket.emit('message', ({
@@ -60,7 +60,6 @@
       messageInput.value = '';
       return false;
     });
-
     const createMessage = (message) => {
       const messagesUl = document.querySelector('#messages');
       const li = document.createElement('li');
@@ -68,34 +67,33 @@
       li.setAttribute('data-testid', 'message')
       messagesUl.appendChild(li);
     };
-
     const createUser = (user) => {
         const usersUl = document.querySelector('#users');
         const li = document.createElement('li');
         li.innerText = user.nickname;
+        lastUser = user.nickname;
+        li.setAttribute('id', `${user.nickname}`);
         li.setAttribute('data-testid', 'online-user');
         usersUl.appendChild(li);
       }
-
     const listUsers = (users) => {
       const userUl = document.querySelector('#users');
       userUl.innerHTML= '';
       createUser(currentUser)
-      users.filter(user => user.id !== currentUser.id)
-        .forEach(user => createUser(user));
+      users.forEach((user) => {
+        if(user.id !== currentUser.id) createUser(user)
+      });
     };
-
     socket.on('connect', () => {
+      console.log('aquiiieiieiii')
       const nickname = randomNickname;
       currentUser = { nickname }
       socket.emit('user', nickname);
     });
-    
     socket.on('users', (users) => {
       currentUser = users.find(user => user.nickname === currentUser.nickname);
       listUsers(users);
     })
-
     window.onload = async () => {
       const messages = await fetch('http://localhost:3000/messages', {
         method: 'GET',
@@ -111,7 +109,6 @@
         messagesUl.appendChild(li);
       });
     };
-
     socket.on('message', (message) => createMessage(message));
   </script>
 </body>
