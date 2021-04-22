@@ -41,9 +41,8 @@ const socketOnUserUpdate = async (socket) => {
   socket.on('userUpdate', async (user) => {
     Users.updateUser(user);
     usersOnline.map((newUser) => {
-      if (newUser.id === socket.id) {
-      return newUser.nickname = user.nickname;
-      }
+      const element = newUser;
+      if (newUser.id === socket.id) element.nickname = user.nickname;
       return newUser;
     });
     io.emit('users', usersOnline);
