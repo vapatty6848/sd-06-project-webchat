@@ -3,6 +3,7 @@ const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app);
+
 const port = process.env.PORT || 3000;
 
 const cors = require('cors');
@@ -44,7 +45,6 @@ io.on('connection', (socket) => {
     const message = `${times} ${nickname} ${chatMessage}`;
     io.emit('message', message);
   });
-
   socket.on('updateNickname', (newNickname) => {
    newUserNickname({ newNickname, socket });
   }); 
@@ -63,7 +63,7 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
   console.log('listAll', listAll);
-  res.render('home', { listAll } );
+  res.render('home', { listAll });
 }); 
 
 httpServer.listen(port, () => console.log(`${port}`));
