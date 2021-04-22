@@ -11,11 +11,17 @@
       body {
         font: 13px Helvetica, Arial;
       }
-      form {
+      #sendMessageForm {
         background: #000;
         padding: 3px;
         position: fixed;
         bottom: 0;
+        width: 100%;
+      }
+      #setNickForm {
+        background: #000;
+        padding: 3px;
+        top: 0;
         width: 100%;
       }
       form input {
@@ -31,33 +37,49 @@
         padding: 10px;
         cursor: pointer;
       }
-      #mensagens {
+      #users {
+        background: #000;
+        padding: 3px;
+      }
+      #messages {
         list-style-type: none;
         margin: 0;
         padding: 0;
       }
-      #mensagens li {
+      #messages li, #users li {
         padding: 5px 10px;
       }
-      #mensagens li:nth-child(odd) {
+      #messages li:nth-child(odd), #users li {
         background: #eee;
       }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="messageInput" autocomplete="off" /><button>Enviar</button>
-    </form>
+    <div className="usersContainer">
+      <form id="setNickForm" action="">
+        <input id="nickInput" placeholder="Digite seu Nick aqui" />
+        <button>Definir Nick</button>
+      </form>
+      <ul id="users"></ul>
+    </div>
+    <div className="messagesContainer">
+      <ul id="messages"></ul>
+      <form id="sendMessageForm" action="">
+        <input id="messageInput" autocomplete="off" />
+        <button>Enviar</button>
+      </form>
+    </div>
     <script>
       const socket = io();
-      const form = document.querySelector('form')
-      const inputMessage = document.querySelector('#messageInput')
-      form.addEventListener('submit', (event) =>{
+
+      const messageForm = document.querySelector('#sendMessageForm')
+      const messageInput = document.querySelector('#messageInput')
+
+      messageForm.addEventListener('submit', (event) =>{
         event.preventDefault();
-        socket.emit('message', inputMessage.value);
-        inputMessage.value = '';
+        socket.emit('message', messageInput.value);
+        messageInput.value = '';
         return false;
       })
       const createMessage = (message) => {
@@ -66,8 +88,33 @@
         li.innerText = message;
         messagesUl.appendChild(li);
       }
+
       socket.on('welcome', (message) => createMessage(message));
       socket.on('serverMessage', ({ message }) => createMessage(message));
+
+      const createUserList = (users) => {
+        const usersUl = document.querySelector('#users');
+        usersUl.innerHTML = '';
+        users.forEach((user) => {
+          const li = document.createElement('li');
+          li.innerText = user.userNick;
+          usersUl.appendChild(li);
+        });
+      }
+
+      socket.on('updateUsers', (users) => createUserList(users));
+
+      const nickForm = document.querySelector('#setNickForm')
+      const nickInput = document.querySelector('#nickInput')
+
+      nickForm.addEventListener('submit', (event) =>{
+        event.preventDefault();
+        if (nickInput.value) {
+          socket.emit('setNick', nickInput.value);
+          return false;
+        }
+      })
+      socket.on('setNick', ( nick ) => createMessage(message));
     </script>
   </body>
 </html>
