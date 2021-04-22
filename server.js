@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
   socket.emit('welcome', `Seja bem vindo ao nosso chat, ${userNick}!`);
   socket.broadcast.emit(
     'message',
-    { message: `${userNick} acabou de se conectar.` },
+    { chatMessage: `${userNick} acabou de se conectar.`, userNick },
   );
 
   socket.on('disconnect', () => {
@@ -91,12 +91,15 @@ io.on('connection', (socket) => {
     io.emit('updateUsers', users);
     socket.broadcast.emit(
       'message',
-      { message: `${userNick} acabou de se desconectar.` },
+      { chatMessage: `${userNick} acabou de se desconectar.`, userNick },
     );
   });
 
   socket.on('message', ({ chatMessage }) => {
-    io.emit('message', { message: `${generateTimeStamp()} - ${userNick}: ${chatMessage}` });
+    io.emit(
+      'message',
+      { chatMessage: `${generateTimeStamp()} - ${userNick}: ${chatMessage}`, userNick },
+    );
   });
 
   socket.on('setNick', (nick) => {
@@ -104,11 +107,11 @@ io.on('connection', (socket) => {
     io.emit('updateUsers', users);
     socket.broadcast.emit(
       'message',
-      { message: `${userNick} agora se chama ${nick}.` },
+      { chatMessage: `${userNick} agora se chama ${nick}.`, userNick },
     );
     socket.emit(
       'message',
-      { message: `Seu novo nick é: ${nick}.` },
+      { chatMessage: `Seu novo nick é: ${nick}.`, userNick },
     );
   });
 });
