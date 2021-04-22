@@ -78,7 +78,7 @@
 
       messageForm.addEventListener('submit', (event) =>{
         event.preventDefault();
-        socket.emit('message', messageInput.value);
+        socket.emit('message', { chatMessage: messageInput.value });
         messageInput.value = '';
         return false;
       })
@@ -90,7 +90,7 @@
       }
 
       socket.on('welcome', (message) => createMessage(message));
-      socket.on('serverMessage', ({ message }) => createMessage(message));
+      socket.on('message', ({ message }) => createMessage(message));
 
       const createUserList = (users) => {
         const usersUl = document.querySelector('#users');
