@@ -26,34 +26,40 @@
     <script>
       const socket = io('http://localhost:3000');
 
+      let username = `Guest${Math.random().toString().substr(2, 11)}`
+
+      socket.emit('newUser', username);
+
       socket.on('updatedUserList', (users) => {
-        document.getElementById('user').innerHTML = '';
+        const list = document.getElementById('user');
+        list.innerHTML = '';
+        const user = document.createElement('li');
+        user.innerHTML = username;
+        user.setAttribute('data-testid', 'online-user');
+        list.appendChild(user);
         users.forEach((element) => {
-          const user = document.createElement('li');
-          socket.name = element.name;
-          user.innerHTML = element.name;
-          user.setAttribute('data-testid', 'online-user');
-          document.getElementById('user').appendChild(user);
+          if (element.name !== username) {
+            const user = document.createElement('li');
+            user.innerHTML = element.name;
+            user.setAttribute('data-testid', 'online-user');
+            list.appendChild(user);
+          }
         });
       });
 
-      socket.on('user', (guest) => {
-        let username = guest.name;
+      document.getElementById('nickChange').addEventListener('click', () => {
+        const newName = document.getElementById('nick').value;
 
-        document.getElementById('nickChange').addEventListener('click', () => {
-          const newName = document.getElementById('nick').value;
+        username = newName;
 
-          username = newName;
+        socket.emit('updateUser', username);
+      });
 
-          socket.emit('updateUser', { name: newName, id: socket.id });
-        });
+      document.getElementById('send').addEventListener('click', () => {
+        const chatMessage = document.getElementById('message').value;
+        let nickname = username;
 
-        document.getElementById('send').addEventListener('click', () => {
-          const chatMessage = document.getElementById('message').value;
-          let nickname = username;
-
-          socket.emit('message', { chatMessage, nickname });
-        });
+        socket.emit('message', { chatMessage, nickname });
       });
 
       socket.on('oldChat', async (oldMessages) => {
