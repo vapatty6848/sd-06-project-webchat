@@ -65,7 +65,7 @@ io.on('connection', async (socket) => {
     const getUpdatedUsers = await Users.getUsers();
     io.emit('connectedUsers', getUpdatedUsers);
   });
-  // Remove o usuário quando ele desconecta
+
     socket.on('disconnect', async () => {
     await Users.deleteDisconnectedUser(socket.id);
     const users = await Users.getUsers();
