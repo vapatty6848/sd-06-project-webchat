@@ -26,6 +26,7 @@ describe('1 - Crie um back-end para conexão simultânea de clientes e troca de 
 
     client1.on('message', (message) => {
       console.log(typeof message)
+      console.log('chatMessage: ' + chatMessage)
       console.log('>> message: ' + JSON.stringify(message))
       expect(message.includes(chatMessage)).toBeTruthy();
       expect.assertions(1);

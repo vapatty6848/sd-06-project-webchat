@@ -95,17 +95,8 @@
       nickname = inputNickname.value;
       socket.emit('nickname', { nickname });
       inputNickname.value = '';
-      // console.log('nickname: ' + nickname);
       return false;
     })
-
-    const createMessage = (message) => {
-      const messagesUl = document.querySelector('#messages');
-      const li = document.createElement('li');
-      li.innerText = message;
-      li.setAttribute('data-testid', 'message');
-      messagesUl.appendChild(li);
-    }
 
     const onlineUsers = (userNickname) => {
       const messagesUl = document.querySelector('#usersList');
@@ -122,6 +113,21 @@
         onlineUsers(user.nickname);
       });
     });
+
+    const createMessage = (message) => {
+      const messagesUl = document.querySelector('#messages');
+      // messagesUl.innerHTML = '';
+      const li = document.createElement('li');
+      li.innerText = message;
+      li.setAttribute('data-testid', 'message');
+      messagesUl.appendChild(li);
+      // message.forEach(eachLineMsg => {
+      //   const li = document.createElement('li');
+      //   li.innerText = eachLineMsg;
+      //   li.setAttribute('data-testid', 'message');
+      //   messagesUl.appendChild(li);
+      // })
+    }
 
     socket.on('message', (message) => createMessage(message));
   </script>
