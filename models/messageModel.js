@@ -8,14 +8,11 @@ const getAll = async () => {
   return allMessages;
 };
 
-const create = async (message, nickname, timestamp) => {
-  const newMessage = await connection()
-    .then((db) => db.collection('messages')
-      .insertOne({ message, nickname, timestamp }));
-
-  const newMessageData = newMessage.ops[0];
-  return newMessageData;
-};
+const create = async (data) => connection()
+.then(async (db) => {
+  const message = await db.collection('messages').insertOne(data);
+  return message.ops[0];
+});
 
 module.exports = {
   getAll,

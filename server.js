@@ -27,19 +27,19 @@ const currDate = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
 
 let allUsers = [];
 
-const newLogin = (socket, currUser) => {
-  allUsers.push(currUser);
-  socket.broadcast.emit('usersList', allUsers);
-  const filtered = allUsers.filter((el) => el !== currUser);
-  socket.emit('usersList', [currUser, ...filtered]);
-};
-
 const sendMsg = async (msg) => {
   await Messages.create(
     { nickname: msg.nickname, chatMessage: msg.chatMessage, timestamp: currDate },
-);
-  io.emit('message', `${currDate} - ${msg.nickname}: ${msg.chatMessage}`);
-};
+    );
+    io.emit('message', `${currDate} ${msg.nickname} ${msg.chatMessage}`);
+  };
+  
+  const newLogin = (socket, currUser) => {
+    allUsers.push(currUser);
+    socket.broadcast.emit('usersList', allUsers);
+    const filterUsers = allUsers.filter((e) => e !== currUser);
+    socket.emit('usersList', [currUser, ...filterUsers]);
+  };
 
 io.on('connection', (socket) => {
   let currUser;
@@ -47,23 +47,18 @@ io.on('connection', (socket) => {
     currUser = user;
     newLogin(socket, currUser);
   });
-
+  
   socket.on('disconnect', () => {
-    const updateUsers = allUsers.filter((el) => el !== currUser);
+    const updateUsers = allUsers.filter((e) => e !== currUser);
     allUsers = updateUsers;
     io.emit('usersList', updateUsers);
   });
-
+  
   socket.on('updateNickname', (nickname) => {
-    const idx = allUsers.indexOf(currUser);
-    allUsers[idx] = nickname;
+    const index = allUsers.indexOf(currUser);
+    allUsers[index] = nickname;
     currUser = nickname;
     io.emit('usersList', allUsers);
-  });
-
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    const dbMsg = await Messages.create(chatMessage, nickname, currDate);
-    io.emit('message', `${dbMsg.timestamp} ${dbMsg.nickname}: ${dbMsg.message}`);
   });
 });
 

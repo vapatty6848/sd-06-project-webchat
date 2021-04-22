@@ -2,14 +2,6 @@
 <html>
   <head>
     <title>Socket.IO - trybe</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-    </style>
-    <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
     <h2>Users</h2>
@@ -17,12 +9,13 @@
     <input data-testid="nickname-box" id="userInput" type="text"/>
     <button data-testid="nickname-button" onclick="updateNickname()">Save</button>
     <ul id="messages">
-      <% messages.forEach(msg => { %>
-      <li data-testid="message"><%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %></li>
+      <% msg.forEach(msg => { %>
+      <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.chatMessage}` %></li>
       <%})%>
     </ul>
     <input type="text" id="messageinput" data-testid="message-box" />
     <button onclick="sendBtn()" data-testid="send-button">Send</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
     <script>
       const socket = io();
 
@@ -51,10 +44,10 @@
         messagesUl.appendChild(li);
       });
 
-      socket.emit('user', nickname)
-
+      socket.emit('users', nickname)
+      
       socket.on('usersList', (user) => {
-        const usersList = document.getElementById('users');
+        const usersList = document.querySelector('#users');
         usersList.innerHTML = '';
         user.forEach(user => {
         const li = document.createElement('li');
@@ -65,7 +58,7 @@
       })
 
       const updateNickname = () => {
-        const newNickname = document.getElementById('nickname').value;
+        const newNickname = document.querySelector('#userInput').value;
         nickname = newNickname;
         socket.emit('updateNickname', newNickname)
       }
