@@ -52,7 +52,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
-    console.log('desconectando', users);
     io.emit('updateUsers', users);
   });
 });
