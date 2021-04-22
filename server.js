@@ -1,10 +1,10 @@
-
 const moment = require('moment');
 const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app); // servidor
 const port = process.env.PORT || 3000;
+
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
   cors: {
@@ -34,7 +34,6 @@ let users = [];
  }
 
 io.on('connection', (socket) => {
-
   const randonUser = `user_${Math.random().toString().substr(2, 11)}`;
   const newUser = { socketId: socket.id, nickname: randonUser };
   users.push(newUser);
@@ -49,7 +48,7 @@ io.on('connection', (socket) => {
     console.log('message - l46', message);
     io.emit('message', message);
   });
-  
+
   socket.on('updateNickname', (newNickname) => {
    newUserNickname({ newNickname, socket });
   }); 
@@ -68,7 +67,7 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
   console.log('listAll', listAll);
-  res.render('home', {listAll} );
+  res.render('home', { listAll } );
 }); 
 
 httpServer.listen(port, () => console.log(`${port}`));
