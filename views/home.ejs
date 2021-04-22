@@ -13,11 +13,14 @@
 
   <h2>Nickname: <span id="nicknameShow"></span></h2>
 
-  <input type="text" id="nickname">
-  <button type="button" id="saveNickname">Save nickname</button>
+  <input type="text" id="message" data-testid="message-box">
+  <button type="button" id="sendMessage" data-testid="send-button">Send message</button>
 
-  <input type="text" id="message">
-  <button type="button" id="sendMessage">Send message</button>
+  <br />
+  <br />
+
+  <input type="text" id="nickname-box" data-testid="nickname-box">
+  <button type="button" id="saveNickname" data-testid="nickname-button">Save nickname</button>
 
   <h3>Messages</h3>
 
@@ -29,43 +32,55 @@
 
   <script>
     const socket = io();
+    let nickname;
+
+    function generateRandomNickname() {
+      const nickname = '----------------';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+      return nickname.split('')
+      .map((e) => e.replace('-', characters.charAt((Math.floor(Math.random() * characters.length)))), nickname)
+      .join('');
+    }
+
+    socket.on('connect', () => {
+      nickname = generateRandomNickname();
+      const nicknameSpan = document.createElement('span');
+      nicknameSpan.innerHTML = nickname;
+      nicknameSpan.setAttribute('data-testid', 'online-user');
+      nicknameSpan.id = 'nickname';
+      document.querySelector('#nicknameShow').appendChild(nicknameSpan);
+    })
 
     document.querySelector('#sendMessage').addEventListener('click', () => {
       const message = document.querySelector('#message').value;
-      const nickname = document.querySelector('#nickname').value;
+      const nickFrom = document.getElementById('nickname').innerHTML;
+      console.log(nickFrom);
 
-      socket.emit('message', { chatMessage: message, nickname });
-    });
-
-    document.querySelector('#saveNickname').addEventListener('click', () => {
-      const nickname = document.querySelector('#nickname').value;
-
-      socket.emit('nickname', { nickname });
+      socket.emit('message', { chatMessage: message, nickname: nickFrom });
     });
 
     socket.on('message', (message) => {
       const msgLi = document.createElement('li');
       msgLi.innerHTML = message;
+      msgLi.setAttribute('data-testid', 'message');
 
       document.querySelector('#messages').appendChild(msgLi);
     });
 
-    socket.on('nickname', (nickname) => {
-      const nicknameSpan = document.createElement('span');
-      nicknameSpan.innerHTML = nickname;
-
-      document.querySelector('#nicknameShow').appendChild(nicknameSpan);
-    });
-
     socket.on('updateUsers', (users) => {
-      console.log(users);
       users.map((user) => {
         const userLi = document.createElement('li');
         userLi.innerHTML = user.socketId;
-        console.log(userLi);
   
         document.querySelector('#users').appendChild(userLi);
       });
+    });
+
+    document.querySelector('#saveNickname').addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box').value;
+
+      document.querySelector('#nickname').innerHTML = newNickname;
     });
   </script>
   

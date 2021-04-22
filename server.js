@@ -24,10 +24,6 @@ io.on('connection', (socket) => {
 
   io.emit('updateUsers', users);
 
-  socket.on('nickname', ({ nickname }) => {
-    io.emit('nickname', nickname);
-  });
-
   socket.on('message', ({ chatMessage, nickname }) => {
     const thisDate = getThisDate();
     io.emit('message', `${thisDate} ${nickname} ${chatMessage}`);
