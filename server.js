@@ -2,7 +2,8 @@ const app = require('express')();
 const express = require('express');
 const httpServer = require('http').createServer(app);
 const cors = require('cors');
-const dateFormat = require('dateformat');
+// const dateFormat = require('dateformat');
+const moment = require('moment');
 
 const io = require('socket.io')(httpServer, {
   cors: {
@@ -37,7 +38,9 @@ app.get('/', async (_req, res) => {
 
 app.set('view engine', 'ejs');
 
-const date = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
+const dateNow = new Date().getTime();
+const date = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
+// const date = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss');
 
 /* const onConnect = async (socket, nickname, ioConnection) => {
   await Users.registerUser(socket.id, nickname);
