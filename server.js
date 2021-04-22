@@ -1,68 +1,57 @@
 const express = require('express');
 
 const app = express();
-const cors = require('cors');
-const crypto = require('crypto');
-
-app.use(cors());
-
-app.set('view engine', 'ejs'); // Informa para o app que será utilizado ejs para montar a página.
-
-app.set('views', './views');
-
-const PORT = 3000;
-
-const http = require('http').createServer(app);
-
+const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer);
 const dateFormat = require('dateformat');
+const model = require('./models/message');
+const formatMessage = require('./utils/formatMessage');
+
+app.set('view engine', 'ejs');
+app.set('views', './views');
+app.use(express.static(`${__dirname}/public/`));
+
+const PORT = process.env.PORT || 3000;
 
 let users = [];
 
-const io = require('socket.io')(http, {
-  cors: {
-    origin: 'http://localhost:3000', // url aceita pelo cors
-    methods: ['GET', 'POST'], // Métodos aceitos pela url
-  },
+app.get('/', async (_req, res) => {
+  const previousMessages = await model.getAllMessages();
+  const oldMessages = previousMessages.map((message) => formatMessage(message));
+  return res.render('../views', { oldMessages });
 });
 
-const handleNickNameChange = (newNickName, oldNickName) => {
-  users = users.map((user) => {
-    if (user.nickname === oldNickName) { 
-      return { ...user, nickname: newNickName };
-    }
-    return user;
-  });
-  console.log(users);
+const userConnect = ({ nickname, socket }) => {
+  users.push({ id: socket.id, nickname });
+  io.emit('updateUsers', users);
 };
 
-app.get('/', async (_request, response) => {
-  response.render('../views/');
+const messageEvent = async ({ nickname, chatMessage }) => {
+  const timestamp = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
+  const message = formatMessage({ nickname, chatMessage, timestamp });
+  await model.saveMessage({ nickname, chatMessage, timestamp });
+  io.emit('message', message);
+};
+
+const changeNick = ({ newNickname, socket }) => {
+  users.map((user) => {
+    if (user.id === socket.id) Object.assign(user, { id: user.id, nickname: newNickname });
+    return user;
+  });
+  io.emit('updateUsers', users);
+};
+
+const userDisconnected = (socket) => {
+  const userList = users.filter((user) => user.id !== socket.id);
+  users = userList;
+  io.emit('updateUsers', users);
+};
+
+io.on('connection', async (socket) => {  
+  socket.on('userConnected', ({ nickname }) => userConnect({ nickname, socket }));
+  socket.on('changeNickname', (newNickname) => changeNick({ newNickname, socket }));
+  socket.on('message', ({ nickname, chatMessage }) => messageEvent({ nickname, chatMessage }));
+  socket.on('disconnect', () => userDisconnected(socket));
 });
 
-io.on('connection', (socket) => {
-  const randomNickName = crypto.randomBytes(8).toString('hex');
-  users.push({ id: socket.id, nickname: randomNickName });
-  users.reverse();
-  socket.emit('connected', randomNickName);
-  io.emit('userList', users);
-
-  socket.on('message', async ({ nickname, chatMessage }) => {
-    const dateTimeStamp = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
-    const message = `${dateTimeStamp} - ${nickname}: ${chatMessage}`;
-    io.emit('message', message);
-  });
-
-  socket.on('nickNameChange', async (newNickName, oldNickName) => {
-    handleNickNameChange(newNickName, oldNickName);
-    io.emit('userList', users);
-  });
-
-  socket.on('disconnect', () => {
-    users = users.filter((user) => user.id !== socket.id);
-    io.emit('userList', users);
-  });
-});
-
-http.listen(PORT, () => {
-  console.log(`Server has been started on Port ${PORT}.`);
-});
+httpServer.listen(PORT, () => console.log(`Server has been started on PORT ${PORT}.`));
