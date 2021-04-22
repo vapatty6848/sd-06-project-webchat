@@ -3,7 +3,8 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const socketIo = require('socket.io');
 const Helpers = require('./helpers');
-const MessageModel = require('./models/messagesModel');
+const Messages = require('./models/messagesModel');
+const Users = require('./models/onlineUsers');
 
 require('dotenv/config');
 const Routes = require('./Routes');
@@ -17,16 +18,33 @@ app.set('view engine', 'ejs');
 
 const server = http.createServer(app);
 const io = new socketIo.Server(server);
+const date = Helpers.dateGenerator();
+
+const getUsers = async () => {
+  Users.getAll().then((users) => {
+    io.emit('server-client-users-online', users);
+  });
+};
 
 io.on('connection', (socket) => {
-  console.log('Usuário Conectado:', socket.id);
+  socket.on('client-server-get-users', () => getUsers());
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    console.log(chatMessage);
-    const date = Helpers.dateGenerator();
+    Messages.create(chatMessage, nickname, date);
     const formatedMessage = Helpers.formatMessage({ date, nickname, chatMessage });
-    MessageModel.create(chatMessage, nickname, date);
     io.emit('message', formatedMessage);
+  });
+
+  socket.on('client-server-add-user', async (nickname) => Users.addUser(nickname, socket.id));
+
+  socket.on('client-server-update-user', async (nickname) => {
+    await Users.updateUser(nickname, socket.id);
+    getUsers();
+  });
+
+  socket.on('disconnect', async () => {
+    await Users.deleteUser(socket.id);
+    getUsers();
   });
 });
 

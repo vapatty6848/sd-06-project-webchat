@@ -14,6 +14,11 @@
   <div class="container">
     <h1>TryChat</h1>
     <div class="container">
+      <h3>Online:</h3>
+      <ul class="list-group" id="online-users-list">
+      </ul>
+      </div>
+    <div class="container">
       <p>Nickname: </p>
       <span data-testid="online-user" id="nickname"></span>
     </div>
@@ -65,7 +70,7 @@
               class='list-group-item'
               data-testid='message'
             >
-            <%=`${helpers.dateFormater(message.timestamp)} ${message.nickname} - ${message.message}`%>
+            <%=`${helpers.dateFormater(message.timestamp)} - ${message.nickname}: ${message.message}`%>
             </li>
           <% }) %>
         </ul>
@@ -88,6 +93,7 @@
         const nicknameField = document.querySelector('#nickname');
         const nickname = document.querySelector('#nickname-input');
 
+        socket.emit('client-server-update-user', nickname.value)
         nicknameField.innerHTML = nickname.value;
         // nickname.readOnly = true;
       });
@@ -110,8 +116,40 @@
       });
     }
 
+    function renderOnlineUsers(users, socketId) {
+
+      const currentUser = users.filter((user) => user.socketId === socketId);
+      const removeCurrent = users.filter((user) => user.socketId !== socketId)
+
+      const usersToRender = [...currentUser, ...removeCurrent];
+
+      const userList = document.querySelector('#online-users-list');
+      userList.innerHTML = ('');
+
+      usersToRender.forEach((user) => {
+        const listItem = document.createElement('li');
+        listItem.className = ''
+        listItem.innerHTML = user.nickname;
+        listItem.setAttribute('data-testid', 'online-user');
+        userList.appendChild(listItem);
+      });
+    }
+
+    function sendNickOnConnection() {
+      const nickname = document.querySelector('#nickname').innerHTML;
+      socket.emit('client-server-add-user', nickname)
+    }
+
+    socket.on('connect', (socket) => {
+      setNickname();
+      sendNickOnConnection();
+    });
+
+    socket.on('server-client-users-online', (users) => {
+      renderOnlineUsers(users, socket.id);
+    });
+
     socket.on('message', (message) => {
-      console.log(message);
       const chatBody = document.querySelector('#chat-body');
       const listItem = document.createElement('li');
       listItem.innerHTML = message;
@@ -119,9 +157,9 @@
       listItem.setAttribute('data-testid', 'message');
       chatBody.appendChild(listItem);
     });
-
+    
+    document.onload = socket.emit('client-server-get-users')
     sendMessage();
-    setNickname();
     saveNickname();
     
   </script>

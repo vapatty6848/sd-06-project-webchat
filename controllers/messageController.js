@@ -7,8 +7,8 @@ const controller = Router();
 // const SUCCESS = 200;
 
 controller.get('/', async (_req, res) => {
-  MessagesModel.getAll()
-  .then((messages) => res.render('webchat/chat', { messages, helpers }));
+  const messages = await MessagesModel.getAll();
+  res.render('webchat/chat', { messages, helpers });
 });
 
 module.exports = controller;

@@ -19,11 +19,7 @@ const create = (message, nickname, timestamps) => {
     timestamps,
   });
 
-  insertion.save()
-    .then((result) => {
-    console.log(result);
-    })
-    .catch((err) => console.log(err));
+  insertion.save();
 };
 
 module.exports = {
