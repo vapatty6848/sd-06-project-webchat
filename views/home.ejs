@@ -10,6 +10,7 @@
       integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF"
       crossorigin="anonymous"
     ></script>
+    <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
     <header>
@@ -38,9 +39,9 @@
       />
       <button type="button" id="sendMessage" data-testid="send-button">Enviar</button>
     </footer>
-    <script src="/socket.io/socket.io.js"></script>
     <script>
       // entrada de dados do usuário
+
       const socket = io();
       let nickName = '';
 
