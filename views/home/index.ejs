@@ -9,7 +9,7 @@
   <title>WebChat</title>
 </head>
 <body>
-  <ul id="online-user" class="ul-users"></ul>
+  <ul id="online-user"></ul>
   <div class="username-div">
     <form>
       <input data-testid="nickname-box" id="nickname-input" placeholder="username" />
@@ -78,12 +78,19 @@
       onlineUser.appendChild(li);
     }
 
+/*     const addToBeginning = (user) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = user.nickname;
+      onlineUser.prepend(user);
+    }
+ */
     const createUserList = (arrayUsers) => {
       onlineUser.innerHTML = '';
-      // console.log('usuario corrente', currentUser);
-      // createUser(currentUser);
+      console.log('usuario corrente l90', currentUser[0].id);
+      createUser(currentUser[0]);
       arrayUsers
-        .filter(user => user.id !== currentUser.nickname)
+        .filter(user => user.id !== currentUser[0].id)
         .forEach((user) => {
         // console.log('usuário', user);
         createUser(user);
