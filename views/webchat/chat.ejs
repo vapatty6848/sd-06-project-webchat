@@ -20,7 +20,7 @@
       </div>
     <div class="container">
       <p>Nickname: </p>
-      <span data-testid="online-user" id="nickname"></span>
+      <span id="nickname"></span>
     </div>
     <form>
       <div class="form-group">
@@ -117,9 +117,11 @@
     }
 
     function renderOnlineUsers(users, socketId) {
-
       const currentUser = users.filter((user) => user.socketId === socketId);
-      const removeCurrent = users.filter((user) => user.socketId !== socketId)
+      let removeCurrent = [];
+      if (users.length >= 2) {
+        removeCurrent = (users.filter((user) => user.socketId !== socketId)).reverse();
+      }
 
       const usersToRender = [...currentUser, ...removeCurrent];
 
