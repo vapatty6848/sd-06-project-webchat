@@ -129,6 +129,12 @@
       // })
     }
 
+    socket.on('updatingList', (update) => {
+      console.log(update)
+      const messagesUl = document.querySelector('#messages');
+      messagesUl.innerHTML = '';
+    })
+
     socket.on('message', (message) => createMessage(message));
   </script>
 </body>

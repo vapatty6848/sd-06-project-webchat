@@ -18,8 +18,9 @@ const onMessage = async (io, socket, { chatMessage, nickname }) => {
   const nick = (!nickname) ? nicknameFromList : nickname; 
   console.log(`nickname: ${nicknameFromList}`);
   await insertMessage({ message: chatMessage, nickname: nick, timestamp: timeStamp() });
-  const usersList = await getAllMessages();
-  usersList.forEach((user) => io.emit('message', msgFormat(user)));
+  io.emit('updatingList', true);
+  const allMsgs = await getAllMessages();
+  allMsgs.forEach((user) => io.emit('message', msgFormat(user)));
 };
 
 const chatController = async (io, socket) => {
