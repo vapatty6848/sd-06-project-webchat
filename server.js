@@ -42,7 +42,7 @@ const sendMessage = async ({ chatMessage, nickname }) => {
   const brDate = moment().format('DD-MM-YYYY H:mm:ss');
   const message = `${brDate} - ${nickname}: ${chatMessage} `;
   await messages.createMessage(chatMessage, nickname, brDate);
-  io.emit('newMessage', message);
+  io.emit('message', message);
 };
 
 const disconnectUser = (id) => {

@@ -74,7 +74,7 @@
         }
       });
 
-      socket.on('newMessage', (message) => {
+      socket.on('message', (message) => {
         const chat = document.getElementById('chat');
         const text = document.createElement('li');
         text.innerHTML = message;
