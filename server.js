@@ -12,7 +12,6 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
-const { indexOf } = require('lodash');
 const Messages = require('./models/messageModel');
 
 app.get('/', (_req, res) => {
@@ -26,7 +25,9 @@ const allUsers = [];
 io.on('connection', (socket) => {
   socket.on('userLogin', async (nickname) => {
     allUsers.push({ id: socket.id, nickname });
+    console.log(allUsers);
     io.emit('users', allUsers);
+    
     const allMsgs = await Messages.getAll();
     allMsgs.forEach((msg) => {
       socket.emit('message', `${msg.timestamp} ${msg.nickname}: ${msg.message}`);
@@ -34,7 +35,8 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => { 
-    allUsers.splice(indexOf(socket.id), 1); 
+    allUsers.splice(socket.id, 1);
+    io.emit('users', allUsers);
   });
   
   socket.on('message', async ({ chatMessage, nickname }) => {

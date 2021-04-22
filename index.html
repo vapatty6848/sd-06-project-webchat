@@ -73,19 +73,10 @@
       const createUsers = (user) => {
         const usersUl = document.querySelector('#users');
         const li = document.createElement('li');
-        if (typeof user === 'string') {
           li.innerText = user;
           li.setAttribute('data-testid', 'online-user');
           usersUl.appendChild(li);
           return;
-        }
-        user.map((u) => {
-          if (u.nickname !== currUser) {
-            li.innerText = u.nickname;
-            li.setAttribute('data-testid', 'online-user');
-            usersUl.appendChild(li);
-          }
-        })
       }
 
       socket.on('connect', () => {
@@ -93,10 +84,10 @@
         currUser = nickname;
         socket.emit('userLogin', nickname);
       });
-
-
+      
+      
       socket.on('message', (message) => {createMessage(message)});
-      socket.on('users', (user) => {console.log(user); createUsers(user)})
+      socket.on('users', (user) => {user.forEach((e) => createUsers(e.nickname))})
 
     </script>
   </body>
