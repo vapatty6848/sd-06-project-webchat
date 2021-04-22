@@ -39,11 +39,10 @@ io.on('connection', (socket) => {
   const newUser = { socketId: socket.id, nickname: randonUser };
   users.push(newUser);
   io.emit('updateUsers', users);
-  socket.on('message', async ({ nickname, chatMessage }) => {
+  socket.on('message', async ({ chatMessage, nickname }) => {
     const times = userDate();
     await saveMsg({ nickname, chatMessage, times });
-    const message = `${times} ${nickname} ${chatMessage}`;
-    io.emit('message', message);
+    io.emit('message', `${times} ${nickname} ${chatMessage}`);
   });
   socket.on('updateNickname', (newNickname) => {
    newUserNickname({ newNickname, socket });
