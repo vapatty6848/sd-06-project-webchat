@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 const express = require('express');
 const cors = require('cors');
 const httpServer = require('http');
@@ -74,46 +73,52 @@ const removeUser = (socketId) => {
   users = users.filter(({ userId }) => socketId !== userId);
 };
 
+const setNick = (socket, nick, userNick) => {
+  changeNick(socket.id, nick);
+  io.emit('updateUsers', users);
+  socket.broadcast.emit(
+    'message',
+    { chatMessage: `${userNick} agora se chama ${nick}.`, userNick },
+  );
+  socket.emit(
+    'message',
+    { chatMessage: `Seu novo nick é: ${nick}.`, userNick },
+  );
+};
+
+const sendMessage = (socket, { message }) => {
+  const updatedNick = getNick(socket.id);
+  io.emit(
+    'message',
+    { chatMessage: `${generateTimeStamp()} - ${updatedNick}: ${message}`, nickname: updatedNick },
+  );
+};
+
+const userDisconnect = (socket, guestNumber) => {
+  usedGuestNumbers = usedGuestNumbers.filter((number) => number !== guestNumber);
+  const updatedNick = getNick(socket.id);
+  removeUser(socket.id);
+  io.emit('updateUsers', users);
+  socket.broadcast.emit(
+    'message',
+    { chatMessage: `${updatedNick} acabou de se desconectar.`, nickname: updatedNick },
+  );
+};
+
 io.on('connection', (socket) => {
   const guestNumber = newGuestNumber();
   users.push({ userId: socket.id, userNick: `Guest ${guestNumber}`, guestNumber });
   const userNick = getNick(socket.id);
   io.emit('updateUsers', users);
-  socket.emit('welcome', `Seja bem vindo ao nosso chat, ${userNick}!`);
+  socket.emit('welcome', { chatMessage: `Seja bem vindo ao nosso chat, ${userNick}!`, userNick });
   socket.broadcast.emit(
     'message',
     { chatMessage: `${userNick} acabou de se conectar.`, userNick },
   );
 
-  socket.on('disconnect', () => {
-    usedGuestNumbers = usedGuestNumbers.filter((number) => number !== guestNumber);
-    removeUser(socket.id);
-    io.emit('updateUsers', users);
-    socket.broadcast.emit(
-      'message',
-      { chatMessage: `${userNick} acabou de se desconectar.`, userNick },
-    );
-  });
-
-  socket.on('message', ({ chatMessage }) => {
-    io.emit(
-      'message',
-      { chatMessage: `${generateTimeStamp()} - ${userNick}: ${chatMessage}`, userNick },
-    );
-  });
-
-  socket.on('setNick', (nick) => {
-    changeNick(socket.id, nick);
-    io.emit('updateUsers', users);
-    socket.broadcast.emit(
-      'message',
-      { chatMessage: `${userNick} agora se chama ${nick}.`, userNick },
-    );
-    socket.emit(
-      'message',
-      { chatMessage: `Seu novo nick é: ${nick}.`, userNick },
-    );
-  });
+  socket.on('disconnect', () => userDisconnect(socket, guestNumber));
+  socket.on('message', (chatMessage) => sendMessage(socket, chatMessage));
+  socket.on('setNick', (nick) => setNick(socket, nick, userNick));
 });
 
 http.listen(3000, () => {

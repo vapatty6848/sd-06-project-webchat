@@ -61,6 +61,7 @@
         <input id="nickInput" placeholder="Digite seu Nick aqui" />
         <button>Definir Nick</button>
       </form>
+      <h1>Usuários online:</h1>
       <ul id="users"></ul>
     </div>
     <div className="messagesContainer">
@@ -78,19 +79,17 @@
 
       messageForm.addEventListener('submit', (event) =>{
         event.preventDefault();
-        socket.emit('message', { chatMessage: messageInput.value });
+        socket.emit('message', { message: messageInput.value });
         messageInput.value = '';
         return false;
       })
       const createMessage = (message) => {
+        console.log(message)
         const messagesUl = document.querySelector('#messages');
         const li = document.createElement('li');
         li.innerText = message;
         messagesUl.appendChild(li);
       }
-
-      socket.on('welcome', (message) => createMessage(message));
-      socket.on('message', ({ message }) => createMessage(message));
 
       const createUserList = (users) => {
         const usersUl = document.querySelector('#users');
@@ -102,8 +101,6 @@
         });
       }
 
-      socket.on('updateUsers', (users) => createUserList(users));
-
       const nickForm = document.querySelector('#setNickForm')
       const nickInput = document.querySelector('#nickInput')
 
@@ -114,6 +111,10 @@
           return false;
         }
       })
+
+      socket.on('welcome', ({ chatMessage }) => createMessage(chatMessage));
+      socket.on('message', ({ chatMessage }) => createMessage(chatMessage));
+      socket.on('updateUsers', (users) => createUserList(users));
       socket.on('setNick', ( nick ) => createMessage(message));
     </script>
   </body>
