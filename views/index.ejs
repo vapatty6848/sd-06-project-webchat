@@ -4,12 +4,11 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <title>Webchat Project</title>
 </head>
 <body>
   <h1>Webchat</h1>
-  <ul id="online-users" class="list-group"></ul>
+  <ul id="online-users"></ul>
   <input id="change-nickname" data-testid="nickname-box">
   <button id="change-nickname-button" data-testid="nickname-button" disabled>Change nickname</button>
   <ul id="chat-messages" class="list-group">
@@ -18,83 +17,83 @@
     <% }); %>
   </ul>
   <form class="input-group mb-3 fixed-bottom">
-    <input id="message" data-testid="message-box" type= "text" class="form-control" placeholder="Type your message">
+    <input id="message" data-testid="message-box" type= "text" placeholder="Type your message">
     <div class="input-group-append">
-      <button id="send-button" disabled data-testid="send-button" class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+      <button id="send-button" disabled data-testid="send-button" type="submit" id="button-addon2">Send</button>
     </div>
   </form>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  // const socket = io();
-  // let userNickname;
+  const socket = io();
+  let userNickname;
 
-  // const changeNicknameInput = document.querySelector('#change-nickname');
-  // const changeNicknameButton = document.querySelector('#change-nickname-button');
-  // const sendMessageButton = document.querySelector('#send-button');
-  // const chatMessages = document.querySelector('#chat-messages');
-  // const userList = document.querySelector('#online-users');
-  // const messageForm = document.querySelector('form');
-  // const messageInputArea = document.querySelector('#message');
+  const changeNicknameInput = document.querySelector('#change-nickname');
+  const changeNicknameButton = document.querySelector('#change-nickname-button');
+  const sendMessageButton = document.querySelector('#send-button');
+  const chatMessages = document.querySelector('#chat-messages');
+  const userList = document.querySelector('#online-users');
+  const messageForm = document.querySelector('form');
+  const messageInputArea = document.querySelector('#message');
 
-  // const generateRandomNickName = (length) => {
-  //   const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  //   let result = '';
-  //   for (let i = 0; i < length; i += 1) {
-  //     result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-  //   }
-  //   return result;
-  // };
+  const generateRandomNickName = (length) => {
+    const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i += 1) {
+      result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+    }
+    return result;
+  };
 
-  // socket.on('connect', () => { 
-  //   userNickname = generateRandomNickName(16);
-  //   socket.emit('userConnected', { nickname: userNickname });
-  // })
+  socket.on('connect', () => { 
+    userNickname = generateRandomNickName(16);
+    socket.emit('userConnected', { nickname: userNickname });
+  })
 
-  // socket.on('updateUsers', (onlineUsers) => {
-  //   const otherUsers =  onlineUsers.filter((user) => user.id !== socket.id);
-  //   const firstUser = onlineUsers.filter((user) => user.id === socket.id);
-  //   const usersInOrder = firstUser.concat(otherUsers);
-  //   userNickname = onlineUsers.find((user) => user.id === socket.id).nickname
-  //   userList.innerHTML = '';
-  //   usersInOrder.forEach((user) => {
-  //     const newUser = document.createElement('li');
-  //     newUser.setAttribute('data-testid', 'online-user');
-  //     newUser.innerHTML = user.nickname;
-  //     userList.appendChild(newUser);
-  //   });
-  // });
+  socket.on('updateUsers', (onlineUsers) => {
+    const otherUsers =  onlineUsers.filter((user) => user.id !== socket.id);
+    const firstUser = onlineUsers.filter((user) => user.id === socket.id);
+    const usersInOrder = firstUser.concat(otherUsers);
+    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname
+    userList.innerHTML = '';
+    usersInOrder.forEach((user) => {
+      const newUser = document.createElement('li');
+      newUser.setAttribute('data-testid', 'online-user');
+      newUser.innerHTML = user.nickname;
+      userList.appendChild(newUser);
+    });
+  });
   
-  // socket.on('message', (message) => {
-  //   const newMessage = document.createElement('li');
-  //   newMessage.setAttribute('data-testid', 'message');
-  //   newMessage.setAttribute('class', 'list-group-item');
-  //   newMessage.innerHTML = message;
-  //   chatMessages.appendChild(newMessage);
-  // });
+  socket.on('message', (message) => {
+    const newMessage = document.createElement('li');
+    newMessage.setAttribute('data-testid', 'message');
+    newMessage.setAttribute('class', 'list-group-item');
+    newMessage.innerHTML = message;
+    chatMessages.appendChild(newMessage);
+  });
 
-  // messageForm.addEventListener('submit', (event) => {
-  //   event.preventDefault();
-  //   const chatMessage = messageInputArea.value;
-  //   messageInputArea.value = '';
+  messageForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const chatMessage = messageInputArea.value;
+    messageInputArea.value = '';
     
-  //   socket.emit('message', { nickname: userNickname, chatMessage });
-  // });
+    socket.emit('message', { nickname: userNickname, chatMessage });
+  });
 
-  // messageInputArea.addEventListener('input', (event) => {
-  //   if (event.target.value.length > 0) sendMessageButton.removeAttribute('disabled');
-  //   else sendMessageButton.setAttribute('disabled', '');
-  // });
+  messageInputArea.addEventListener('input', (event) => {
+    if (event.target.value.length > 0) sendMessageButton.removeAttribute('disabled');
+    else sendMessageButton.setAttribute('disabled', '');
+  });
 
-  // changeNicknameButton.addEventListener('click', () => {
-  //   userNickname = changeNicknameInput.value;
-  //   changeNicknameInput.value = '';
-  //   socket.emit('changeNickname', userNickname);
-  // });
+  changeNicknameButton.addEventListener('click', () => {
+    userNickname = changeNicknameInput.value;
+    changeNicknameInput.value = '';
+    socket.emit('changeNickname', userNickname);
+  });
 
-  // changeNicknameInput.addEventListener('input', (event) => {
-  //   if (event.target.value.length > 0) changeNicknameButton.removeAttribute('disabled');
-  //   else changeNicknameButton.setAttribute('disabled', '');
-  // });
+  changeNicknameInput.addEventListener('input', (event) => {
+    if (event.target.value.length > 0) changeNicknameButton.removeAttribute('disabled');
+    else changeNicknameButton.setAttribute('disabled', '');
+  });
 </script>
 </html>
