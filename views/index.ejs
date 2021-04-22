@@ -2,9 +2,16 @@
 <html>
   <head>
     <title>WebChat</title>
+    <script src="/globalVariables.js"></script>
   </head>
   <body>
     <h1>WebChat</h1>
+    <header>
+      <div>
+        <h2>User:</h2>
+        <p data-testid="online-user" id="userName"></p>  
+      </div>
+    </header>
     <div>
       <input id="messageInput" data-testid="message-box" autocomplete="off" />
       <button id="sendButton" data-testid="send-button" type="button">Send message!</button>
@@ -13,13 +20,16 @@
       <input id="nicknameInput" data-testid="nickname-box" autocomplete="off" />
       <button id="nicknameButton" data-testid="nickname-button" type="button">Save nickname!</button>
     </div>
+    <div class="messagesContainer">
+      <ul id="messagesList">
+
+      </ul>
+    </div>
 
   </body>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/globalVariables.js"></script>
   <script src="/user.js"></script>
-  <script src="/sendMessage.js"></script>
-
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/socketHandler_Front.js"></script>
 
 </html>
