@@ -67,103 +67,103 @@
       };
 
       window.onload = () => {
-        const socket = io('http://localhost:3000');
+        const socket = io('http://localhost:3001');
 
-        const button = document.querySelector('#send-button');
-        button.addEventListener('click', () =>{
-          const inputMessage = document.querySelector('#message-box');
-          const nickname = document.querySelector('#online-user');
-          socket.emit('message', { nickname: nickname.innerHTML, chatMessage: inputMessage.value });
-          inputMessage.value = '';
-          return false;
-        })
+        // const button = document.querySelector('#send-button');
+        // button.addEventListener('click', () =>{
+        //   const inputMessage = document.querySelector('#message-box');
+        //   const nickname = document.querySelector('#online-user');
+        //   socket.emit('message', { nickname: nickname.innerHTML, chatMessage: inputMessage.value });
+        //   inputMessage.value = '';
+        //   return false;
+        // })
 
         
-        const createMessage = (message) => {
-          const messagesUl = document.querySelector('#mensagens');
-          const li = document.createElement('li');
-          li.innerText = message;
-          li.setAttribute('data-testid', 'message');
-          messagesUl.appendChild(li);
-        }
+        // const createMessage = (message) => {
+        //   const messagesUl = document.querySelector('#mensagens');
+        //   const li = document.createElement('li');
+        //   li.innerText = message;
+        //   li.setAttribute('data-testid', 'message');
+        //   messagesUl.appendChild(li);
+        // }
         
-        socket.on('message', (mensagem) => createMessage(mensagem));
+        // socket.on('message', (mensagem) => createMessage(mensagem));
 
-        const createUserOn = ({ nickname, idSocket }) => {
-          const userUl = document.querySelector('#user-on');
-          const li = document.createElement('li');
-          li.innerText = nickname;
-          li.id = idSocket;
-          li.setAttribute('class', 'online-user2');
-          li.setAttribute('data-testid', 'online-user');
-          userUl.appendChild(li);
-        }
-        // Quando nosso evento `ola` for emitido, vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
-        socket.on('usersOn', (mensagem) => createUserOn(mensagem));
+        // const createUserOn = ({ nickname, idSocket }) => {
+        //   const userUl = document.querySelector('#user-on');
+        //   const li = document.createElement('li');
+        //   li.innerText = nickname;
+        //   li.id = idSocket;
+        //   li.setAttribute('class', 'online-user2');
+        //   li.setAttribute('data-testid', 'online-user');
+        //   userUl.appendChild(li);
+        // }
+        // // Quando nosso evento `ola` for emitido, vamos pegar a string mensagem enviada pelo nosso evento e passar para a função `createMessage`
+        // socket.on('usersOn', (mensagem) => createUserOn(mensagem));
 
-        const randomName = () => {
-          const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-          let result = '';
-          var charactersLength = characters.length;
-          for (let i = 0; i < 16; i++) {
-            result += characters[Math.floor(Math.random() * charactersLength)];
-          }
-          return result
-        }
+        // const randomName = () => {
+        //   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        //   let result = '';
+        //   var charactersLength = characters.length;
+        //   for (let i = 0; i < 16; i++) {
+        //     result += characters[Math.floor(Math.random() * charactersLength)];
+        //   }
+        //   return result
+        // }
 
-        const nickname = document.querySelector('#online-user');
-        nickname.innerHTML = loadStorage('nickname', randomName());
-        saveStorage('nickname', nickname.innerHTML);
+        // const nickname = document.querySelector('#online-user');
+        // nickname.innerHTML = loadStorage('nickname', randomName());
+        // saveStorage('nickname', nickname.innerHTML);
 
-        const allUsers = document.querySelectorAll('.online-user2');
+        // const allUsers = document.querySelectorAll('.online-user2');
 
-        allUsers.forEach((element) => {
-          const nickname = document.querySelector('#online-user');
-          const userUl = document.querySelector('#user-on');
-          if (element.id === loadStorage('oldId', '')) {
-            userUl.removeChild(element);
-          }
-        });
+        // allUsers.forEach((element) => {
+        //   const nickname = document.querySelector('#online-user');
+        //   const userUl = document.querySelector('#user-on');
+        //   if (element.id === loadStorage('oldId', '')) {
+        //     userUl.removeChild(element);
+        //   }
+        // });
 
-        console.log('socket',socket)
-        console.log('socket.id',socket.ids)
-        socket.emit('userOn', nickname.innerHTML);
+        // console.log('socket',socket)
+        // console.log('socket.id',socket.ids)
+        // socket.emit('userOn', nickname.innerHTML);
 
-        const nicknameButton = document.querySelector('#nickname-button');
-        nicknameButton.addEventListener('click', () => {
-          const nickname = document.querySelector('#online-user');
-          const nicknameBox = document.querySelector('#nickname-box');
-          nickname.innerHTML = nicknameBox.value;
-          saveStorage('nickname', nickname.innerHTML);
-          socket.emit('userUpdate', nickname.innerHTML);
-        })
+        // const nicknameButton = document.querySelector('#nickname-button');
+        // nicknameButton.addEventListener('click', () => {
+        //   const nickname = document.querySelector('#online-user');
+        //   const nicknameBox = document.querySelector('#nickname-box');
+        //   nickname.innerHTML = nicknameBox.value;
+        //   saveStorage('nickname', nickname.innerHTML);
+        //   socket.emit('userUpdate', nickname.innerHTML);
+        // })
 
-        const deleteUser = (idUser) => {
-          const userUl = document.querySelector('#user-on');
-          const userli = document.getElementById(idUser);
-          console.log('userli', userli)
-          userUl.removeChild(userli);
-        };
+        // const deleteUser = (idUser) => {
+        //   const userUl = document.querySelector('#user-on');
+        //   const userli = document.getElementById(idUser);
+        //   console.log('userli', userli)
+        //   userUl.removeChild(userli);
+        // };
 
-        const userNicknameUpdate = ({ nickname, idSocket }) => {
-          const userUl = document.querySelector('#user-on');
-          const userli = document.getElementById(idSocket);
-          console.log('idSocket', idSocket);
-          userUl.removeChild(userli);
-          const li = document.createElement('li');
-          li.innerText = nickname;
-          li.id = idSocket;
-          li.setAttribute('class', 'online-user2');
-          li.setAttribute('data-testid', 'online-user');
-          userUl.appendChild(li);
-        }
+        // const userNicknameUpdate = ({ nickname, idSocket }) => {
+        //   const userUl = document.querySelector('#user-on');
+        //   const userli = document.getElementById(idSocket);
+        //   console.log('idSocket', idSocket);
+        //   userUl.removeChild(userli);
+        //   const li = document.createElement('li');
+        //   li.innerText = nickname;
+        //   li.id = idSocket;
+        //   li.setAttribute('class', 'online-user2');
+        //   li.setAttribute('data-testid', 'online-user');
+        //   userUl.appendChild(li);
+        // }
 
-        socket.on('userOff', (idUser) => deleteUser(idUser));        
-        socket.on('userNicknameUpdate', (mensagem) => userNicknameUpdate(mensagem));
-        window.onbeforeunload = function(event) {
-          saveStorage('oldId', socket.id);
-          // event.returnValue = "Write something clever here..";
-        };
+        // socket.on('userOff', (idUser) => deleteUser(idUser));        
+        // socket.on('userNicknameUpdate', (mensagem) => userNicknameUpdate(mensagem));
+        // window.onbeforeunload = function(event) {
+        //   saveStorage('oldId', socket.id);
+        //   // event.returnValue = "Write something clever here..";
+        // };
       }      
     </script>
   </head>
@@ -173,11 +173,12 @@
         <input id="nickname-box" type="text" data-testid="nickname-box">
         <button id="nickname-button" data-testid="nickname-button">Salvar</button>
       </div>
-      <p>
-        Seu nickname é:
-        <%= ' ' %>
-        <span id="online-user" data-testid="online-user"></span>
-      </p>
+      <ul id="user-on">
+        <li id="online-user" data-testid="online-user"></li>
+        <% arrayUsersOn.forEach(({ nickname, idSocket }) => { %>
+          <li class="online-user2" data-testid="online-user" id=<%= idSocket %> ><%= nickname %></li>
+        <% }) %>      
+      </ul>      
     </div>
     <h2>mensagens</h2>
     <ul id="mensagens">
@@ -186,11 +187,7 @@
       <% }) %>      
     </ul>
     <h2>pessoas online</h2>
-    <ul id="user-on">
-      <% arrayUsersOn.forEach(({ nickname, idSocket }) => { %>
-        <li class="online-user2" data-testid="online-user" id=<%= idSocket %> ><%= nickname %></li>
-      <% }) %>      
-    </ul>
+    
     <div>
       <input id="message-box" data-testid="message-box" type="text" />
       <button id="send-button" data-testid="send-button" >Enviar</button>
