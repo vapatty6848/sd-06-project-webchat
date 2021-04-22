@@ -2,7 +2,7 @@ const moment = require('moment');
 const express = require('express');
 
 const app = express();
-const httpServer = require('http').createServer(app); // servidor
+const httpServer = require('http').createServer(app);
 const port = process.env.PORT || 3000;
 
 const cors = require('cors');
@@ -37,15 +37,11 @@ io.on('connection', (socket) => {
   const randonUser = `user_${Math.random().toString().substr(2, 11)}`;
   const newUser = { socketId: socket.id, nickname: randonUser };
   users.push(newUser);
-  console.log('alguem se conectou', users);
-
   io.emit('updateUsers', users);
-
   socket.on('message', async ({ nickname, chatMessage }) => {
     const times = userDate();
     await saveMsg({ nickname, chatMessage, times });
     const message = `${times} ${nickname} ${chatMessage}`;
-    console.log('message - l46', message);
     io.emit('message', message);
   });
 
