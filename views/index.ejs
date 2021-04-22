@@ -183,17 +183,11 @@
         setOnlineUsers(users);
       }
 
-      const updateNickname = () => {
-        sessionStorage.setItem('nickname', nicknameInput.value)
-        return;
-      }
-
       sendButton.addEventListener('click', () => {
         socket.emit('message', { chatMessage: messageInput.value });
       })
 
       nicknameButton.addEventListener('click', () => {
-        updateNickname();
         socket.emit('updateUserNick', nicknameInput.value)
       })
       socket.emit('newUser', generateRandomNickname() )

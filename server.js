@@ -8,11 +8,11 @@ const io = require('socket.io')(http, {
   },
 });
 
+app.use(cors());
+
 app.set('view engine', 'ejs');
 
 app.set('views', './views');
-
-app.use(cors());
 
 app.get('/', (req, res) => {
   res.status(200).render('index'); 
@@ -20,59 +20,43 @@ app.get('/', (req, res) => {
 
 let users = [];
 
-const setNewOnlineUser = (socket) => {
-  const userLogin = (newUser) => {
-    socket.emit('setOnlineUsers', [{ id: socket.id, nick: newUser }, ...users]);
-    users.push({ id: socket.id, nick: newUser });
-    socket.broadcast.emit('userConnected', { nick: newUser, users });
-  };
-
-  socket.on('newUser', userLogin);
+const setNewOnlineUser = (socket, newUser) => {
+  socket.emit('setOnlineUsers', [{ id: socket.id, nick: newUser }, ...users]);
+  users.push({ id: socket.id, nick: newUser });
+  socket.broadcast.emit('userConnected', { nick: newUser, users });
 };
 
-const setMessage = (socket) => {
-  const sendMessage = ({ chatMessage }) => {
-    const msgTime = new Date().toLocaleString().replace(/\//g, '-');
-    const messageUser = users.find((user) => user.id === socket.id);
-    if (messageUser) {
-      const nickname = messageUser.nick;
-      const newMessage = `${msgTime} - ${nickname}: ${chatMessage}`;
-      io.emit('message', newMessage);
-    }
-  };
-
-  socket.on('message', sendMessage);
+const setMessage = (socket, chatMessage) => {
+  const msgTime = new Date().toLocaleString().replace(/\//g, '-');
+  const messageUser = users.find((user) => user.id === socket.id);
+  if (messageUser) {
+    const nickname = messageUser.nick;
+    const newMessage = `${msgTime} - ${nickname}: ${chatMessage}`;
+    io.emit('message', newMessage);
+  }
 };
 
-const setNickname = (socket) => {
-  const updateNick = (nick) => {
-    const userToUpdate = users.find((user) => user.id === socket.id);
-    users = users.filter((user) => user !== userToUpdate);
-    socket.emit('updateUserNick', [{ id: socket.id, nick }, ...users]);
-    users.push({ id: socket.id, nick });
-    socket.broadcast.emit('updateUserNickToOthers', users);
-  };
-
-  socket.on('updateUserNick', updateNick);
+const setNickname = (socket, nick) => {
+  const userToUpdate = users.find((user) => user.id === socket.id);
+  users = users.filter((user) => user !== userToUpdate);
+  socket.emit('updateUserNick', [{ id: socket.id, nick }, ...users]);
+  users.push({ id: socket.id, nick });
+  socket.broadcast.emit('updateUserNickToOthers', users);
 };
 
 const logOff = (socket) => {
-  const disconnectUser = () => {
-    const userOff = users.find((user) => user.id === socket.id);
-    if (userOff) {
-      users = users.filter((user) => user !== userOff);
-      socket.broadcast.emit('userDisconnected', { nick: userOff.nick, users });
-    }
-  };
-
-  socket.on('disconnect', disconnectUser);
+  const userOff = users.find((user) => user.id === socket.id);
+  if (userOff) {
+    users = users.filter((user) => user !== userOff);
+    socket.broadcast.emit('userDisconnected', { nick: userOff.nick, users });
+  }
 };
 
 io.on('connection', (socket) => {
-  setNewOnlineUser(socket);
-  setMessage(socket);
-  setNickname(socket);
-  logOff(socket);
+  socket.on('newUser', (newUser) => setNewOnlineUser(socket, newUser));
+  socket.on('message', ({ chatMessage }) => setMessage(socket, chatMessage));
+  socket.on('updateUserNick', (nick) => setNickname(socket, nick));
+  socket.on('disconnect', () => logOff(socket));
 });
 
 http.listen(3000, () => {
