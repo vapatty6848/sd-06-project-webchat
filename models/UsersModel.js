@@ -1,26 +1,39 @@
-const connection = require('./connection');
+// const connection = require('./connection');
+
+let usersDb = [];
 
 const registerUser = async (id, nickname) => {
-  const insertedUser = await connection().then((db) => {
+  usersDb.push({ id, nickname });
+/*   const insertedUser = await connection().then((db) => {
     db.collection('users').insertOne({ id, nickname });
-  });
-  return insertedUser;
+  }); */
+  return { id, nickname };
 };
 
-const getUsers = async () => connection().then((db) => db
-  .collection('users').find().toArray());
+const getUsers = async () => usersDb; // connection().then((db) => db
+  // .collection('users').find().toArray());
 
 const updateUser = async (socketId, newNickname) => {
-  const updatedUser = await connection().then((db) => db
+  usersDb = usersDb.map((user) => {
+    if (user.id === socketId) {
+      return { id: socketId, nickname: newNickname };
+    }
+    return user;
+  });
+  return { id: socketId, nickname: newNickname };
+  /* const updatedUser = await connection().then((db) => db
   .collection('users').updateOne(
     { id: socketId },
     { $set: { nickname: newNickname } },
   ));
-  return updatedUser;
+  return updatedUser; */
 };
 
-const deleteDisconnectedUser = async (socketId) => connection().then((db) => db
-  .collection('users').deleteOne({ id: socketId }));
+const deleteDisconnectedUser = async (socketId) => {
+  usersDb = usersDb.filter((user) => user.id !== socketId);
+};
+// connection().then((db) => db
+  // .collection('users').deleteOne({ id: socketId }));
 
 module.exports = {
   registerUser,
