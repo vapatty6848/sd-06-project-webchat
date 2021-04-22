@@ -51,12 +51,11 @@ const date = moment(dateNow).format('DD-MM-yyyy h:mm:ss A');
 io.on('connection', async (socket) => {
   await Users.registerUser(socket.id, generateRandomNickname(16));
   const getUsers = await Users.getUsers();
-  io.emit('connectedUsers', getUsers); 
-
+  io.emit('connectedUsers', getUsers);
   // Esse socket recebe do frontend (canal message) a mensagem que será emitida para todos os users online
   socket.on('message', async ({ nickname, chatMessage }) => {
-    await Message.registerMessage(chatMessage, nickname, date);
     io.emit('message', `${date} - ${nickname}: ${chatMessage}`);
+    await Message.registerMessage(chatMessage, nickname, date);
   });
   // Recebe do Frontend o usuário com o nickname editado
   socket.on('updateNickname', async (user) => {
