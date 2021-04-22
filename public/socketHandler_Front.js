@@ -1,6 +1,7 @@
 const io = window.io('http://localhost:3000');
 
 const button = document.querySelector('#sendButton');
+const messageList = document.querySelector('#messagesList');
 
 button.addEventListener('click', () => {
   const { NICKNAME: nickname } = window.window.globalVariables;
@@ -11,10 +12,7 @@ button.addEventListener('click', () => {
   return false;
 });
 
-const messageList = document.querySelector('#messagesList');
-
 const renderMessage = (message) => {
-  console.log('messageReceived');
   const newMessage = document.createElement('li');
   newMessage.setAttribute('class', 'chatMessage');
   newMessage.setAttribute('data-testid', 'message');
