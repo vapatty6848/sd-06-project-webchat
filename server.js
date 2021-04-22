@@ -18,7 +18,7 @@ let users = [];
 app.get('/', async (_req, res) => {
   const previousMessages = await model.getAllMessages();
   const oldMessages = previousMessages.map((message) => formatMessage(message));
-  return res.render('../views', { oldMessages });
+  return res.render('index', { oldMessages });
 });
 
 const userConnect = ({ nickname, socket }) => {
