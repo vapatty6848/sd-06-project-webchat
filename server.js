@@ -13,8 +13,6 @@ const { chatController } = require('./controllers/chatController');
 
 app.use(cors());
 
-// app.use('/views', express.static('views'));
-
 app.get('/', (req, res) => {
   res.sendFile(`${__dirname}/views/index.html`);
 });
