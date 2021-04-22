@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO - trybe</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h2>Users</h2>
+    <ul id="users"></ul>
+    <input data-testid="nickname-box" id="userInput" type="text"/>
+    <button data-testid="nickname-button" onclick="updateNickname()">Save</button>
+    <ul id="messages">
+      <% messages.forEach(msg => { %>
+      <li data-testid="message"><%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %></li>
+      <%})%>
+    </ul>
+    <input type="text" id="messageinput" data-testid="message-box" />
+    <button onclick="sendBtn()" data-testid="send-button">Send</button>
+    <script>
+      const socket = io();
+
+      const randomName = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let name = '';
+        for (let i = 0; i < 16; i += 1) {
+          name += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return name;
+      };
+
+      let nickname = randomName();
+
+      const messageInput =  document.querySelector('#messageinput')
+      const sendBtn = () => {
+        socket.emit('message', { chatMessage: messageInput.value, nickname })
+        messageInput.value = '';
+      }; 
+
+      socket.on('message', (msg) => {
+        const messagesUl = document.querySelector('#messages');
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerText = msg;
+        messagesUl.appendChild(li);
+      });
+
+      socket.emit('user', nickname)
+
+      socket.on('usersList', (user) => {
+        const usersList = document.getElementById('users');
+        usersList.innerHTML = '';
+        user.forEach(user => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerText = user;
+        usersList.appendChild(li);
+        })
+      })
+
+      const updateNickname = () => {
+        const newNickname = document.getElementById('nickname').value;
+        nickname = newNickname;
+        socket.emit('updateNickname', newNickname)
+      }
+    </script>
+  </body>
+</html> 
