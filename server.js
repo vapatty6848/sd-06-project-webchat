@@ -1,8 +1,10 @@
+
+const moment = require('moment');
 const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app); // servidor
-
+const port = process.env.PORT || 3000;
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
   cors: {
@@ -15,9 +17,7 @@ const { saveMsg, getAll } = require('./models/chatMsg');
 app.use(cors());
 
 function userDate() {
-  const time = new Date();
-  const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}
-  ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+  const timeFormated = moment().format('DD-MM-yyyy h:mm:ss A');
   return timeFormated;
 }
 let users = [];
@@ -25,31 +25,39 @@ let users = [];
   const userNick = users.map((user) => { 
     if (user.socketId === socket.id) {
       return { ...user, nickname: newNickname };
-    }
+    } // verifica se o nick existe e atualiza ou mantem
     return user;      
    }); 
     users = userNick;
-    io.emit('updateUsers', { users });
+    console.log('linha 32', users, userNick);
+    io.emit('updateUsers', users);
  }
 
 io.on('connection', (socket) => {
+
   const randonUser = `user_${Math.random().toString().substr(2, 11)}`;
   const newUser = { socketId: socket.id, nickname: randonUser };
   users.push(newUser);
+  console.log('alguem se conectou', users);
+
   io.emit('updateUsers', users);
+
   socket.on('message', async ({ nickname, chatMessage }) => {
     const times = userDate();
     await saveMsg({ nickname, chatMessage, times });
     const message = `${times} ${nickname} ${chatMessage}`;
+    console.log('message - l46', message);
     io.emit('message', message);
   });
+  
   socket.on('updateNickname', (newNickname) => {
-    newUserNickname({ newNickname, socket }); 
-    }); 
+   newUserNickname({ newNickname, socket });
+  }); 
 
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
+    console.log('desconectando', users);
     io.emit('updateUsers', users);
   });
 });
@@ -59,8 +67,8 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
-  
-  res.render('home', { listAll });
+  console.log('listAll', listAll);
+  res.render('home', {listAll} );
 }); 
 
-httpServer.listen('3000', () => console.log('servidor 1'));
+httpServer.listen(port, () => console.log(`${port}`));
