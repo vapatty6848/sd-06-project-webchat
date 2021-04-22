@@ -30,6 +30,14 @@
       <button type="submit" id="button-message" data-testid="send-button">Enviar</button>
     </form>
   </div>
+<!--   <div>
+    <ul>
+      <% users.forEach((user) => {
+        %>
+        <li><%=`${user.nickname}`%></li>
+        <%})%>
+    </ul>
+  </div> -->
   <script>
     const socket = io('http://localhost:3000');
 
@@ -41,30 +49,11 @@
     const onlineUser = document.querySelector('#online-user');
     let currentUser;
 
-    const generateRandomNickname = (length) => {
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let str = '';
-      for (let i = 0; i < length; i ++) {
-        str += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      return str;
-    }
-
-    // Assim que o user conecta, gero um nome aleatório e atribuo o nickname a currentUser
-      socket.on('connect', () => {
-      const nickname = generateRandomNickname(16);
-      currentUser = [{ nickname }];
-      console.log('linha 57', currentUser);
-      createUser(currentUser[0]);
-      // Envio ao backend o nickname no canal onConnection
-      socket.emit('onConnection', nickname);
-    });
-
     // Recebe do backend um array com os usuários conectados
     socket.on('connectedUsers', (users) => {
       // console.log('array users', users);
-      currentUser = users.filter(user => user.nickname === currentUser[0].nickname);
-      console.log('linha 66', currentUser);
+      currentUser = users.filter(user => user.id === socket.id);
+      console.log('linha 66', users);
       createUserList(users);
     });
 
@@ -78,25 +67,14 @@
       onlineUser.appendChild(li);
     }
 
-/*     const addToBeginning = (user) => {
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.innerText = user.nickname;
-      onlineUser.prepend(user);
-    }
- */
     const createUserList = (arrayUsers) => {
       onlineUser.innerHTML = '';
       console.log('usuario corrente l90', currentUser[0].id);
       createUser(currentUser[0]);
       arrayUsers
-        .filter(user => user.id !== currentUser[0].id)
+        .filter(user => user.id !== socket.id)
         .forEach((user) => {
-        // console.log('usuário', user);
         createUser(user);
-        // const li = document.createElement('li');
-        // li.innerText = user.userNickname;
-        // onlineUser.appendChild(li);
         });
     }
     // socket.on('updateNickname', (users) => createUserList(users));
