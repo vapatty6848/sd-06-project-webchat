@@ -153,6 +153,7 @@
 
       const generateRandomNickname = () => {
         const randomnickname = 'guest_' + getRandomHex(10);
+        sessionStorage.setItem('nickname', randomnickname)
 
         return randomnickname;
       }
@@ -167,7 +168,7 @@
         onlineUsers.forEach((onlineUser, index) => {
           const newUser = document.createElement('li');
   
-          newUser.innerText = onlineUser.nick;
+          newUser.innerText = onlineUser.nickname;
           newUser.setAttribute('data-testid', 'online-user')
           usersList.appendChild(newUser);
         })
@@ -178,23 +179,29 @@
         const userMsg = document.createElement('li');
 
         userMsg.innerText = status === 'on' ? `Usuário ${nick} entrou` : `Usuário ${nick} saiu`;
+        userMsg.style.color = status === 'on' ? 'blue' : 'red';
         messagesList.appendChild(userMsg);
 
         setOnlineUsers(users);
       }
 
       sendButton.addEventListener('click', () => {
-        socket.emit('message', { chatMessage: messageInput.value });
+        const nickname = sessionStorage.getItem('nickname')
+
+        socket.emit('message', { chatMessage: messageInput.value, nickname });
       })
 
       nicknameButton.addEventListener('click', () => {
-        socket.emit('updateUserNick', nicknameInput.value)
+        const nickname = nicknameInput.value;
+
+        sessionStorage.setItem('nickname', nickname)
+        socket.emit('updateUserNick', nickname)
       })
       socket.emit('newUser', generateRandomNickname() )
 
       socket.on('message', (message) => createNewMessage(message));
-      socket.on('userConnected', ({ nick, users }) => userStatusMsg(nick, users, "on"));
-      socket.on('userDisconnected', ({ nick, users }) => userStatusMsg(nick,users,  "off"));
+      socket.on('userConnected', ({ nickname, users }) => userStatusMsg(nickname, users, "on"));
+      socket.on('userDisconnected', ({ nickname, users }) => userStatusMsg(nickname ,users,  "off"));
       socket.on('setOnlineUsers', (onlineUsers) => setOnlineUsers(onlineUsers));
       socket.on('updateUserNick', (onlineUsers) => setOnlineUsers(onlineUsers));
       socket.on('updateUserNickToOthers', (onlineUsers) => setOnlineUsers(onlineUsers));
