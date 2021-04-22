@@ -47,7 +47,7 @@
     <script>
       const loadStorage = (key, initialValue) => {
         try {
-          const serializedState = localStorage.getItem(key);
+          const serializedState = sessionStorage.getItem(key);
           if (serializedState === null) {
             return initialValue;
           }
@@ -60,7 +60,7 @@
       const saveStorage = (nameKey, state) => {
         try {
           const serializedState = JSON.stringify(state);
-          localStorage.setItem(nameKey, serializedState);
+          sessionStorage.setItem(nameKey, serializedState);
         } catch (err) {
           // ignore
         }
