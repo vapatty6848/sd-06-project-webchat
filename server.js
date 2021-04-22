@@ -27,6 +27,11 @@ const newUser = (username, id) => {
   io.emit('updatedUserList', users);
 };
 
+const oldchat = async (socket) => {
+  const oldMessages = await messages.getAllMessages();
+  socket.emit('oldChat', oldMessages);
+};
+
 const updateUsers = (name, id) => {
   const index = users.indexOf(users.find((user) => user.id === id));
   users[index].name = name;
@@ -45,10 +50,9 @@ const disconnectUser = (id) => {
   io.emit('updatedUserList', users);
 };
 
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
+  oldchat(socket);
   socket.on('newUser', (username) => newUser(username, socket.id));
-  const oldMessages = await messages.getAllMessages();
-  socket.emit('oldChat', oldMessages);
   socket.on('updateUser', (name) => updateUsers(name, socket.id));
   socket.on('message', ({
     chatMessage,
