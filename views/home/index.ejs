@@ -62,7 +62,7 @@
     });
 
     // Recebe do backend um objeto contendo os dados do user para renderizar a msg
-    socket.on('message', (objUser) => createMessage(objUser));
+    socket.on('message', (message) => createMessage(message));
 
     const createUser = (user) => {
       const li = document.createElement('li');
