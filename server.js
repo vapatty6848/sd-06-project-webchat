@@ -48,7 +48,6 @@ io.on('connection', (socket) => {
   socket.on('updateNickname', (newNickname) => {
    newUserNickname({ newNickname, socket });
   }); 
-
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
