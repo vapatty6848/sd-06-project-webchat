@@ -17,9 +17,7 @@ app.set('view engine', 'ejs');
 
 app.set('views', './views');
 
-app.get('/', (req, res) => {
-   res.render('index');
-});
+app.get('/', async (req, res) => res.render('index'));
 
 const getDate = () => {
   const date = new Date().getTime();
@@ -30,29 +28,34 @@ const getDate = () => {
 const getHour = () => {
   const time = new Date();
   const parseHour = time.getHours() - 12;
+  const parseMinutes = time.getMinutes() < 10 ? `0${time.getMinutes()}` : time.getMinutes();  
   let code = 'PM';
   if (parseHour < 0) {
     code = 'AM';
-    const hour = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${code}`;
+    const hour = `${time.getHours()}:${parseMinutes}:${time.getSeconds()} ${code}`;
     return hour;
   }
   if (parseHour === 0) {
-    const hour = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()} ${code}`;
+    const hour = `${time.getHours()}:${parseMinutes}:${time.getSeconds()} ${code}`;
     return hour;
   }
-  const hour = `${parseHour}:${time.getMinutes()}:${time.getSeconds()} ${code}`;
+  const hour = `${parseHour}:${parseMinutes}:${time.getSeconds()} ${code}`;
   return hour;
 };
 
 io.on('connection', (socket) => {
-  console.log(`entrou com id:${socket.id}`);
+  const guest = socket.id.substring(0, 16);
+  const newUser = { id: Math.random().toString(36).substring(0, 16) };
+  console.log(`entrou com id:${newUser.id}`);
+  io.emit('showUser', guest);
+
   socket.on('disconnect', () => {
     console.log('desconectado');  
   });
 
   socket.on('message', (message) => {
-    const msg = `${getDate()} ${getHour()} ${message.chatMessage}, ${message.nickname}`;
-    io.emit(msg);
+    const msg = `${getDate()} ${getHour()} ${message.nickname}: ${message.chatMessage}`;
+    io.emit('message', msg);
   });
 });
 

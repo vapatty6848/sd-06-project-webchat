@@ -8,22 +8,47 @@
     <title>Web Chat</title>
 </head>
 <body>
+  <div id="userList">
+  </div>
   <h2>Conversa</h2>
-  <ul id="msgList">
-  </ul>
-  <input type="text" name="message" id="userMessage" />
-  <button type="button" id="send">Enviar</button>
+  <div id="msgList">
+  </div>
+  <input type="text" name="message" id="userMessage" data-testid="message-box"/>
+  <button type="button" id="send" data-testid="send-button">Enviar</button>
+  <input type="text", name="nickname", id="nickName" data-testid="nickname-box"/>
+  <button data-testid="nickname-button" id="changeNickname">adicionar nickname</button>
   <script>
     const socket = io();
-    document.querySelector('#send').addEventListener('click', (e) => {
-      const msg = document.querySelector("#userMessage").value;
-      socket.emit('message', msg);
+    let uId = null;
+    const connectedUser = [];
+
+    const showId = (userId) => {
+      const txt = document.createElement('p');
+      txt.setAttribute('data-testid', 'online-user');
+      txt.innerText = userId;
+      document.querySelector('#userList').appendChild(txt);
+    }
+    
+    socket.on('showUser', (id) => {
+      showId(id);
+      uId = id;
     });
 
-    socket.on('newMsg', (newMsg) => {
-      const element = document.createElement('li');
-      element.innerText = newMsg;
-      document.querySelector('#msgList').appendChild(element);
+    socket.on('message', (msg) => {
+      console.log(msg)
+      const txt = document.createElement('p');
+      txt.setAttribute('data-testid', 'message');
+      txt.innerText = msg;
+      document.querySelector('#msgList').appendChild(txt);
+    });
+    document.querySelector('#send').addEventListener('click', () => {
+      const newMsg = document.querySelector('#userMessage').value;
+      socket.emit('message', { nickname: uId, chatMessage: newMsg })
+    });
+
+    document.querySelector('#changeNickname').addEventListener('click', () => {
+      const newNick = document.querySelector('#nickName').value;
+      uId = newNick;
     });
   </script>
 </body>
