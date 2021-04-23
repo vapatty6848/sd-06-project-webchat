@@ -1,12 +1,19 @@
-const app = require('express')();
+const express = require('express');
+
+const app = express();
 const http = require('http').createServer(app);
 const cors = require('cors');
 const io = require('socket.io')(http, {
   cors: {
-    origin: 'http://localhost:3000', // url aceita pelo cors
-    methods: ['GET', 'POST'], // Métodos aceitos pela url
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
   },
 });
+
+const WebChatController = require('./controllers/WebChatController');
+const { saveMessage } = require('./models/Messages');
+
+app.use(express.json());
 
 app.use(cors());
 
@@ -14,9 +21,7 @@ app.set('view engine', 'ejs');
 
 app.set('views', './views');
 
-app.get('/', (req, res) => {
-  res.status(200).render('index'); 
-});
+app.use('/', WebChatController);
 
 let users = [];
 
@@ -26,10 +31,11 @@ const setNewOnlineUser = (socket, newUser) => {
   socket.broadcast.emit('userConnected', { nickname: newUser, users });
 };
 
-const setMessage = (chatMessage, nickname) => {
-  const msgTime = new Date().toLocaleString().replace(/\//g, '-');
-  const newMessage = `${msgTime} - ${nickname}: ${chatMessage}`;
-  io.emit('message', newMessage);
+const setMessage = async (chatMessage, nickname) => {
+  const timestamp = new Date().toLocaleString().replace(/\//g, '-');
+  await saveMessage(chatMessage, nickname, timestamp);
+  const message = `${timestamp} - ${nickname}: ${chatMessage}`;
+  io.emit('message', message);
 };
 
 const setNickname = (socket, nickname) => {

@@ -114,7 +114,11 @@
         </div>
         <div class="rightBoard">
           <h2>Mensagens:</h2>
-          <ul id="messages"></ul>
+          <ul id="messages">
+            <% setMessages.forEach((msg) => { %>
+              <li data-testid="message"><%= msg %></li>
+            <% }) %>
+          </ul>
         </div>
       </div>
       <div class="sendMessageContainer">
@@ -131,6 +135,7 @@
       const nicknameButton = document.querySelector('#nicknameButton');
       
       const createNewMessage = (message) => {
+        console.log(message)
         const messagesList = document.querySelector('#messages');
         const newMessage = document.createElement('li');
 
