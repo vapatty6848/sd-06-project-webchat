@@ -18,7 +18,7 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
-const twoDigitsNumber = (number) =>{
+const twoDigitsNumber = (number) => {
   if (number < 10) {
     return `0${number}`;
   }
