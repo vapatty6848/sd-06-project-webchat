@@ -38,15 +38,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    const timestamps = getThisDate();
-    const msgString = `${timestamps} ${nickname} ${chatMessage}`;
-    io.emit('message', msgString);
-    await saveMessage({ message: chatMessage, nickname, timestamps });
+    io.emit('message', `${getThisDate()} ${nickname} ${chatMessage}`);
+    await saveMessage({ message: chatMessage, nickname, timestamps: getThisDate() });
   });
 
   socket.on('disconnect', () => {
-    const onlineUsers = users.filter((u) => u.socketId !== socket.id);
-    users = onlineUsers;
+    users = users.filter((u) => u.socketId !== socket.id);
     io.emit('updateUsers', users);
   });
 });
