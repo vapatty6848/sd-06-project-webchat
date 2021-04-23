@@ -41,8 +41,8 @@ io.on('connection', (socket) => {
   io.emit('updateUsers', users);
   socket.on('message', async ({ chatMessage, nickname }) => {
     const times = userDate();
+    io.emit('message', `${times} -  ${nickname}: ${chatMessage}`);
     await saveMsg({ nickname, chatMessage, times });
-    io.emit('message', `${times} ${nickname} ${chatMessage}`);
   });
   socket.on('updateNickname', (newNickname) => {
    newUserNickname({ newNickname, socket });
@@ -59,8 +59,6 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
-  console.log('listAll', listAll);
-  res.render('home', { listAll });
+  res.render('home', { listAll, users } );
 }); 
-
 httpServer.listen(port, () => console.log(`${port}`));

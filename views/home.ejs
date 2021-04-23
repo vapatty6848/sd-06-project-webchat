@@ -33,6 +33,9 @@
         <div>
           <h2>Usuários</h2>
           <ul id="online-users">
+            <% users.forEach((user) => {%>
+              <li><%= user.nickname %></li>
+            <% })%>
           </ul>
         </div>
       </div>
@@ -64,7 +67,7 @@
     
     let nickname = '';
     
-    // o ejs só acontece uma vez
+    // o ejs na construção da pagina
     socket.on('updateUsers', (users) => {
       const listUsers = document.querySelector('#online-users');
       listUsers.innerHTML = '';
@@ -76,6 +79,7 @@
         listUsers.appendChild(userLi);
       });
     });//inicia o usuario e forma a lista
+    // utilizar o ejs e renderizar listAll
 
     document.querySelector('#nickname-button').addEventListener('click', () => {
       const newNickname = document.querySelector('#nickname-box').value;
