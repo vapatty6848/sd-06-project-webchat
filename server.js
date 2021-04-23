@@ -20,8 +20,10 @@ app.set('views', './views');
 app.get('/', async (req, res) => res.render('index'));
 
 const getDate = () => {
-  const date = new Date().getTime();
-  const parseDate = new Date(date).toLocaleDateString();
+//   const date = new Date().getTime();
+//   const parseDate = new Date(date).toLocaleDateString();
+  const date =  new Date();
+  const parseDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
   return parseDate;
 };
 
