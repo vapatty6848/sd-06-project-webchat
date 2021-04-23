@@ -12,27 +12,63 @@ const io = require('socket.io')(httpServer, {
 
 const msgControler = require('./controller/msgController');
 
-  const users = [];
-
-io.on('connection', (socket) => {
+// array de usuários
+const users = [];
+// função user aleatorio.
+const getFisrtUser = (socket) => {
+  const randomUser = (`${Math.random().toString(36)}00000000000000000`).slice(2, 16 + 2);
+  const objUser = { name: randomUser, socketId: socket.id };
+  users.push(objUser);
+  socket.emit('withoutNick', randomUser);
+  io.emit('updateUsers', users);
+};
+// função update user com nickName
+const updateNickame = (socket) => {
   socket.on('nickName', (nickname) => {
     const userObj = { name: nickname, socketId: socket.id };
+    const userId = users.findIndex((el) => el.socketId === socket.id);
+    if (userId >= 0) { users.splice(userId, 1); }
     users.push(userObj);
     io.emit('updateUsers', users);
     socket.emit('yourNick', nickname);
   });
-    socket.on('disconnect', () => {
-    const userId = users.findIndex((el) => el.socketId === socket.id);
-    if (userId >= 0) { users.splice(userId, 1); }
-    socket.broadcast.emit('updateUsers', users);
-  });
+};
+// função mandar msg com nick
+const sendMsgNick = (socket) => {
   socket.on('message', (message) => {
+    console.log('back', message);
     const data = new Date();
     const time = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()}`
     + `${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
      const fullMsg = `${time} - ${message.nickname}: ${message.chatMessage}`;
      io.emit('message', fullMsg);
   });
+};
+// função mandar msg sem nick
+const sendMsg = (socket) => {
+  socket.on('msg', (objMsg) => {
+    console.log('back', objMsg);
+    const data = new Date();
+    const time = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()}`
+    + `${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
+     const fullMsg = `${time} - ${objMsg.nickname}: ${objMsg.chatMessage}`;
+     io.emit('messageSnick', fullMsg);
+  });
+};
+//  função desconectar user.
+const disconnect = (socket) => {
+  socket.on('disconnect', () => {
+    const userId = users.findIndex((el) => el.socketId === socket.id);
+    if (userId >= 0) { users.splice(userId, 1); }
+    socket.broadcast.emit('updateUsers', users);
+  });
+};
+io.on('connection', (socket) => {
+  getFisrtUser(socket);
+  updateNickame(socket);
+  disconnect(socket);
+  sendMsgNick(socket);
+  sendMsg(socket);
 });
 
 app.use(express.static(`${__dirname}/public`));

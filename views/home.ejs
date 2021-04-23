@@ -1,78 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/style.css" rel="stylesheet" type="text/css">
   <title>Pagina com socket.io</title>
-  <script src="/socket.io/socket.io.js"></script> 
+  <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body>
   <main class="main">
     <section class="S1">
       <h2>Usuários</h2>
       <input placeholder="digite seu nick name" id="nick-name" data-testid="nickname-box">
-      <button type="button" id="btn_nick" data-testid="nickname-button">Entrar</button>
+      <button type="button" id="btn_nick" data-testid="nickname-button">
+        Entrar
+      </button>
       <ul id="users"></ul>
-      <li id="firstUser" data-testid="online-user"></li>
     </section>
-    <section class="S2" id="messages" >
+    <section class="S2" id="messages">
       <h2>Mensagens</h2>
     </section>
     <section class="S3">
-      <input
-      data-testid="message-box"
-      type="text"
-      id="message-box"
-      >
-      <button
-        data-testid="send-button"
-        type="button"
-        id="send-button"
-      >
+      <input data-testid="message-box" type="text" id="message-box">
+      <button data-testid="send-button" type="button" id="send-button">
         Enviar
       </button>
     </section>
   </main>
   <script>
     const socket = io('http://localhost:3000');
-    
-    document.querySelector('#firstUser').innerHTML = (Math.random().toString(36)+'00000000000000000').slice(2, 16+2);
-
+    //btn envia nick p/ server
+    let nick = "";
     document.querySelector('#btn_nick').addEventListener('click', (e) => {
-      const nick = document.querySelector('#nick-name').value
-      console.log('html', nick);
+      nick = document.querySelector('#nick-name').value
+      document.querySelector('#users').innerHTML = '';//não esta apagando.
       socket.emit('nickName', nick)
     });
-    socket.on('yourNick', (nickname) => {
-      document.querySelector('#send-button').addEventListener('click', (e) => {
-      const msg = document.querySelector('#message-box').value;
-      const name = nickname;
-      const message = {chatMessage: msg, nickname: name }
-      socket.emit('message', message)
-    });
-    })
-    
-
+    // com nick renderiza msg
     socket.on('message', (message) => {
-      console.log('msg', message);
       const msgP = document.createElement('p');
+      console.log('fullMsg', message);
       msgP.innerHTML = message;
       msgP.dataset.testid = "message"
       document.querySelector('#messages').appendChild(msgP);
-      
-    });
 
+    });
+    // sem nick envia msg p/ server
+    document.querySelector('#send-button').addEventListener('click', (e) => {
+      const msg = document.querySelector('#message-box').value;
+      const name = nick;
+      const objmsg = { chatMessage: msg, nickname: name }
+      socket.emit('msg', objmsg);
+      document.querySelector('#message-box').value = "";
+    });
+    socket.on('withoutNick', (nickName) => {
+      nick = nickName;
+
+    });
+    // sem nick renderiza msg
+    socket.on('messageSnick', (message) => {
+      const msgP = document.createElement('p');
+      console.log('fullMsg', message);
+      msgP.innerHTML = message;
+      msgP.dataset.testid = "message"
+      document.querySelector('#messages').appendChild(msgP);
+
+    });
+    // atualiza users no browser
     socket.on('updateUsers', (users) => {
-      document.querySelector('#users').innerHTML='';
+      document.querySelector('#users').innerHTML = '';
       users.forEach((user) => {
         const userLi = document.createElement('li');
+        userLi.dataset.testid = "online-user"
         userLi.innerHTML = user.name;
         document.querySelector('#users').appendChild(userLi);
       })
     });
   </script>
-  <footer>Leonardo Cavachini Bendto</footer>
 </body>
+
 </html>
