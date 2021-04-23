@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>W38 CH4T</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div>
+    <h1 id="online-user"></h1>
+    <input id="change-nick" data-testid="nickname-box" type="text">
+    <button id="send-nick"  data-testid="nickname-button">Change</button>
+  </div>
+  <div>
+    <h2>Send message</h2>
+    <input data-testid="message-box" id="message" type="text">
+    <button data-testid="send-button" id="send">Send</button>
+  </div>
+  <div>
+    <h2>Messages</h2>
+    <ul id="list">
+      <% message.forEach((item) => { %>
+        <li data-testid="message">
+          <%= `${item.timestamp} ${item.nickname} ${item.message}` %>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <div>
+    <h1>Online Users</h1>
+    <ul id="users"></ul>
+  </div>
+
+  <script>
+    const socket = io();
+    let nickname;
+
+    const usersElement = document.querySelector('#online-user');
+    socket.on('connect', () => {
+      nickname = (socket.id).slice(0, 16);
+      socket.emit('newUser', nickname);
+      usersElement.innerHTML = nickname;
+    });
+
+    socket.on('updateUsers', (users) => {
+      const usersList = document.querySelector('#users');
+      const searchUser = users.find((user) => user.id === socket.id);
+      const index = users.findIndex((user) => user === searchUser);
+      users.splice(index, 1);
+      users.unshift(searchUser);
+      usersList.innerHTML = '';
+      users.forEach((item) => {
+        const nicknameLi = document.createElement('li');
+        nicknameLi.innerHTML = item.nickname;
+        nicknameLi.setAttribute('data-testid', 'online-user');
+        usersList.appendChild(nicknameLi);
+      });
+    });
+
+    socket.on('message', (message) => {
+      const messageList = document.querySelector('#list');
+      const messageLi = document.createElement('li');
+      messageLi.innerHTML = message;
+      messageLi.setAttribute('data-testid', 'message');
+      messageList.appendChild(messageLi);
+    });
+
+    const sendButton = document.querySelector('#send');
+    sendButton.addEventListener('click', () => {
+      const messageElement = document.querySelector('#message');
+      const message = messageElement.value;
+      socket.emit('message', { chatMessage: message, nickname });
+    });
+
+    const sendChange= document.querySelector('#send-nick');
+    sendChange.addEventListener('click', () => {
+      const changeElement = document.querySelector('#change-nick');
+      const newNick = changeElement.value;
+      nickname = newNick;
+      usersElement.innerHTML = newNick;
+      socket.emit('newNick', newNick);
+    });
+  </script>
+</body>
+</html>
