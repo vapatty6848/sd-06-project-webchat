@@ -7,6 +7,13 @@ const io = require('socket.io')(httpServer);
 
 app.set('view engine', 'ejs');
 
+const { saveMessage, getAllMessages } = require('./models/messages');
+
+app.get('/', async (_req, res) => {
+  const messages = await getAllMessages();
+  res.render('home', { messages });
+});
+
 const users = [];
 
 function getThisDate() {
@@ -24,9 +31,14 @@ io.on('connection', (socket) => {
 
   io.emit('updateUsers', users);
 
-  socket.on('message', ({ chatMessage, nickname }) => {
-    const thisDate = getThisDate();
-    io.emit('message', `${thisDate} ${nickname} ${chatMessage}`);
+  socket.on('message', async ({ chatMessage, nickname }) => {
+    const timestamps = getThisDate();
+
+    const msgString = `${timestamps} ${nickname} ${chatMessage}`;
+
+    io.emit('message', msgString);
+
+    await saveMessage({ message: chatMessage, nickname, timestamps });
   });
 });
 
