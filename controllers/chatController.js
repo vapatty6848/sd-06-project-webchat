@@ -12,17 +12,18 @@ const nicknameSocket = (io, socket, nickname) => {
 };
 
 const onMessage = async (io, socket, { chatMessage, nickname }) => {
-  let nicknameFromList;
-  if (!nickname) {
-  const userIndex = sockets.findIndex((user) => user.id === socket.id);
-  nicknameFromList = sockets[userIndex].nickname;
-  }
-  const nick = (!nickname) ? nicknameFromList : nickname; 
-  console.log(`nickname: ${nicknameFromList}`);
-  await insertMessage({ message: chatMessage, nickname: nick, timestamp: timeStamp() });
+  console.log(`nik: ${nickname}`);
+  // let nicknameFromList;
+  // if (!nickname) {
+  // const userIndex = sockets.length > 0 && sockets.findIndex((user) => user.id === socket.id);
+  // nicknameFromList = sockets[userIndex].nickname;
+  // }
+  // const nick = (!nickname) ? nicknameFromList : nickname; 
+  console.log(`nickname: ${nickname}`);
+  await insertMessage({ message: chatMessage, nickname, timestamp: timeStamp() });
   // io.emit('updatingList', true);
   const allMsgs = await getAllMessages();
-  io.emit('message', JSON.stringify(messagesList(allMsgs)));
+  io.emit('messageHistory', messagesList(allMsgs));
   // allMsgs.forEach((user) => io.emit('message', msgFormat(user)));
 };
 
@@ -30,9 +31,9 @@ const chatController = async (io, socket) => {
   console.log(`${socket.id} conectou!`);  
   sockets.push({ id: socket.id });
 
-  io.emit('onlineUsers', sockets);
+  if (sockets.length > 1) io.emit('onlineUsers', sockets);
   const usersList = await getAllMessages();
-  io.emit('message', JSON.stringify(messagesList(usersList)));
+  io.emit('messageHistory', messagesList(usersList));
   // usersList.forEach((user) => io.emit('message', msgFormat(user)));
 
   // socket.broadcast.emit('message', message({ chatMessage: 'se conectou', nickname: socket.id }));
