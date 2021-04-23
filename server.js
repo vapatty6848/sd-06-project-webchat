@@ -1,21 +1,28 @@
 const express = require('express');
 const cors = require('cors');
-const httpServer = require('http');
-const socketIo = require('socket.io');
 
+const PORT = process.env.PORT || 3000;
 const app = express();
-const http = httpServer.createServer(app);
-const io = socketIo(http, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
-});
+const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer);
+const models = require('./models/messages');
 
 app.use(cors());
 
-app.get('/', (_req, res) => {
-  res.sendFile(`${__dirname}/server.html`);
+app.set('view engine', 'ejs');
+app.set('views', './views');
+app.use(express.static(`${__dirname}/public/`));
+
+const messagesFormatter = ({ nickname, chatMessage, timestamp }) => {
+  const formattedMessage = `${timestamp} - ${nickname} disse: ${chatMessage}`;
+
+  return formattedMessage;
+};
+
+app.get('/', async (_req, res) => {
+  const previousMessages = await models.getMessages();
+  const messagesToRender = previousMessages.map((message) => messagesFormatter(message));
+  return res.render('home', { messagesToRender });
 });
 
 let users = [];
@@ -68,9 +75,11 @@ const setNick = (socket, nick, userNick) => {
   socket.emit('message', `Seu novo nick é: ${nick}.`);
 };
 
-const sendMessage = ({ chatMessage, nickname }) => {
-  const message = `${generateTimeStamp()} - ${nickname} disse: ${chatMessage}`;
+const sendMessage = async ({ chatMessage, nickname }) => {
+  const timestamp = generateTimeStamp();
+  const message = messagesFormatter({ nickname, chatMessage, timestamp });
 
+  await models.saveMessages({ nickname, chatMessage, timestamp });
   io.emit('message', message);
 };
 
@@ -94,6 +103,6 @@ io.on('connection', (socket) => {
   socket.on('setNick', (nick) => setNick(socket, nick));
 });
 
-http.listen(3000, () => {
-  console.log('Servidor ouvindo na porta 3000');
+httpServer.listen(PORT, () => {
+  console.log(`Servidor ouvindo na porta ${PORT}`);
 });
