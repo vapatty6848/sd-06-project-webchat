@@ -1,4 +1,4 @@
-const { timeStamp, messagesList, msgFormat } = require('../utils');
+const { timeStamp, messagesList } = require('../utils');
 const { getAllMessages, insertMessage } = require('../models/chatModel');
 
 const sockets = [];
