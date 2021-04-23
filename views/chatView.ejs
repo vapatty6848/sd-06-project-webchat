@@ -202,8 +202,15 @@
     });
 
     socket.on('message', (message) => {
-      saveMessageInDB(message);
-      createMessage(message)      
+      const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+      const time = new Date().toLocaleTimeString();
+      const timestamp = `${date} ${time}`;
+      
+      const getMessage = message.split(': ')[1];
+      const payload = { message: getMessage, nickname: nick, timestamp };
+      
+      saveMessageInDB(payload);
+      createMessage(payload);
     });
     
     socket.on('reload', () => {

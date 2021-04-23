@@ -18,12 +18,13 @@ app.use(express.json());
 
 let userList = [];
 
-function generateUserMessage(message, nickname, socket) {
+function generateUserMessage(chatMessage, nickname, socket) {
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
   const time = new Date().toLocaleTimeString();
   const timestamp = `${date} ${time}`;
   
-  const userMessage = { message, nickname, timestamp };
+  const userMessage = `${timestamp} - ${nickname}: ${chatMessage}`;
+  
   socket.emit('message', userMessage);
   io.emit('reload');
 }
