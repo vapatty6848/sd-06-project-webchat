@@ -18,15 +18,15 @@ app.use(express.json());
 
 let userList = [];
 
-function generateUserMessage(chatMessage, nickname, socket) {
+function generateUserMessage(chatMessage, nickname, socket, io2) {
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
   const time = new Date().toLocaleTimeString();
   const timestamp = `${date} ${time}`;
   
   const userMessage = `${timestamp} - ${nickname}: ${chatMessage}`;
   
-  socket.emit('message', userMessage);
-  io.emit('reload');
+  io2.emit('message', userMessage);
+  // io2.emit('reload');
 }
 
 function removeUserFromList(id) {
@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('message', ({ chatMessage, nickname }) => {
-    generateUserMessage(chatMessage, nickname, socket);
+    generateUserMessage(chatMessage, nickname, socket, io);
   });
 });
 
