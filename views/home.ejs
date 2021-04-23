@@ -56,10 +56,12 @@
       nickname = generateRandomNickname();
       const nicknameSpan = document.createElement('span');
       nicknameSpan.innerHTML = nickname;
-      nicknameSpan.setAttribute('data-testid', 'online-user');
+      // nicknameSpan.setAttribute('data-testid', 'online-user');
       nicknameSpan.id = 'nickname';
+
+      socket.emit('newUser', nickname);
       document.querySelector('#nicknameShow').appendChild(nicknameSpan);
-    })
+    });
 
     document.querySelector('#sendMessage').addEventListener('click', () => {
       const message = document.querySelector('#message').value;
@@ -77,16 +79,24 @@
     });
 
     socket.on('updateUsers', (users) => {
+      const firstUser = users.find((u) => u.socketId === socket.id);
+      const firstUserIndex = users.indexOf(firstUser);
+      users.splice(firstUserIndex, 1);
+      users.unshift(firstUser);
+
+      document.querySelector('#users').innerHTML = '';
       users.map((user) => {
         const userLi = document.createElement('li');
-        userLi.innerHTML = user.socketId;
-  
+        userLi.innerHTML = user.nickname;
+        userLi.setAttribute('data-testid', 'online-user');
         document.querySelector('#users').appendChild(userLi);
       });
     });
 
     document.querySelector('#saveNickname').addEventListener('click', () => {
       const newNickname = document.querySelector('#nickname-box').value;
+
+      socket.emit('newNickname', { id: socket.id, nickname: newNickname });
 
       document.querySelector('#nickname').innerHTML = newNickname;
     });

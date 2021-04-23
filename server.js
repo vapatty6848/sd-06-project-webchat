@@ -14,7 +14,7 @@ app.get('/', async (_req, res) => {
   res.render('home', { messages });
 });
 
-const users = [];
+let users = [];
 
 function getThisDate() {
   const newDate = new Date();
@@ -25,20 +25,29 @@ function getThisDate() {
 }
 
 io.on('connection', (socket) => {
-  console.log(`new user connected: ${socket.id}`);
+  socket.on('newUser', (nickname) => {
+    users.push({ socketId: socket.id, nickname });
+    io.emit('updateUsers', users);
+  });
 
-  users.push({ socketId: socket.id });
-
-  io.emit('updateUsers', users);
+  socket.on('newNickname', ({ id, nickname }) => {
+    const userToUpdate = users.find((u) => u.socketId === id);
+    const userIndex = users.indexOf(userToUpdate);
+    users[userIndex].nickname = nickname;
+    io.emit('updateUsers', users);
+  });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const timestamps = getThisDate();
-
     const msgString = `${timestamps} ${nickname} ${chatMessage}`;
-
     io.emit('message', msgString);
-
     await saveMessage({ message: chatMessage, nickname, timestamps });
+  });
+
+  socket.on('disconnect', () => {
+    const onlineUsers = users.filter((u) => u.socketId !== socket.id);
+    users = onlineUsers;
+    io.emit('updateUsers', users);
   });
 });
 
