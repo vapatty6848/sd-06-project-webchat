@@ -22,6 +22,11 @@
     </section>
     <section class="S2" id="messages">
       <h2>Mensagens</h2>
+      <% messagesToRender.forEach((message)=> { %>
+        <li data-testid="message">
+          <%= message %>
+        </li>
+        <% }); %>
     </section>
     <section class="S3">
       <input data-testid="message-box" type="text" id="message-box">
@@ -31,7 +36,7 @@
     </section>
   </main>
   <script>
-    const socket = io('http://localhost:3000');
+    const socket = io();
     //btn envia nick p/ server
     let nick = "";
     document.querySelector('#btn_nick').addEventListener('click', (e) => {
@@ -42,7 +47,6 @@
     // com nick renderiza msg
     socket.on('message', (message) => {
       const msgP = document.createElement('p');
-      console.log('fullMsg', message);
       msgP.innerHTML = message;
       msgP.dataset.testid = "message"
       document.querySelector('#messages').appendChild(msgP);
@@ -53,7 +57,7 @@
       const msg = document.querySelector('#message-box').value;
       const name = nick;
       const objmsg = { chatMessage: msg, nickname: name }
-      socket.emit('msg', objmsg);
+      socket.emit('message', objmsg);
       document.querySelector('#message-box').value = "";
     });
     socket.on('withoutNick', (nickName) => {
@@ -63,7 +67,6 @@
     // sem nick renderiza msg
     socket.on('messageSnick', (message) => {
       const msgP = document.createElement('p');
-      console.log('fullMsg', message);
       msgP.innerHTML = message;
       msgP.dataset.testid = "message"
       document.querySelector('#messages').appendChild(msgP);

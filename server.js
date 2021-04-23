@@ -1,5 +1,7 @@
 const express = require('express');
+const cors = require('cors');
 
+const PORT = process.env.PORT || 3000;
 const app = express();
 const httpServer = require('http').createServer(app);
 
@@ -10,7 +12,27 @@ const io = require('socket.io')(httpServer, {
   },
 });
 
-const msgControler = require('./controller/msgController');
+app.use(express.static(`${__dirname}/public`));
+app.use(cors());
+app.set('view engine', 'ejs'); // caminha para o eja renderizar uma pg.
+app.set('views', './views');
+
+app.use(express.urlencoded({ extend: true }));
+app.use(express.json());
+
+const { saveMessages, getMessages } = require('./models/message');
+
+const messagesFormatter = ({ nickname, chatMessage, timestamp }) => {
+  const formattedMessage = `${timestamp} - ${nickname} disse: ${chatMessage}`;
+
+  return formattedMessage;
+};
+
+app.get('/', async (_req, res) => {
+  const previousMessages = await getMessages();
+  const messagesToRender = previousMessages.map((message) => messagesFormatter(message));
+  return res.render('home', { messagesToRender });
+});
 
 // array de usuários
 const users = [];
@@ -33,28 +55,28 @@ const updateNickame = (socket) => {
     socket.emit('yourNick', nickname);
   });
 };
-// função mandar msg com nick
-const sendMsgNick = (socket) => {
-  socket.on('message', (message) => {
-    console.log('back', message);
+// função mandar msg
+const sendMsgNick = async (socket) => {
+  socket.on('message', async ({ nickname, chatMessage }) => {
     const data = new Date();
-    const time = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()}`
+    const timestamp = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()} `
     + `${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
-     const fullMsg = `${time} - ${message.nickname}: ${message.chatMessage}`;
+     const fullMsg = `${timestamp} - ${nickname}: ${chatMessage}`;
+     await saveMessages({ timestamp, nickname, chatMessage });
      io.emit('message', fullMsg);
   });
 };
 // função mandar msg sem nick
-const sendMsg = (socket) => {
-  socket.on('msg', (objMsg) => {
-    console.log('back', objMsg);
+/*  const sendMsg = async (socket) => {
+  socket.on('message', async (objMsg) => {
+    const { nickname, chatMessage } = objMsg;
     const data = new Date();
-    const time = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()}`
+    const timestamp = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()} `
     + `${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
-     const fullMsg = `${time} - ${objMsg.nickname}: ${objMsg.chatMessage}`;
+     const fullMsg = `${timestamp} - ${nickname}: ${chatMessage}`;
      io.emit('messageSnick', fullMsg);
   });
-};
+};  */
 //  função desconectar user.
 const disconnect = (socket) => {
   socket.on('disconnect', () => {
@@ -68,18 +90,7 @@ io.on('connection', (socket) => {
   updateNickame(socket);
   disconnect(socket);
   sendMsgNick(socket);
-  sendMsg(socket);
+  //  sendMsg(socket);
 });
 
-app.use(express.static(`${__dirname}/public`));
-app.set('view engine', 'ejs'); // caminha para o eja renderizar uma pg.
-app.set('views', './views');
-
-app.use(express.urlencoded({ extend: true }));
-app.use(express.json());
-app.get('/', (_req, res) => {
-  res.render('home');
-});
-app.post('/ready', msgControler);
-
-httpServer.listen(3000, () => console.log('socket.io ouvindo na port 3000'));
+httpServer.listen(PORT, () => console.log(`socket.io ouvindo na port ${PORT}`));
