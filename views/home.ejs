@@ -70,7 +70,7 @@
     <div className="messagesContainer">
       <ul id="messages">
         <% messagesToRender.forEach((message) => { %>
-        <li data-testid="message"><%= message %></li>li>
+        <li data-testid="message"><%= message %></li>
       <% }); %>
       </ul>
       <form id="sendMessageForm" action="">
@@ -102,15 +102,25 @@
       messagesUl.appendChild(li);
     }
 
+    const usersUl = document.querySelector('#users');
+
     const createUserList = (users) => {
-      const usersUl = document.querySelector('#users');
+      const otherUsers =  users.filter(({ userId }) => userId !== socket.id);
+      const firstUser = users.filter(({ userId }) => userId === socket.id);
+      const orderedUsers = firstUser.concat(otherUsers);
+
+      nickname = users.find(({ userId }) => userId === socket.id).userNick;
+
+      while (usersUl.firstChild) usersUl.removeChild(usersUl.lastChild);
+
       usersUl.innerHTML = '';
-      users.forEach((user) => {
+      orderedUsers.forEach((user) => {
         const li = document.createElement('li');
         li.innerText = user.userNick;
         li.setAttribute('data-testid', 'online-user');
         usersUl.appendChild(li);
       });
+      
     }
 
     const nickForm = document.querySelector('#setNickForm');
