@@ -19,7 +19,6 @@ app.get('/', (_req, res) => {
 });
 
 let users = [];
-let usedGuestNumbers = [];
 
 const generateTimeStamp = () => {
   const dateOptions = Intl.DateTimeFormat(
@@ -31,34 +30,23 @@ const generateTimeStamp = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true,
+      hour12: false,
     },
   ).formatToParts(new Date());
   const dateParts = {};
+
   dateOptions.forEach(({ type, value }) => {
     dateParts[type] = value;
   });
-  const { day, month, year, hour, minute, second, dayPeriod } = dateParts;
-  return `${day}/${month}/${year} ${hour}:${minute}:${second} ${dayPeriod}`;
-};
 
-const newGuestNumber = () => {
-  if (usedGuestNumbers.includes(1)) {
-    let newNumber = 2;
-    for (let i = 2; usedGuestNumbers.includes(i); i += 1) {
-      newNumber = i + 1;
-    }
-    usedGuestNumbers.push(newNumber);
+  const { day, month, year, hour, minute, second } = dateParts;
 
-    return newNumber;
-  }
-  usedGuestNumbers.push(1);
-  return 1;
+  return `${day}-${month}-${year} ${hour}:${minute}:${second}`;
 };
 
 const getNick = (socketId) => {
   const userFound = users.find(({ userId }) => socketId === userId);
-  return userFound.userNick;
+  if (userFound) return userFound.userNick;
 };
 
 const changeNick = (socketId, nick) => {
@@ -76,49 +64,34 @@ const removeUser = (socketId) => {
 const setNick = (socket, nick, userNick) => {
   changeNick(socket.id, nick);
   io.emit('updateUsers', users);
-  socket.broadcast.emit(
-    'message',
-    { chatMessage: `${userNick} agora se chama ${nick}.`, userNick },
-  );
-  socket.emit(
-    'message',
-    { chatMessage: `Seu novo nick é: ${nick}.`, userNick },
-  );
+  socket.broadcast.emit('message', `${userNick} agora se chama ${nick}.`);
+  socket.emit('message', `Seu novo nick é: ${nick}.`);
 };
 
-const sendMessage = (socket, { message }) => {
-  const updatedNick = getNick(socket.id);
-  io.emit(
-    'message',
-    { chatMessage: `${generateTimeStamp()} - ${updatedNick}: ${message}`, nickname: updatedNick },
-  );
+const sendMessage = ({ chatMessage, nickname }) => {
+  const message = `${generateTimeStamp()} - ${nickname} disse: ${chatMessage}`;
+
+  io.emit('message', message);
 };
 
-const userDisconnect = (socket, guestNumber) => {
-  usedGuestNumbers = usedGuestNumbers.filter((number) => number !== guestNumber);
+const userDisconnect = (socket) => {
   const updatedNick = getNick(socket.id);
+
   removeUser(socket.id);
   io.emit('updateUsers', users);
-  socket.broadcast.emit(
-    'message',
-    { chatMessage: `${updatedNick} acabou de se desconectar.`, nickname: updatedNick },
-  );
+  socket.broadcast.emit('message', `${updatedNick} acabou de se desconectar.`);
+};
+
+const loginUser = ({ nickname, socket }) => {
+  users.push({ userId: socket.id, userNick: nickname });
+  io.emit('updateUsers', users);
 };
 
 io.on('connection', (socket) => {
-  const guestNumber = newGuestNumber();
-  users.push({ userId: socket.id, userNick: `Guest ${guestNumber}`, guestNumber });
-  const userNick = getNick(socket.id);
-  io.emit('updateUsers', users);
-  socket.emit('welcome', { chatMessage: `Seja bem vindo ao nosso chat, ${userNick}!`, userNick });
-  socket.broadcast.emit(
-    'message',
-    { chatMessage: `${userNick} acabou de se conectar.`, userNick },
-  );
-
-  socket.on('disconnect', () => userDisconnect(socket, guestNumber));
-  socket.on('message', (chatMessage) => sendMessage(socket, chatMessage));
-  socket.on('setNick', (nick) => setNick(socket, nick, userNick));
+  socket.on('login', ({ nickname }) => loginUser({ nickname, socket }));
+  socket.on('message', ({ chatMessage, nickname }) => sendMessage({ chatMessage, nickname }));
+  socket.on('disconnect', () => userDisconnect(socket));
+  socket.on('setNick', (nick) => setNick(socket, nick));
 });
 
 http.listen(3000, () => {
