@@ -18,24 +18,32 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
-  // https://www.ti-enxame.com/pt/javascript/gere-stringcaracteres-aleatorios-em-javascript/967048592/
-  // const randonNickname = () => {
-  //   let newNickname = '';
-  //   const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  //   for (let i = 0; i < 16; i = +1) {
-  //     newNickname += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-  //   }
-  //  return newNickname;
-  // };
+const twoDigitsNumber = (number) =>{
+  if (number < 10) {
+    return `0${number}`;
+  }
+  return number;
+};
+
+const getDate = () => {
+  const date = new Date();
+  const day = twoDigitsNumber(date.getDate());
+  const month = twoDigitsNumber(date.getMonth());
+  const year = date.getFullYear();
+  const hour = twoDigitsNumber(date.getHours());
+  const minute = twoDigitsNumber(date.getMinutes());
+
+  const newFormatDate = `${day}-${month}-${year} ${hour}:${minute}`;
+  return newFormatDate;
+};
 
 io.on('connection', (socket) => {
   console.log(`usuário conectado ${socket.id}`);
 
-  // const nickname = randonNickname();
-  // const date = new Date();
-  socket.on('Message', (message) => {
-    console.log(message);
-    io.emit('newMessage', message);
+  socket.on('message', ({ chatMessage, nickname }) => {
+    const date = getDate();
+    const theNewMessage = `${date} ${nickname} ${chatMessage}`;
+    io.emit('message', theNewMessage);
   });
 
   // socket.on('disconnect', () => {

@@ -7,28 +7,41 @@
   <title>Página de mensagens</title>
 </head>
 <body>
+  <aside>
+    <p data-testid="online-user"></p>
+  </aside>
+
   <h1>Web Chat</h1>
-  
-  <input type="text" id='message' />
-  <button id='sendMessage'>Enviar</button>
-  
-  <ul id='messages'>Mensagens</ul>
+ 
+  <div>
+    <ul id='messages'>Mensagens</ul>
+  </div>
+
+  <div>
+    <input type="text" id='message' data-testid="message-box" />
+    <button id='sendMessage' data-testid="send-button">Enviar</button>
+    <input type="text" id='nickname' placeholder="Como gostaria de ser chamado(a)" />
+    <button id='nicknameUser' data-testid="nickname-button">Salvar</button>
+  </div>
   
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
 
-    document.getElementById('sendMessage').addEventListener('click', (event) =>{
-      const message = document.getElementById('message').value;
+    document.querySelector('#sendMessage').addEventListener('click', (event) =>{
+      const message = document.querySelector('#message').value;
+      const nickname = document.querySelector('#nickname').value;
+      console.log('message', message);
+      console.log('nickname', nickname);
       console.log('estive aqui')
-    // canal: Message, mensagem: conteudo de message
-      socket.emit('Message', message)
+    // canal: message, mensagem: conteudo de message
+      socket.emit('message', { chatMessage: message, nickname })
     });
 
-    socket.on('newMessage', (message) =>{
+    socket.on('message', (message) =>{
       const messageLi = document.createElement('li');
       messageLi.innerHTML = message;
-      document.getElementById('messages').appendChild(messageLi);
+      document.querySelector('#messages').appendChild(messageLi);
     });
     </script>
 </body>
