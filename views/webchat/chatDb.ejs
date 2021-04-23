@@ -118,14 +118,13 @@
 
     function renderOnlineUsers(users, socketId) {
       const currentUser = users.filter((user) => user.socketId === socketId);
-
       let removeCurrent = [];
-      let usersToRender = [...currentUser];
       if (users.length >= 2) {
         removeCurrent = (users.filter((user) => user.socketId !== socketId)).reverse();
-        usersToRender = [...currentUser, ...removeCurrent];
       }
-      
+
+      const usersToRender = [...currentUser, ...removeCurrent];
+
       const userList = document.querySelector('#online-users-list');
       userList.innerHTML = ('');
 

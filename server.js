@@ -4,7 +4,6 @@ const http = require('http');
 const socketIo = require('socket.io');
 const Helpers = require('./helpers');
 const Messages = require('./models/messagesModel');
-const Users = require('./models/onlineUsers');
 
 require('dotenv/config');
 const Routes = require('./Routes');
@@ -19,15 +18,38 @@ app.set('view engine', 'ejs');
 const server = http.createServer(app);
 const io = new socketIo.Server(server);
 const date = Helpers.dateGenerator();
+const serverClientUsers = 'server-client-users-online';
+let users = [];
 
-const getUsers = async () => {
-  Users.getAll().then((users) => {
-    io.emit('server-client-users-online', users);
-  });
+// const getUsers = async () => {
+//   Users.getAll().then((users) => {
+//     io.emit('server-client-users-online', users);
+//   });
+// };
+
+const addUser = (nickname, socketId) => {
+  // users = [...users, { nickname, socketId }];
+  users.push({ nickname, socketId });
+  io.emit(serverClientUsers, users);
+};
+
+const updateUser = (nickname, socketId) => {
+  const result = users.filter((user) => user.socketId !== socketId);
+  users = [...result, { nickname, socketId }];
+
+  io.emit(serverClientUsers, users);
+};
+
+const deleteUser = (socketId) => {
+  const result = users.filter((user) => user.socketId !== socketId);
+  users = [...result];
+  io.emit(serverClientUsers, users);
 };
 
 io.on('connection', (socket) => {
-  socket.on('client-server-get-users', () => getUsers());
+  socket.on('client-server-get-users', () => {
+    io.emit('server-client-users-online', users);
+  });
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     Messages.create(chatMessage, nickname, date);
@@ -35,17 +57,11 @@ io.on('connection', (socket) => {
     io.emit('message', formatedMessage);
   });
 
-  socket.on('client-server-add-user', async (nickname) => Users.addUser(nickname, socket.id));
+  socket.on('client-server-add-user', async (nickname) => addUser(nickname, socket.id));
 
-  socket.on('client-server-update-user', async (nickname) => {
-    await Users.updateUser(nickname, socket.id);
-    getUsers();
-  });
+  socket.on('client-server-update-user', async (nickname) => updateUser(nickname, socket.id));
 
-  socket.on('disconnect', async () => {
-    await Users.deleteUser(socket.id);
-    getUsers();
-  });
+  socket.on('disconnect', async () => deleteUser(socket.id));
 });
 
 server.listen(port, () => {
