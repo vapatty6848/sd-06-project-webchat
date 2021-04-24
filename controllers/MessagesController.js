@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { createMessages, getAllMessages } = require('../models/MessagesModel');
-const { createUser, getAllUsers } = require('../models/UsersModel');
+const { getAllUsers } = require('../models/UsersModel');
 
 const routerMessage = Router();
 const CREATED = 201;
