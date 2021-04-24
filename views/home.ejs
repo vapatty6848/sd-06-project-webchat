@@ -108,10 +108,8 @@
       const otherUsers =  users.filter(({ userId }) => userId !== socket.id);
       const firstUser = users.filter(({ userId }) => userId === socket.id);
       const orderedUsers = firstUser.concat(otherUsers);
-
+      
       nickname = users.find(({ userId }) => userId === socket.id).userNick;
-
-      while (usersUl.firstChild) usersUl.removeChild(usersUl.lastChild);
 
       usersUl.innerHTML = '';
       orderedUsers.forEach((user) => {
@@ -120,7 +118,6 @@
         li.setAttribute('data-testid', 'online-user');
         usersUl.appendChild(li);
       });
-      
     }
 
     const nickForm = document.querySelector('#setNickForm');
@@ -129,7 +126,7 @@
     nickForm.addEventListener('submit', (event) =>{
       event.preventDefault();
       if (nickInput.value) {
-        socket.emit('setNick', nickInput.value);
+        socket.emit('setNick', { nickname: nickInput.value, userNick: nickname });
         return false;
       }
     })
@@ -139,10 +136,7 @@
       socket.emit('login', { nickname: userNickname });
     });
     socket.on('message', (message) => createMessage(message));
-    socket.on('updateUsers', (users) => {
-      nickname = users.find(({ userId }) => userId === socket.id).userNick;
-      createUserList(users);
-    });
+    socket.on('updateUsers', (users) => createUserList(users));
     socket.on('setNick', ( nick ) => createMessage(message));
   </script>
 </html>

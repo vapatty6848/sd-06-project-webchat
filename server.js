@@ -68,11 +68,11 @@ const removeUser = (socketId) => {
   users = users.filter(({ userId }) => socketId !== userId);
 };
 
-const setNick = (socket, nick, userNick) => {
-  changeNick(socket.id, nick);
+const setNick = (socket, nickname, userNick) => {
+  changeNick(socket.id, nickname);
   io.emit('updateUsers', users);
-  socket.broadcast.emit('message', `${userNick} agora se chama ${nick}.`);
-  socket.emit('message', `Seu novo nick é: ${nick}.`);
+  socket.broadcast.emit('message', `${userNick} agora se chama ${nickname}.`);
+  socket.emit('message', `Seu novo nick é: ${nickname}.`);
 };
 
 const sendMessage = async ({ chatMessage, nickname }) => {
@@ -100,7 +100,7 @@ io.on('connection', (socket) => {
   socket.on('login', ({ nickname }) => loginUser({ nickname, socket }));
   socket.on('message', ({ chatMessage, nickname }) => sendMessage({ chatMessage, nickname }));
   socket.on('disconnect', () => userDisconnect(socket));
-  socket.on('setNick', (nick) => setNick(socket, nick));
+  socket.on('setNick', ({ nickname, userNick }) => setNick(socket, nickname, userNick));
 });
 
 httpServer.listen(PORT, () => {
