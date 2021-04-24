@@ -66,17 +66,6 @@ const sendMsgNick = async (socket) => {
      io.emit('message', fullMsg);
   });
 };
-// função mandar msg sem nick
-/*  const sendMsg = async (socket) => {
-  socket.on('message', async (objMsg) => {
-    const { nickname, chatMessage } = objMsg;
-    const data = new Date();
-    const timestamp = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()} `
-    + `${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
-     const fullMsg = `${timestamp} - ${nickname}: ${chatMessage}`;
-     io.emit('messageSnick', fullMsg);
-  });
-};  */
 //  função desconectar user.
 const disconnect = (socket) => {
   socket.on('disconnect', () => {
