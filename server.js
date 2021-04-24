@@ -41,7 +41,7 @@ const getFisrtUser = (socket) => {
   const randomUser = (`${Math.random().toString(36)}00000000000000000`).slice(2, 16 + 2);
   const objUser = { name: randomUser, socketId: socket.id };
   users.push(objUser);
-  socket.emit('withoutNick', randomUser);
+  //  socket.emit('withoutNick', randomUser);
   io.emit('updateUsers', users);
 };
 // função update user com nickName

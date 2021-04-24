@@ -18,7 +18,7 @@
       <button type="button" id="btn_nick" data-testid="nickname-button">
         Entrar
       </button>
-      <ul id="users"></ul>
+      <ul id="usersGroup"></ul>
     </section>
     <section class="S2" id="messages">
       <h2>Mensagens</h2>
@@ -39,9 +39,10 @@
     const socket = io();
     //btn envia nick p/ server
     let nick = "";
+    const onlineUsersList = document.querySelector('#usersGroup');
     document.querySelector('#btn_nick').addEventListener('click', (e) => {
       nick = document.querySelector('#nick-name').value
-      document.querySelector('#users').innerHTML = '';//não esta apagando.
+      document.querySelector('#usersGroup').innerHTML = '';//não esta apagando.
       socket.emit('nickName', nick)
     });
     // com nick renderiza msg
@@ -74,12 +75,17 @@
     });
     // atualiza users no browser
     socket.on('updateUsers', (users) => {
-      document.querySelector('#users').innerHTML = '';
-      users.forEach((user) => {
+      document.querySelector('#usersGroup').innerHTML = '';
+      const otherUsers = users.filter((user) => user.socketId !== socket.id);
+      const firstUser = users.filter((user) => user.socketId === socket.id);
+      const orderedUsers = firstUser.concat(otherUsers);
+      nick = users.find((user) => user.socketId === socket.id).name
+      while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
+      orderedUsers.forEach((user) => {
         const userLi = document.createElement('li');
         userLi.dataset.testid = "online-user"
         userLi.innerHTML = user.name;
-        document.querySelector('#users').appendChild(userLi);
+        document.querySelector('#usersGroup').appendChild(userLi);
       })
     });
   </script>
