@@ -37,7 +37,7 @@ const time = () => {
   const dia = dNow.getDate();
   const ano = dNow.getFullYear();
   const hr = dNow.getHours();
-  const localdate = `${dia}/${month()}/${ano} ${hr}:${min()}`;
+  const localdate = `${dia}-${month()}-${ano} ${hr}:${min()}`;
   return localdate;
 };
 
@@ -46,7 +46,7 @@ const myTime = time();
 io.on('connection', async (socket) => {
   socket.on('message', async ({ nickname, chatMessage }) => {
     await createMessages(nickname, chatMessage, myTime);
-    io.emit('newMessage', `${myTime} ${nickname} ${chatMessage}`);
+    io.emit('message', `${myTime} ${nickname} ${chatMessage}`);
   });
 
   socket.on('initialNickname', async ({ nickname, socketID }) => {

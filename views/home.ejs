@@ -68,7 +68,7 @@
       return false;
     });
     
-    socket.on('newMessage', (message) => {
+    socket.on('message', (message) => {
       const messageLi = document.createElement('li');
       messageLi.innerText = message;
       messageLi.setAttribute('data-testid', 'message')
