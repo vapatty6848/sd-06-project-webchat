@@ -88,9 +88,9 @@
     };
     const randomName = randomNickname();
 
-    socket.on('connect', () => {
-      socket.emit('nickname', { nickname: randomName })
-    })
+
+    socket.emit('nickname', { nickname: randomName })
+
 
     sessionStorage.setItem('nickname', randomName);
 

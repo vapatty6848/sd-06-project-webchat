@@ -7,7 +7,11 @@ const nicknameSocket = (io, socket, nickname) => {
   console.log(`nickname: ${nickname}`);
   console.log(`socket.id: ${socket.id}`);
   const userIndex = sockets.findIndex((user) => user.id === socket.id);
-  sockets[userIndex].nickname = nickname;
+  if (userIndex > -1) {
+    sockets[userIndex].nickname = nickname;
+  } else {
+    sockets.push({ id: socket.id, nickname });
+  }
   io.emit('onlineUsers', sockets);
 };
 
@@ -19,9 +23,10 @@ const onMessage = async (io, socket, { chatMessage, nickname }) => {
 
 const chatController = async (io, socket) => {
   console.log(`${socket.id} conectou!`);  
-  sockets.push({ id: socket.id, nickname: socket.id });
+  // sockets.push({ id: socket.id, nickname: socket.id });
 
-  if (sockets.length > 1) io.emit('onlineUsers', sockets);
+  // if (sockets.length > 1) io.emit('onlineUsers', sockets);
+  io.emit('onlineUsers', sockets);
   const usersList = await getAllMessages();
   io.emit('messageHistory', messagesList(usersList));
 
