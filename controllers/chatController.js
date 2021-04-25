@@ -18,9 +18,9 @@ const nicknameSocket = (io, socket, nickname) => {
 const onMessage = async (io, _socket, { chatMessage, nickname }) => {
   const timestamp = timeStamp();
   const msg = msgFormat({ message: chatMessage, nickname, timestamp });
+  io.emit('message', msg);
   await insertMessage({ message: chatMessage, nickname, timestamp });
   // const allMsgs = await getAllMessages();
-  io.emit('message', msg);
 };
 
 const chatController = async (io, socket) => {
