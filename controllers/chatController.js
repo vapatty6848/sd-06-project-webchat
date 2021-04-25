@@ -1,4 +1,4 @@
-const { timeStamp, messagesList } = require('../utils');
+const { timeStamp, messagesList, msgFormat } = require('../utils');
 const { getAllMessages, insertMessage } = require('../models/chatModel');
 
 const sockets = [];
@@ -15,10 +15,12 @@ const nicknameSocket = (io, socket, nickname) => {
   io.emit('onlineUsers', sockets);
 };
 
-const onMessage = async (io, socket, { chatMessage, nickname }) => {
-  await insertMessage({ message: chatMessage, nickname, timestamp: timeStamp() });
-  const allMsgs = await getAllMessages();
-  io.emit('messageHistory', messagesList(allMsgs));
+const onMessage = async (io, _socket, { chatMessage, nickname }) => {
+  const timestamp = timeStamp();
+  const msg = msgFormat({ message: chatMessage, nickname, timestamp });
+  await insertMessage({ message: chatMessage, nickname, timestamp });
+  // const allMsgs = await getAllMessages();
+  io.emit('message', msg);
 };
 
 const chatController = async (io, socket) => {
@@ -28,8 +30,8 @@ const chatController = async (io, socket) => {
   if (sockets.length > 0) io.emit('onlineUsers', sockets);
 
   // io.emit('onlineUsers', sockets);
-  const usersList = await getAllMessages();
-  io.emit('messageHistory', messagesList(usersList));
+  // const usersList = await getAllMessages();
+  // io.emit('message', messagesList(usersList));
 
   // socket.broadcast.emit('message', message({ chatMessage: 'se conectou', nickname: socket.id }));
 

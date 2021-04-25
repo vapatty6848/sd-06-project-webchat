@@ -10,11 +10,20 @@ const io = require('socket.io')(http, {
   },
 });
 const { chatController } = require('./controllers/chatController');
+const { getAllMessages } = require('./models/chatModel');
+const { msgFormat } = require('./utils');
 
 app.use(cors());
 
-app.get('/', (req, res) => {
-  res.sendFile(`${__dirname}/views/index.html`);
+app.set('view engine', 'ejs');
+app.set('views', './views');
+app.use(express.static(`${__dirname}/public/`));
+
+app.get('/', async (_req, res) => {
+  const previousMessages = await getAllMessages();
+  const messagesToRender = previousMessages.map((message) => msgFormat(message));
+  return res.render('index', { messagesToRender });
+  // res.sendFile(`${__dirname}/views/index.html`);
 });
 
 const ioConnection = (socket) => chatController(io, socket);
