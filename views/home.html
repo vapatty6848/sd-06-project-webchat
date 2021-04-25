@@ -4,53 +4,26 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <link rel="stylesheet" href="./home.css">
   <title>The Coyote</title>
 </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <div class="title">
-          <p>Fofocando</p>
-        </div>
-        <div class="nick">
-          <form action="" id="nicknameForm">
-            <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button       data-testid="nickname-button">Salvar</button>
-          </form>
-        </div>
-      </div>
-      <div class="content">
-        <div class="aside">
-          <h3>USERS</h3>
-          <ul id="users"></ul>
-        </div>
-        <div class="message">
-          <h3>MESSAGES</h3>
-          <ul id="messages">
-            <% messages.forEach((msg) => { %>
-              <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
-            <% }) %>
-          </ul>
-        </div>
-      </div>
-      <div class="footer">
-        <form action="" id="messageForm">
-          <input
-            class="input-message"
-            data-testid="message-box"
-            id="messageInput" autocomplete="off"
-            placeholder="Informe a mensagem"
-          />
-          <button
-            data-testid="send-button"
-          >
-            Enviar
-          </button>
-        </form>
-      </div>
-    </div>
-
+    <h1>Fofocando</h1>
+    <h3>USERS</h3>
+    <ul id="users"></ul>
+    <form action="" id="nicknameForm">
+      <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-button">Salvar</button>
+    </form>
+    <h3>MESSAGES</h3>
+    <ul id="messages">
+      <% messages.forEach((msg) => { %>
+        <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
+      <% }) %>
+    </ul>
+    <form action="" id="messageForm">
+      <input data-testid="message-box" id="messageInput" autocomplete="off" /><button data-testid="send-button">Enviar</button>
+    </form>
     <script>
       const socket = io();
       const userNickname = document.querySelector('#user-nickname')
