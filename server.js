@@ -29,25 +29,26 @@ const io = socketIo(socketIoServer, {
 let users = [];
 const newUsersChat = ({ newUserNick, socket }) => {
   const nickUser = users.map((user) => {
-    if (user.socketId !== socket.id) return user;
-    return { ...user, nickname: newUserNick };
+  if (user.socketId !== socket.id) return user;
+   return { ...user, nickname: newUserNick };
   });
 
   users = nickUser;
-  io.emit('new users', { users });
+   io.emit('new users', { users });
 };
 
 app.use(cors());
 
+const randomName = `user_${Math.random().toString().substr(2, 11)}`;
 io.on('connection', (socket) => {
-  const randomName = `user_${Math.random().toString().substr(2, 11)}`;
   const newUser = { socketId: socket.id, name: randomName };
-  users.push(newUser);
+  const test = users.push(newUser);
+  console.log('test', test);
   io.emit('new users', users);
-  socket.on('message', ({ nickname, chatMessage }) => {
+  socket.on('message', async ({ nickname, chatMessage }) => {
     const newDate = checkDate();
-    postMsg({ nickname, chatMessage, newDate });
-    const message = `${newDate} ${nickname}${chatMessage}`;
+    await postMsg({ nickname, chatMessage, newDate });
+    const message = `${newDate}-${nickname}:${chatMessage}`;
     io.emit('message', message);
   });
 
@@ -68,7 +69,7 @@ app.set('views', './views');
 app.get('/', async (_req, res) => {
   const getAll = await getAllMsg();
 
-  res.render('front', getAll);
+  res.render('home', { getAll, users });
 });
 
 socketIoServer.listen(3000, () => console.log('listening on port 3000'));

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/socket.io/socket.io.js"></script>
+  <title>Webchat</title>
+</head>
+<body>
+  <div>
+    <h3 id="online-user" data-testid="online-user"></h3>
+    <input
+    type="text"
+    data-testid="nickname-box"
+    id="nickname-box"
+    placeholder="insira seu nickname"
+    >
+    <button
+    type="button"
+    data-testid="nickname-button"
+    id="nickname-button"
+    >
+    salvar nickname
+  </button>
+  </div>
+  <div>
+    <h2>Mensagem</h2>
+    <input
+    type="text"
+    data-testid="message-box"
+    id="message-box"
+    >
+    <button
+    type="button"
+    data-testid="send-button"
+    id="send-button"
+    >
+    enviar
+    </button>
+    <div>
+      <h2
+      id="message"
+      >
+      Mensagens recebidas
+    </h2>
+      <ul>
+       <% users.forEach((newDate, nickname, chatMessage) => { %>
+         <li data-testid="message"><%= msg
+       })
+      </ul>
+    </div>
+  </div>
+  <script>
+    const socket = io('http://localhost:3000');
+
+  </script>
+</body>
+</html>
