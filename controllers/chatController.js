@@ -25,8 +25,9 @@ const chatController = async (io, socket) => {
   console.log(`${socket.id} conectou!`);  
   // sockets.push({ id: socket.id, nickname: socket.id });
 
-  // if (sockets.length > 1) io.emit('onlineUsers', sockets);
-  io.emit('onlineUsers', sockets);
+  if (sockets.length > 0) io.emit('onlineUsers', sockets);
+
+  // io.emit('onlineUsers', sockets);
   const usersList = await getAllMessages();
   io.emit('messageHistory', messagesList(usersList));
 
