@@ -10,7 +10,7 @@ router.get('/', async (_req, res) => {
   const formatedMessages = await messages
     .map((message) => `${message.timestamp} - ${message.nickname}: ${message.message}`);
 
-    res.render('home', { formatedMessages });
+  res.render('home', { formatedMessages });
 });
 
 module.exports = router;
