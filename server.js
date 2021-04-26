@@ -1,34 +1,39 @@
+// Package imports
 const app = require('express')();
-const dayjs = require('dayjs');
 
+// Setting up express server and socketIO
 const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer);
 
-const { MessagesController, saveMessage } = require('./controllers/MessagesController');
+// Local imports
+const { MessagesController } = require('./controllers/MessagesController');
 const randomUserNickname = require('./utils/randomUserNickname');
+const { userJoin, changeUserNickname, getAllUsers, userDisconnect } = require('./utils/users');
+const messageHandler = require('./sockets');
 
-io.on('connection', (socket) => {
-  console.log(`Novo usuário! ${socket.id}`);
+// Runs when user connects
+io.on('connection', async (socket) => {
   const nickname = randomUserNickname();
 
-  socket.emit('userLogin', nickname);
+  // Joins user to users array and emits random user nickname
+  socket.emit('userLogin', userJoin(socket.id, nickname));
 
-  socket.on('message', (data) => {
-    const date = dayjs().format('DD-MM-YYYY hh:mm:ss A');
+  io.emit('loggedUsers', getAllUsers());
 
-    const message = `<li data-testid='message'>
-    <strong>${date} - ${data.nickname}</strong>: ${data.chatMessage}
-    </li>`;
+  // Changes user nickname in users array
+  socket.on('changeNick', (nick) => {
+    changeUserNickname(socket.id, nick);
+    io.emit('loggedUsers', getAllUsers());
+  });
 
-    const savingMsg = {
-      ...data,
-      timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      date,
-      liMsg: message,
-    };
+  // Message handler
+  messageHandler(io, socket);
 
-    saveMessage(savingMsg);
-    io.emit('message', message);
+  // Removes user from users array and re-emits the array on user disconnection
+  socket.on('disconnect', () => {
+    const users = userDisconnect(socket.id);
+
+    io.emit('loggedUsers', users);
   });
 });
 
