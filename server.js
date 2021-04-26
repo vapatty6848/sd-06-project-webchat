@@ -62,7 +62,7 @@ const sendMsgNick = async (socket) => {
     const timestamp = `${data.getDate()}-${(data.getMonth() + 1)}-${data.getFullYear()} `
     + `${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
      const fullMsg = `${timestamp} - ${nickname}: ${chatMessage}`;
-     await saveMessages({ timestamp, nickname, chatMessage });
+      saveMessages({ timestamp, nickname, chatMessage });
      io.emit('message', fullMsg);
   });
 };
