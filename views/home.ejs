@@ -13,8 +13,10 @@
   </label>
   <button data-testid="nickname-button" id="nickname-btn">Salvar</button>
   <br>
+  <h2 id='eu'></h2>
   <h3>Usuários online:</h3>
   <ul id="users">
+    <li><%=nickname %> </li>
   </ul>
     <br>
     <h3>Mensagens</h3>
@@ -23,7 +25,7 @@
     <input type="text" data-testid="message-box" id="message" placeholder="Digite uma nova mensagem aqui">
   <button data-testid="send-button" id="send-btn">Enviar</button>
   <script>
-    const nickname = '<%=nickname %>';
+    const nickname = `${Math.random().toString().substr(2, 16)}`;
     const socket = io('http://localhost:3000');
     const nickInput = document.querySelector('#nickname');
     const nickButton = document.querySelector('#nickname-btn');
@@ -77,8 +79,16 @@
       return false;
     });
     socket.on('teste', (nicknames) => {
+      const bla = nicknames.find((user) => user.socketID === socket.id)
+      const userNow = document.querySelector("#eu");
+      userNow.setAttribute('data-testid', 'online-user')
+      userNow.innerText = bla.nickname;
+
       const listUsers = document.querySelector("#users");
       listUsers.innerHTML = '';
+      const index = nicknames.findIndex((user) => user.socketID === socket.id);
+      console.log(index, 'indeeex')
+      nicknames.splice(index, 1);
       nicknames.forEach((user) => {
         const userLI = document.createElement('li');
         userLI.setAttribute('data-testid', 'online-user')
