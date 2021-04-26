@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -22,7 +21,6 @@ const {
 } = require('./models/UsersModel');
 
 const port = 3000;
-
 const time = () => {
   const dNow = new Date();
   const month = () => {
@@ -43,32 +41,31 @@ const time = () => {
   const localdate = `${dia}-${month()}-${ano} ${hr}:${min()}`;
   return localdate;
 };
-
 const myTime = time();
-io.on('connection', async (socket) => {
+const messages = async (socket) => {
   socket.on('message', async ({ nickname, chatMessage }) => {
     await createMessages(nickname, chatMessage, myTime);
     io.emit('message', `${myTime} ${nickname} ${chatMessage}`);
   });
-
+};
+io.on('connection', async (socket) => {
+  messages(socket);
   socket.on('initialNickname', async ({ nickname, socketID }) => {
     await createUser(nickname, socketID);
     const allUsersBack = await getAllUsers();
     io.emit('teste', allUsersBack);
   });
-
   socket.on('updateNick', async ({ nickname, socketIdFront }) => {
     await updateUser(nickname, socketIdFront);
+    const allUsersBack = await getAllUsers();
+    io.emit('teste', allUsersBack);
   });
-
   socket.on('disconnect', async () => {
     await removeUser(socket.id);
     const allUsersBack = await getAllUsers();
-    // console.log(socket.id, 'socket.id', 'socketid');
-    io.emit('teste', allUsersBack);
+    io.emit('teste', await allUsersBack);
   });
 });
-
 app.set('view engine', 'ejs');
 app.set('views', './views');
 app.get('/', async (_req, res) => {
@@ -76,7 +73,6 @@ app.get('/', async (_req, res) => {
   const allUsersBack = await getAllUsers();
   res.render('home', { allUsersBack, nickname });
 });
-
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/chat', routerMessage);
