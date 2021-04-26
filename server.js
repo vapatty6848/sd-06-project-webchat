@@ -1,7 +1,4 @@
-// Faça seu código aqui
 require('dotenv').config();
-
-const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -16,10 +13,14 @@ const io = require('socket.io')(httpServer, {
 });
 const routerMessage = require('./controllers/MessagesController');
 const { createMessages } = require('./models/MessagesModel');
-const { createUser, updateUser, getAllUsers, removeUser } = require('./models/UsersModel');
+const {
+  createUser,
+  updateUser,
+  getAllUsers,
+  removeUser,
+} = require('./models/UsersModel');
 
 const port = 3000;
-
 const time = () => {
   const dNow = new Date();
   const month = () => {
@@ -40,39 +41,36 @@ const time = () => {
   const localdate = `${dia}-${month()}-${ano} ${hr}:${min()}`;
   return localdate;
 };
-
 const myTime = time();
-
 io.on('connection', async (socket) => {
   socket.on('message', async ({ nickname, chatMessage }) => {
     await createMessages(nickname, chatMessage, myTime);
     io.emit('message', `${myTime} ${nickname} ${chatMessage}`);
   });
-
   socket.on('initialNickname', async ({ nickname, socketID }) => {
     await createUser(nickname, socketID);
+    const allUsersBack = await getAllUsers();
+    io.emit('teste', allUsersBack);
+  });
+  socket.on('updateNick', async ({ nickname, socketIdFront }) => {
+    await updateUser(nickname, socketIdFront);
+  });
+  socket.on('disconnect', async () => {
+    await removeUser(socket.id);
+    const allUsersBack = await getAllUsers();
+    // console.log(socket.id, 'socket.id', 'socketid');
+    io.emit('teste', allUsersBack);
+  });
 });
-
-socket.on('updateNick', async ({ nickname, socketIdFront }) => {
-  await updateUser(nickname, socketIdFront);
+app.set('view engine', 'ejs');
+app.set('views', './views');
+app.get('/', async (_req, res) => {
+  const nickname = `${Math.random().toString().substr(2, 16)}`;
+  const allUsersBack = await getAllUsers();
+  res.render('home', { allUsersBack, nickname });
 });
-
-const allUsersBack = await getAllUsers();
-socket.emit('teste', allUsersBack);
-
-socket.on('disconnect', async () => {
-  await removeUser(socket.id);
-  // console.log(socket.id, 'socket.id', 'socketid');
-  socket.emit('teste', allUsersBack);
-});
-});
-
-app.get('/', (_req, res) => {
-  const pathname = path.join(__dirname, 'views', '/home.ejs');
-  res.render(pathname);
-});
-
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/chat', routerMessage);
-httpServer.listen(port, () => console.log(`Example app listening on port ${port}!`));
+httpServer.listen(port, () =>
+  console.log(`Example app listening on port ${port}!`));
