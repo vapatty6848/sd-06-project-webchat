@@ -11,10 +11,25 @@ const getDate = () => {
   return date;
 };
 
-const getPrefix = (nickname) => {
-  const date = getDate();
-  const prefix = `${date} - ${nickname}: `;
-  return prefix;
+// '2021-04-01 12:00:00'
+
+const convertDate = (dateToConvert) => {
+  const [date, hour, timeFormat] = dateToConvert.split(' ');
+  const newDate = date.split('-').reverse().join('-');
+  const [hours, minutes, seconds] = hour.split(':');
+  const newHour = timeFormat === 'PM' && Number(hours) + 12;
+  const newTimeStamp = `${newHour || hours}:${minutes}:${seconds}`;
+  const convertedDate = `${newDate} ${newTimeStamp}`;
+  return convertedDate;
 };
 
-module.exports = getPrefix;
+const getPrefixes = (nickname) => {
+  const date = getDate();
+  const messagePrefix = `${date} - ${nickname}: `;
+
+  const convertedDate = convertDate(date);
+
+  return { messagePrefix, convertedDate };
+};
+
+module.exports = getPrefixes;

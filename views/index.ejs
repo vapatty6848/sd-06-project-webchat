@@ -22,7 +22,9 @@
     </div>
     <div class="messagesContainer">
       <ul id="messagesList">
-
+        <% messageHistory.map(({message, nickname}) => { %>
+          <li data-testid="message"><%= `${nickname}: ${message}` %></li>
+        <% }) %>
       </ul>
     </div>
 
