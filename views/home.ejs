@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/socket.io/socket.io.js"></script>
+  <title>Webchat</title>
+</head>
+<body>
+
+  <input type="text" placeholder="Insira seu nickname" id="nick" name="nickname" data-testid="nickname-box">
+  <button data-testid="nickname-button" id="sendNick" type="button">Salvar</button>
+
+  <h2>Usuários</h2>
+  <ul id="listaUsuarios">
+  </ul>
+
+  <input data-testid="message-box" type="text" placeholder="Digite uma nova mensagem" id="msg" name="message">
+  <button data-testid="send-button" type="button" id="sendMsg">Enviar</button>
+
+  <h2>Mensagens</h2>
+  <ul id="listaMensagens">
+    <% formatedMessages.forEach((message) => { %>
+      <li data-testid="message"><%= message %></li>
+    <% }) %>
+  </ul>
+
+  <script>
+    // pesquisei alguns meios de fazer o nickname aleatório mas ainda não estava fazendo
+    // muito sentido para mim como implementar, então decidi usar o método que o
+    // Cássio utilizou na função abaixo, achei fácil e fez sentido, então aqui está
+    // link do PR: https://github.com/tryber/sd-06-project-webchat/pull/6/files
+    function generatorNickname(lengthNickname) {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      for (let i = 0; i < lengthNickname; i += 1) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return result;
+    }
+
+    let nickname = generatorNickname(16);
+    const socket = io();
+
+    socket.emit('newUser', nickname);
+
+    // renderizando os usuários online
+    socket.on('updateUsers', (users) => {
+      const list = document.getElementById('listaUsuarios');
+      list.innerHTML = "";
+      const ultimoElem = users.pop();
+      const newArray = users.filter((elem) => elem !== ultimoElem);
+      console.log('NOVO ARRAY', newArray);
+      const teste = [ultimoElem, ...newArray];
+      teste.forEach((user) => {
+        const li = document.createElement('li');
+        li.innerHTML = user;
+        li.setAttribute("data-testid", "online-user");
+        list.appendChild(li);
+      });
+    });
+
+    document.getElementById('sendMsg').addEventListener('click', (event) => {
+      const inputMsg = document.getElementById('msg');
+      const message = inputMsg.value;
+      socket.emit('message', { chatMessage: message, nickname });
+      inputMsg.value = '';
+    });
+
+    // renderizando na tela as mensagens vindas do backend
+    socket.on('message', (msg) => {
+      const list = document.getElementById('listaMensagens');
+      const li = document.createElement('li');
+      li.innerHTML = msg;
+      li.setAttribute("data-testid", "message");
+      list.appendChild(li);
+    });
+
+    document.getElementById('sendNick').addEventListener('click', () => {
+      const inputNick = document.getElementById('nick');
+      const newNickname = inputNick.value;
+      socket.emit('updateNick', nickname, newNickname);
+      nickname = newNickname;
+      inputNick.value = '';
+    });
+  </script>
+</body>
+</html>
