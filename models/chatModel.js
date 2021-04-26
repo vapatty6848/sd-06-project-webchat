@@ -13,11 +13,12 @@ const getAllMessages = async () => {
 // aqui o Luciano me deu a dica de como já formatar as mensagens
 // e já enviar elas prontas com o uso do format
 const createMessage = async (objMessage) => {
-  const { chatMessage: message, nickname } = objMessage;
+  console.log('create message');
+  const { id, chatMessage: message, nickname } = objMessage;
   const data = new Date();
   const newDate = moment(data).format('DD-MM-yyyy hh:mm:ss');
   const newMessage = {
-    message, nickname, timestamp: newDate,
+    message, nickname, timestamp: newDate, id,
   };
   await connection()
     .then((db) => db.collection('messages').insertOne(newMessage))

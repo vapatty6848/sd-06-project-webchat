@@ -47,15 +47,22 @@
 
     // renderizando os usuários online
     socket.on('updateUsers', (users) => {
+      console.log('ARRAY USERS', users);
       const list = document.getElementById('listaUsuarios');
       list.innerHTML = "";
-      const ultimoElem = users.pop();
-      const newArray = users.filter((elem) => elem !== ultimoElem);
+      console.log('SOCKET ID', socket.id);
+      let teste = [];
+      const ultimoElem = users.find((user) => user.id === socket.id);
+      // const ultimoElem = users.pop();
+      console.log('ultimo elem', ultimoElem);
+      const newArray = users.filter((elem) => elem.id !== socket.id);
       console.log('NOVO ARRAY', newArray);
-      const teste = [ultimoElem, ...newArray];
+      teste = [ultimoElem, ...newArray];
+      console.log('ARRAY TESTE', teste);
       teste.forEach((user) => {
+        console.log('user foreach', user);
         const li = document.createElement('li');
-        li.innerHTML = user;
+        li.innerHTML = user.nick;
         li.setAttribute("data-testid", "online-user");
         list.appendChild(li);
       });
