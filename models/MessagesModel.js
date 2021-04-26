@@ -18,5 +18,3 @@ module.exports = {
   createMessages,
   getAllMessages,
 };
-
-// iniciando o projeto
