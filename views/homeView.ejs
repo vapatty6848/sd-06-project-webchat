@@ -81,9 +81,6 @@
       const otherUsers = users.filter((user) => user.id !== socket.id);
       const newArrayUsers = [...firstUser, ...otherUsers];
 
-      //aqui ele mostra quem é o dono da page e atribui a variável nickname o nome dela!
-      nickname = firstUser[0].nickname;
-
       while (usersUl.firstChild) {
         usersUl.removeChild(usersUl.firstChild);
       }
@@ -114,7 +111,6 @@
       if (newNickname !== '') {
         const oldNickname = document.querySelector(`#${socket.id}`);
         oldNickname.innerText = newNickname;
-        // oldNickname.setAttribute('id', newNickname);
         socket.emit('changeNickname', { nickname, newNickname });
         nickname = newNickname;
       };
@@ -129,14 +125,6 @@
     socket.on('message', (message) => createNewMessage(message));
     
     socket.on('updateUsers', (users) => createUser(users));
-
-    socket.on('changeNickName', ({ nickname, newNickname }) => {
-      const oldNickname = document.querySelector(`#${nickname}`);
-      if (oldNickname) {
-        oldNickname.innerText = newNickname;
-        oldNickname.setAttribute('id', newNickname);
-      }
-    });
   </script>
 </body>
 </html>

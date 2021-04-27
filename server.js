@@ -22,7 +22,7 @@ const now = new Date();
 const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
 ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
-const saveUser = ({ nickname, socket }) => {
+const onConnectUser = ({ nickname, socket }) => {
   users.push({ id: socket.id, nickname });
   io.emit('updateUsers', users);
 };
@@ -32,22 +32,20 @@ const onChangeNickname = ({ nickname, newNickname }) => {
 
   if (index >= 0) {
     users[index].nickname = newNickname;
-    console.log(users[index].nickname);
-
     io.emit('updateUsers', users);
   }
 };
 
 const onDisconnect = (socket) => {
   const usersOn = users.filter((user) => user.id !== socket.id);
-  console.log(usersOn);
+
   users = usersOn;
 
   io.emit('updateUsers', users);
 };
 
 io.on('connection', (socket) => {
-  socket.on('connectUser', ({ nickname }) => saveUser({ nickname, socket }));
+  socket.on('connectUser', ({ nickname }) => onConnectUser({ nickname, socket }));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const msg = await messageModel.create(chatMessage, nickname, timestamp);
