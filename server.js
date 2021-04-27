@@ -35,8 +35,9 @@ const createDateString = () => {
 io.on('connection', (socket) => {
   socket.on('random-nickname', () => {
     const nickname = randomNicknameGenerator();
+    console.log('new user: ', nickname)
     users.push({ nickname, socketId: socket.id });
-    socket.emit('public-nickname', users);
+    io.emit('public-nickname', users, nickname);
   });
 
   socket.on('change-nickname', (nickname, idFromClient) => {

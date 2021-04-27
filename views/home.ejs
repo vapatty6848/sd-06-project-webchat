@@ -29,20 +29,27 @@
     <script>
         const socket = io();
         socket.emit('random-nickname', socket.id);
+
         let users = [];
         let messages = [];
 
-        socket.on('public-nickname', (nicknamesFromServer, shouldClearNicknameList) => {
-            if (shouldClearNicknameList) {
-                document.querySelector('#user-names').innerHTML = ''
-            }
-            nicknamesFromServer.forEach(({ nickname }) => {
-                const newUser = document.createElement("LI")
-                newUser.innerText = nickname
-                newUser.setAttribute("data-testid", "online-user");
-                document.querySelector('#user-names').appendChild(newUser)
+        socket.on('public-nickname', (nicknameListFromServer, nicknameFromServer) => {
+            document.querySelector('#user-names').innerHTML = ''
+            const topUser = nicknameListFromServer.find(user => user.socketId === socket.id)
+
+            const newTopUser = document.createElement("LI")
+                newTopUser.innerText = topUser.nickname
+                newTopUser.setAttribute("data-testid", "online-user");
+                document.querySelector('#user-names').appendChild(newTopUser)
+
+            nicknameListFromServer.forEach(({ nickname, socketId }) => {
+                if (socketId !== socket.id) {
+                    const newUser = document.createElement("LI")
+                    newUser.innerText = nickname
+                    newUser.setAttribute("data-testid", "online-user");
+                    document.querySelector('#user-names').appendChild(newUser)
+                }
             })
-            users = nicknamesFromServer
         })
 
         socket.on('message', (messagesFromServer) => {
