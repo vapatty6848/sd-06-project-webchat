@@ -77,17 +77,12 @@
 
     const createUser = (users) => {
       const usersUl = document.querySelector('#onlineUserUl');
-      console.log(users); // 0: {id: "BD-FzVQ1DZTsu8S4AAAB", nickname: "UvZiYrFDcAuPqU
-      console.log(socket.id); // BD-FzVQ1DZTsu8S4AAAB
       const firstUser = users.filter((user) => user.id === socket.id);
-      console.log(firstUser); // 0: {id: "BD-FzVQ1DZTsu8S4AAAB", nickname: "UvZiYrFDcAuPqU
       const otherUsers = users.filter((user) => user.id !== socket.id);
-      console.log(otherUsers); // array vazio
-      const newArrayUsers = firstUser.concat(otherUsers);
-      console.log(newArrayUsers); // {id: "BD-FzVQ1DZTsu8S4AAAB", nickname: "UvZiYrFDcAuPq
+      const newArrayUsers = [...firstUser, ...otherUsers];
 
-      nickname = users.find((user) => user.id === socket.id).nickname;
-      console.log(nickname); // UvZiYrFDcAuPqU
+      //aqui ele mostra quem é o dono da page, e atribui a variável nickname o nome dela!
+      // nickname = firstUser[0].nickname;
 
       while (usersUl.firstChild) {
         usersUl.removeChild(usersUl.firstChild);
