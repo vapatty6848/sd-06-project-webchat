@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webchat</title>
+</head>
+<body>
+  <h1>Webchat Project</h1>
+  <ul id="online-users"></ul>
+  <input id="change-nickname" data-testid="nickname-box">
+  <button id="change-nickname-button" data-testid="nickname-button">Change nickname</button>
+  <ul id="chat-messages">
+    <% messagesToRender.forEach((message) => { %>
+      <li data-testid="message"><%= message %></li>
+    <% }); %>
+  </ul>
+  <form>
+    <input id="message" data-testid="message-box" type= "text">
+      <button id="send-button" data-testid="send-button" type="submit" id="button-addon2">Send</button>
+  </form>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const userList = document.querySelector('#online-users');
+  const userButton = document.querySelector('#change-nickname-button');
+  const inputUser = document.querySelector('#change-nickname');
+  const listMessage = document.querySelector('#chat-messages');
+  const messageForm = document.querySelector('form');
+  const inputMessage = document.querySelector('#message');
+  let userNickname;
+
+  const randomStringNickname = (length) => {
+    const charactersToNickname = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i += 1) {
+      result += charactersToNickname.charAt(Math.floor(Math.random() * charactersToNickname.length));
+    }
+    return result;
+  };
+
+  socket.on('connect', () => { 
+    userNickname = randomStringNickname(16);
+    socket.emit('createNickname', { nickname: userNickname });
+  })
+  
+  socket.on('updateOnlineUsers', (onlineUsers) => {
+    const otherUsers =  onlineUsers.filter((user) => user.id !== socket.id);
+    const firstUser = onlineUsers.filter((user) => user.id === socket.id);
+    const orderedUsers = firstUser.concat(otherUsers);
+    userNickname = onlineUsers.find((user) => user.id === socket.id).nickname;
+    
+    while (userList.firstChild) userList.removeChild(userList.lastChild);
+    orderedUsers.forEach((user) => {
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerHTML = user.nickname;
+      userList.appendChild(li);
+    });
+  });
+  
+  socket.on('message', (message) => {
+    const messageToRender = document.createElement('li');
+    messageToRender.setAttribute('data-testid', 'message');
+    messageToRender.innerHTML = message;
+    listMessage.appendChild(messageToRender);
+  });
+
+  messageForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const chatMessage = inputMessage.value;
+    socket.emit('message', { nickname: userNickname, chatMessage });
+    inputMessage.value = '';
+  });
+
+  userButton.addEventListener('click', () => {
+    const newNickname = inputUser.value;
+    userNickname = newNickname;
+    inputUser.value = '';
+    socket.emit('changeNickname', userNickname);
+  });
+</script>
+</html>
