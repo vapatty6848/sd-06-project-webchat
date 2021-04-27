@@ -41,16 +41,33 @@
 
     socket.on('connect', () =>{
       socket.emit('connectedUser', ({id: socket.id, nickname: nick }));
+
     });
 
     socket.on('connectedUser', ({id, nickname }) =>{
-      console.log(nickname, 'nickname front');
       const nickLi = document.createElement('li')
       nickLi.setAttribute('data-testid', 'online-user');
       nickLi.setAttribute('id', id);
       nickLi.innerHTML = nickname;
       document.querySelector('#nick').appendChild(nickLi);
     });
+
+    socket.on('UsersList', (userList)=> {
+      const nickList = document.querySelector('#nick')
+      while(nickList.firstChild) nickList.removeChild(nickList.firstChild);
+     
+      const myUser = userList.filter(e => e.id === socket.id)
+      const otherUsers = userList.filter(e => e.id !== socket.id)
+      otherUsers.unshift(...myUser);
+      otherUsers.forEach((e)=>{
+        const userLi = document.createElement('li')
+        userLi.setAttribute('data-testid', 'online-user');
+        userLi.setAttribute('id', e.id);
+        userLi.innerHTML = e.nickname;
+          document.querySelector('#nick').appendChild(userLi)
+                
+      })
+    })
 
 
     document.querySelector('#sendMessage').addEventListener('click', (event) =>{
@@ -61,19 +78,15 @@
     });
 
     socket.on('message', (message) =>{
-      console.log(message, 'mensagem que ta dando ruim')
       const messageLi = document.createElement('li')
+
       messageLi.setAttribute('data-testid', 'message');
-      console.log(messageLi, 'messageLi')
       messageLi.innerHTML = message;
-      console.log('messageLi', messageLi)
-      console.log('estive aqui')
       document.querySelector('#messages').appendChild(messageLi);
     });
     
     document.querySelector('#nicknameUser').addEventListener('click', (event) =>{
       const nick = document.querySelector('#nickname').value;
-      console.log(nick, 'nick')
       sessionStorage.setItem('nickname', nick);
       const newNick = document.querySelector(`#${socket.id}`)
       newNick.innerHTML = nick;
@@ -81,7 +94,6 @@
     });
 
     socket.on('newNickname', ({ id, nickname }) => {
-      console.log(nickname, 'nickname newNickname')
       const newNick = document.querySelector(`#${id}`)
       newNick.innerHTML = nickname;
     })
