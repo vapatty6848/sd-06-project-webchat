@@ -13,7 +13,11 @@
   </div>
  
   <div>
-    <ul id='messages'>Mensagens</ul>
+    <ul id='messages'>Mensagens
+      <% allMessages.forEach((e)=>{%>
+      <li data-testid="message"><%= e.timestamp%> <%=e.nickname%> <%=e.message%></li>
+      <%})%>
+    </ul>
   </div>
 
   <div>
@@ -77,7 +81,7 @@
     });
 
     socket.on('newNickname', ({ id, nickname }) => {
-      console.log(nickname)
+      console.log(nickname, 'nickname newNickname')
       const newNick = document.querySelector(`#${id}`)
       newNick.innerHTML = nickname;
     })
