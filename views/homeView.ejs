@@ -81,8 +81,8 @@
       const otherUsers = users.filter((user) => user.id !== socket.id);
       const newArrayUsers = [...firstUser, ...otherUsers];
 
-      //aqui ele mostra quem é o dono da page, e atribui a variável nickname o nome dela!
-      // nickname = firstUser[0].nickname;
+      //aqui ele mostra quem é o dono da page e atribui a variável nickname o nome dela!
+      nickname = firstUser[0].nickname;
 
       while (usersUl.firstChild) {
         usersUl.removeChild(usersUl.firstChild);
@@ -91,6 +91,7 @@
       newArrayUsers.forEach((user) => {
         const userLi = document.createElement('li');
         userLi.setAttribute('data-testid', 'online-user');
+        userLi.setAttribute('id', `${user.id}`);
         userLi.innerText = user.nickname;
         usersUl.appendChild(userLi);
       })
@@ -108,12 +109,12 @@
       document.querySelector('#messageUl').appendChild(messageLi);
     };
 
-    document.querySelector('#nickname-button'). addEventListener('click', () => {
+    document.querySelector('#nickname-button').addEventListener('click', () => {
       const newNickname = document.querySelector('#nickname-box').value;
       if (newNickname !== '') {
-        const oldNickname = document.querySelector(`#${nickname}`);
+        const oldNickname = document.querySelector(`#${socket.id}`);
         oldNickname.innerText = newNickname;
-        oldNickname.setAttribute('id', newNickname);
+        // oldNickname.setAttribute('id', newNickname);
         socket.emit('changeNickname', { nickname, newNickname });
         nickname = newNickname;
       };

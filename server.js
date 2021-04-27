@@ -16,7 +16,7 @@ const messageModel = require('./models/messageModel');
 
 app.use(cors());
 
-const users = [];
+let users = [];
 
 const now = new Date();
 const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
@@ -28,12 +28,22 @@ const saveUser = ({ nickname, socket }) => {
 };
 
 const onChangeNickname = ({ nickname, newNickname }) => {
-  const index = users.indexOf(nickname);
+  const index = users.findIndex((user) => user.nickname === nickname);
+
   if (index >= 0) {
-    users[index] = newNickname;
-    
-    io.emit('changeNickName', { nickname, newNickname });
+    users[index].nickname = newNickname;
+    console.log(users[index].nickname);
+
+    io.emit('updateUsers', users);
   }
+};
+
+const onDisconnect = (socket) => {
+  const usersOn = users.filter((user) => user.id !== socket.id);
+  console.log(usersOn);
+  users = usersOn;
+
+  io.emit('updateUsers', users);
 };
 
 io.on('connection', (socket) => {
@@ -44,9 +54,11 @@ io.on('connection', (socket) => {
     io.emit('message', `${msg.timestamp} ${msg.nickname} ${msg.message}`);
   });
 
-  socket.on('changeNickname', onChangeNickname);
+  socket.on('changeNickname', ({ nickname, newNickname }) => {
+    onChangeNickname({ nickname, newNickname });
+  });
 
-  socket.on('disconnect', () => console.log(`Usuário no socket ${socket.id} se desconectou`));
+  socket.on('disconnect', () => onDisconnect(socket));
 });
 
 app.set('view engine', 'ejs');
