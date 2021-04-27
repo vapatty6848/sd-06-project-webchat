@@ -13,10 +13,13 @@ const io = require('socket.io')(http, {
   },
 });
 
+const model = require('./models/messages');
+
 app.use(cors());
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
+app.use(express.static(`${__dirname}/views/`));
 
 app.get('/', (req, res) => {
   res.render('index');
@@ -24,9 +27,10 @@ app.get('/', (req, res) => {
 
 const users = [];
 
-const addNewUser = (socket) => {
+const addNewUser = (socket, nickname) => {
   const newUser = {
     id: socket.id,
+    nickname,
   };
   users.push(newUser);
 };
@@ -63,26 +67,37 @@ const getRandomString = () => {
   return result;
 };
 
+const removeDisconnected = (socket) => {
+  const index = users.findIndex((user) => user.id === socket.id);
+  users.splice(index, 1);
+};
+
 io.on('connection', (socket) => {
-  console.log(`${socket.id} connected`);
-  addNewUser(socket);
-  // console.log(users);
-  io.emit('connected', getRandomString());
-
-  socket.on('message', ({ chatMessage, nickname }) => {
+  const stringNickname = getRandomString();
+  socket.emit('userConnected', { stringNickname, users }); addNewUser(socket, stringNickname);
+  socket.broadcast.emit('connected', stringNickname);
+  socket.on('message', async ({ chatMessage, nickname }) => {
     addNickname(nickname, socket);
-    const response = `${getTime()} ${getNickname(socket)} ${chatMessage}`;
+    const time = getTime();
+    const response = `${time} ${getNickname(socket)} ${chatMessage}`;
     io.emit('message', response);
+    await model.createMessage(chatMessage, getNickname(socket), time);
   });
-
   socket.on('changeNickname', ({ newNickname }) => {
     changeNickname(newNickname, socket);
     io.emit('changeNickname', users);
   });
-
   socket.on('disconnect', () => {
-    console.log('disconnect');
+    removeDisconnected(socket);
+    socket.broadcast.emit('desconectar', users);
   });
+});
+
+app.get('/', async (_req, res) => {
+  const msgs = await model.getAllMsgs();
+  const renderMsgs = msgs.map((message) => 
+    `${message.timestamp} ${message.nickname} ${message.chatMessage}`);
+  return res.render('index', { renderMsgs });
 });
 
 http.listen(PORT, () => {

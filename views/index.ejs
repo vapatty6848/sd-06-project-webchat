@@ -1,69 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>Welcome to FIX WebChat Project!</h1>
+    <form class="chat">
+      <input
+      type="text"
+      name="nickname"
+      id="nickname-box"
+      data-testid="nickname-box"
+      placeholder="Type your nickname"
+    />
+      <div id="messages"></div>
+      <input
+      type="text"
+      id="message-box"
+      data-testid="message-box"
+      name="message"
+      placeholder="Type your msg"
+    />
+      <button type="button" id="send-button" data-testid="send-button">Send</button>
+      <button type="button" id="nickname-save" data-testid="nickname-button">Save nickname</button>
+    </form>
+    <ul id="allUsers"></ul>
+    <ul id="allMessages">
+      <% renderMsgs.forEach((message) => { %>
+        <li data-testid="message"><%= message %></li>
+      <% }); %>
+    </ul>
+  </body>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Chat</title>
-  <script src="/socket.io/socket.io.js"></script>
-</head>
-
-<body>
-  <input type="text" id="messageInput" data-testid="message-box">
-  <button type="button" id="buttonSend" data-testid="send-button">Enviar mensagem</button>
-  <input type="text" id="nicknameInput" data-testid="nickname-box">
-  <button type="button" id="buttonNickname" data-testid="nickname-button">Mudar nickname</button>
-  <ul id="nicknameList"></ul>
-  <ul id="messages"></ul>
   <script>
     const socket = io();
     let nickname = '';
-    socket.on('connected', (nicknameGenerated) => {
-      nickname = nicknameGenerated;
-      addNickname(nicknameGenerated);
-    });
-    const button = document.querySelector('#buttonSend');
+    const addUser = (nickname) => {
+      const listUsers = document.querySelector('#allUsers');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = nickname;
+      listUsers.appendChild(li);
+    }
+    const createMessage = (response) => {
+      const allMessages = document.querySelector('#allMessages');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerText = response;
+      allMessages.appendChild(li);
+    }
+    const button = document.querySelector('#send-button');
     button.addEventListener('click', () => {
-      const inputMessage = document.querySelector('#messageInput');
+      const inputMessage = document.querySelector('#message-box');
       socket.emit('message', { chatMessage: inputMessage.value, nickname });
       inputMessage.value = '';
       return false;
     });
-    const addNickname = (nickname) => {
-      const listNickname = document.querySelector('#nicknameList');
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.innerText = nickname;
-      listNickname.appendChild(li);
-    }
-    const createMessage = (response) => {
-      const messagesUl = document.querySelector('#messages');
-      const li = document.createElement('li');
-      li.setAttribute('data-testid', 'message');
-      li.innerText = response;
-      messagesUl.appendChild(li);
-    }
-    socket.on('message', (message) => createMessage(message));
-    const buttonNickname = document.querySelector('#buttonNickname');
-    buttonNickname.addEventListener('click', () => {
-      const newNickname = document.querySelector('#nicknameInput');
-      socket.emit('changeNickname', { newNickname: newNickname.value });
-      nickname = newNickname.value;
-      newNickname.value = '';
-    });
-    const changeNickname = (users) => {
-      const listNickname = document.querySelector('#nicknameList');
-      listNickname.innerHTML = '';
+    const getRandomString = () => {
+      const length = 16;
+      const random = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < length; i += 1) {
+        result += random.charAt(Math.floor(Math.random() * random.length));
+      }
+      return result;
+    };
+    const updateNickname = (users) => {
+      const allUsers = document.querySelector('#allUsers');
+      // allUsers.innerHTML = '';
       users.forEach((user) => {
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'online-user');
         li.innerText = user.nickname;
-        listNickname.appendChild(li);
+        allUsers.appendChild(li);
       })
     }
-    socket.on('changeNickname', (users) => changeNickname(users));
+    
+    const buttonNickname = document.querySelector('#nickname-save');
+    buttonNickname.addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box');
+      socket.emit('changeNickname', newNickname.value);
+      nickname = newNickname.value;
+      newNickname.value = '';
+    });
+    socket.on('connect', () => {
+      nickname = getRandomString();
+      socket.emit('newUser', { nickname });
+    });
+    socket.on('message', (message) => createMessage(message));
+    socket.on('updateOnlineUsers', (allUsers) => {
+      const notOnline =  allUsers.filter((user) => user.id !== socket.id);
+      const firstUser = allUsers.filter((user) => user.id === socket.id);
+      const concatUsers = firstUser.concat(notOnline);
+      nickname = allUsers.find((user) => user.id === socket.id).nickname
+      
+      const onlineUsersList = document.querySelector('#allUsers');
+      while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
+      concatUsers.forEach((user) => {
+        const renderUsers = document.createElement('li');
+    
+        renderUsers.setAttribute('data-testid', 'online-user');
+        renderUsers.innerHTML = user.nickname;
+        document.querySelector('#allUsers').appendChild(renderUsers);
+      });
+    });
   </script>
-</body>
-
 </html>

@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const DB_NAME = process.env.DB_NAME || 'webchat';
 const DB_URL = process.env.DB_URL || 'mongodb://localhost:27017/webchat';
+
 let schema = null;
 
 async function connection() {
