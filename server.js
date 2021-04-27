@@ -41,14 +41,10 @@ const getDate = () => {
   return newFormatDate;
 };
 
-const filterUser = (List, id, nickname) => {
-  // const list = List.map((e) => {  
-  //   if (e.id === id) return { ...e, nickname };
-  //   return e;
-  //    });
-  const index = List.findIndex((e) => e.id === id);
-  List.splice(index, 1, { id, nickname });
-     return List;
+const filterUser = (list, id, nickname) => {
+  const index = list.findIndex((e) => e.id === id);
+  list.splice(index, 1, { id, nickname });
+     return list;
 };
 const newMessage = (chatMessage, nickname) => `${getDate()} ${nickname} ${chatMessage}`;
 
