@@ -31,7 +31,7 @@
         </div>
         <div>
           <h3>Usuários</h3>
-          <ul id="onlineUserli"></ul>
+          <ul id="onlineUserUl"></ul>
         </div>
       </div>
       <div>
@@ -75,12 +75,30 @@
       return result;
     };
 
-    const createUser = (user) => {
-      const userLi = document.createElement('li');
-      userLi.setAttribute('data-testid', 'online-user');
-      userLi.setAttribute('id', user);
-      userLi.innerText = user;
-      document.querySelector('#onlineUserli').appendChild(userLi);
+    const createUser = (users) => {
+      const usersUl = document.querySelector('#onlineUserUl');
+      console.log(users); // 0: {id: "BD-FzVQ1DZTsu8S4AAAB", nickname: "UvZiYrFDcAuPqU
+      console.log(socket.id); // BD-FzVQ1DZTsu8S4AAAB
+      const firstUser = users.filter((user) => user.id === socket.id);
+      console.log(firstUser); // 0: {id: "BD-FzVQ1DZTsu8S4AAAB", nickname: "UvZiYrFDcAuPqU
+      const otherUsers = users.filter((user) => user.id !== socket.id);
+      console.log(otherUsers); // array vazio
+      const newArrayUsers = firstUser.concat(otherUsers);
+      console.log(newArrayUsers); // {id: "BD-FzVQ1DZTsu8S4AAAB", nickname: "UvZiYrFDcAuPq
+
+      nickname = users.find((user) => user.id === socket.id).nickname;
+      console.log(nickname); // UvZiYrFDcAuPqU
+
+      while (usersUl.firstChild) {
+        usersUl.removeChild(usersUl.firstChild);
+      }
+
+      newArrayUsers.forEach((user) => {
+        const userLi = document.createElement('li');
+        userLi.setAttribute('data-testid', 'online-user');
+        userLi.innerText = user.nickname;
+        usersUl.appendChild(userLi);
+      })
     };
 
     document.querySelector('#send-button').addEventListener('click', () => {
@@ -114,7 +132,7 @@
     
     socket.on('message', (message) => createNewMessage(message));
     
-    socket.on('updateUsers', (user) => createUser(user));
+    socket.on('updateUsers', (users) => createUser(users));
 
     socket.on('changeNickName', ({ nickname, newNickname }) => {
       const oldNickname = document.querySelector(`#${nickname}`);
