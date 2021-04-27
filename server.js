@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
   console.log(`usuário conectado ${socket.id}`);
   
   socket.on('connectedUser', async ({ id, nickname }) => {
-    console.log(nickname, 'nickname server')
+    console.log(nickname, 'nickname server');
     io.emit('connectedUser', ({ id, nickname }));
     userList.push({ id, nickname });
     // se ja existir trocar no banco e no array
