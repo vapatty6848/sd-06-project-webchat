@@ -9,11 +9,9 @@ const sendMessage = async ({ nickname, chatMessage }, io) => {
 };
 
 const getUsers = (users, socket) => {
-  console.log('getUsers', users);
   const userId = socket.id;
   const newUser = users.find((user) => user.id === userId);
   const otherUsers = users.filter((user) => user.id !== userId);
-  console.log('otherUsers', otherUsers);
   socket.emit('getUsers', otherUsers);
   socket.broadcast.emit('newUser', newUser);
 };
@@ -26,8 +24,10 @@ const saveUser = ({ nickname, socket, users }) => {
 
 const updateNickname = ({ nickname, socket, users }) => {
   const { id } = socket;
+  const newUser = { nickname, id };
   const userIndex = users.indexOf(users.find((user) => user.id === id));
-  users.splice(userIndex, 1, { nickname, id });
+  users.splice(userIndex, 1, newUser);
+  socket.broadcast.emit('updatedUser', newUser);
 };
 
 module.exports = { sendMessage, saveUser, updateNickname, getUsers };

@@ -8,10 +8,11 @@ const usersList = document.querySelector('#online-users');
 const initialNickname = document.querySelector('#userName');
 initialNickname.innerText = window.window.globalVariables.NICKNAME;
 
-const appendUser = (nickname) => {
+const appendUser = (nickname, id) => {
   const li = document.createElement('li');
   li.innerText = nickname;
   li.setAttribute('data-testid', 'online-user');
+  li.setAttribute('id', id);
   usersList.appendChild(li);
 };
 
@@ -42,16 +43,26 @@ const renderMessage = (message) => {
 };
 
 const renderUsers = (users) => {
-  users.forEach(({ nickname }) => {
-    appendUser(nickname);
+  users.forEach(({ nickname, id }) => {
+    appendUser(nickname, id);
   });
 };
 
-const renderNewUser = ({ nickname }) => {
-  appendUser(nickname);
+const renderNewUser = ({ nickname, id }) => {
+  appendUser(nickname, id);
+};
+
+const updateOtherUser = (newUser) => {
+  console.log(newUser);
+  const { id: userId } = newUser;
+  console.log(userId);
+  const { nickname: newNickname } = newUser;
+  const changedUser = document.querySelector(`#${userId}`);
+  changedUser.innerText = newNickname;
 };
 
 io.emit('login', { nickname: initialNickname.innerText });
 io.on('message', (message) => renderMessage(message));
 io.on('getUsers', (users) => renderUsers(users));
 io.on('newUser', (user) => renderNewUser(user));
+io.on('updatedUser', (user) => updateOtherUser(user));
