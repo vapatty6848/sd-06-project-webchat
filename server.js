@@ -27,18 +27,18 @@ let users = [];
 let nick;
 console.log('USER FORA DAS FUNCOES', users);
 
-function newUserFunc(socket) {
-  console.log('conectando', socket.id);
-  console.log('novo usuario conectado');
-  socket.on('newUser', (nickname) => {
-    nick = nickname;
-    console.log('NICKNAME DE PARAMETRO', nickname);
-    console.log('USERS ANTES', users);
-    users.push({ nick, id: socket.id });
-    console.log('USERS DEPOIS', users);
-    io.emit('updateUsers', users);
-  });
-}
+// function newUserFunc(socket) {
+//   console.log('conectando', socket.id);
+//   console.log('novo usuario conectado');
+//   socket.on('newUser', (nickname) => {
+//     nick = nickname;
+//     console.log('NICKNAME DE PARAMETRO', nickname);
+//     console.log('USERS ANTES', users);
+//     users.push({ nick, id: socket.id });
+//     console.log('USERS DEPOIS', users);
+//     io.emit('updateUsers', users);
+//   });
+// }
 
 function messageFunc(socket) {
   socket.on('message', async ({ chatMessage, nickname }) => {
@@ -58,24 +58,40 @@ function updateNickFunc(socket) {
   });
 }
 
-function disconnectFunc(socket) {
-  console.log('desconectando', socket.id);
-  socket.on('disconnect', () => {
-    users = users.filter((user) => user.nick !== nick);
-    io.emit('updateUsers', users);
-  });
-}
+// function disconnectFunc(socket) {
+//   console.log('desconectando', socket.id);
+//   socket.on('disconnect', () => {
+//     users = users.filter((user) => user.id !== socket.id);
+//     console.log('USERS DISCONNECT', users);
+//     io.emit('updateUsers', users);
+//   });
+// }
 
 io.on('connection', async (socket) => {
   console.log('SOCKET ID novo usuario', socket.id);
+  console.log('USER DENTRO DAS FUNCOES', users);
 
-  newUserFunc(socket);
+  // newUserFunc(socket);
+  socket.on('newUser', (nickname) => {
+    nick = nickname;
+    console.log('NICKNAME DE PARAMETRO', nickname);
+    console.log('USERS ANTES', users);
+    users.push({ nick, id: socket.id });
+    console.log('USERS DEPOIS', users);
+    io.emit('updateUsers', users);
+  });
 
   messageFunc(socket);
 
   updateNickFunc(socket);
 
-  disconnectFunc(socket);
+  // disconnectFunc(socket);
+  socket.on('disconnect', () => {
+    console.log('USERS DISCONNECT antes', users);
+    users = users.filter((user) => user.id !== socket.id);
+    console.log('USERS DISCONNECT depois', users);
+    io.emit('updateUsers', users);
+  });
 });
 
 app.use('/', chatController);
