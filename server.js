@@ -15,15 +15,17 @@ const { getMessages } = require('./models/messagesModel');
 
 const publicPath = path.join(__dirname, '/public');
 
-let users = [];
+const users = [];
 
 const removeUser = (socket) => {
-  users = users.filter((user) => user.id !== socket.id);
+  const { id } = socket;
+  const userIndex = users.findIndex((user) => user.id === id);
+  users.splice(userIndex, 1);
+  socket.broadcast.emit('userDisconnected', socket.id);
   return null;
 };
 
 io.on('connection', (socket) => {
-  console.log('connected');
   socket.on('login', ({ nickname }) => saveUser({ nickname, socket, users }));
   socket.on('updateNickname', ({ nickname }) => updateNickname({ nickname, socket, users }));
   socket.on('message', (messagePayload) => sendMessage(messagePayload, io));

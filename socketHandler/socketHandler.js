@@ -25,7 +25,7 @@ const saveUser = ({ nickname, socket, users }) => {
 const updateNickname = ({ nickname, socket, users }) => {
   const { id } = socket;
   const newUser = { nickname, id };
-  const userIndex = users.indexOf(users.find((user) => user.id === id));
+  const userIndex = users.findIndex((user) => user.id === id);
   users.splice(userIndex, 1, newUser);
   socket.broadcast.emit('updatedUser', newUser);
 };

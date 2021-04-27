@@ -53,12 +53,15 @@ const renderNewUser = ({ nickname, id }) => {
 };
 
 const updateOtherUser = (newUser) => {
-  console.log(newUser);
   const { id: userId } = newUser;
-  console.log(userId);
   const { nickname: newNickname } = newUser;
   const changedUser = document.querySelector(`#${userId}`);
   changedUser.innerText = newNickname;
+};
+
+const removeUser = (userId) => {
+  const disconnectedUser = document.querySelector(`#${userId}`);
+  if (disconnectedUser) disconnectedUser.parentNode.removeChild(disconnectedUser);
 };
 
 io.emit('login', { nickname: initialNickname.innerText });
@@ -66,3 +69,4 @@ io.on('message', (message) => renderMessage(message));
 io.on('getUsers', (users) => renderUsers(users));
 io.on('newUser', (user) => renderNewUser(user));
 io.on('updatedUser', (user) => updateOtherUser(user));
+io.on('userDisconnected', (disconnectedUser) => removeUser(disconnectedUser));
