@@ -7,11 +7,10 @@
   <title>Página de mensagens</title>
 </head>
 <body>
-  <aside>
-    <p data-testid="online-user"></p>
-  </aside>
-
-  <h1>Web Chat</h1>
+   <h1>Web Chat</h1>
+  <div>
+    <ul id='nick'>usuarios online</ul>
+  </div>
  
   <div>
     <ul id='messages'>Mensagens</ul>
@@ -20,29 +19,69 @@
   <div>
     <input type="text" id='message' data-testid="message-box" />
     <button id='sendMessage' data-testid="send-button">Enviar</button>
-    <input type="text" id='nickname' placeholder="Como gostaria de ser chamado(a)" />
+  </div>
+  <div>
+    <input type="text" id='nickname' data-testid="nickname-box" placeholder="Como gostaria de ser chamado(a)" />
     <button id='nicknameUser' data-testid="nickname-button">Salvar</button>
   </div>
+   
   
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
+
     const socket = io();
+    const nick = `usuario_${Math.random().toString().substr(2, 8)}`;
+    
+    
+    sessionStorage.setItem('nickname', nick);
+
+    socket.on('connect', () =>{
+      socket.emit('connectedUser', ({id: socket.id, nickname: nick }));
+    });
+
+    socket.on('connectedUser', ({id, nickname }) =>{
+      console.log(nickname, 'nickname front');
+      const nickLi = document.createElement('li')
+      nickLi.setAttribute('data-testid', 'online-user');
+      nickLi.setAttribute('id', id);
+      nickLi.innerHTML = nickname;
+      document.querySelector('#nick').appendChild(nickLi);
+    });
+
 
     document.querySelector('#sendMessage').addEventListener('click', (event) =>{
-      const message = document.querySelector('#message').value;
-      const nickname = document.querySelector('#nickname').value;
-      console.log('message', message);
-      console.log('nickname', nickname);
-      console.log('estive aqui')
-    // canal: message, mensagem: conteudo de message
-      socket.emit('message', { chatMessage: message, nickname })
+      const chatMessage = document.querySelector('#message').value;
+      nickname = sessionStorage.getItem('nickname')         
+    // canal: message, chatMessage: conteudo de message
+      socket.emit('message', { chatMessage, nickname })
     });
 
     socket.on('message', (message) =>{
-      const messageLi = document.createElement('li');
+      console.log(message, 'mensagem que ta dando ruim')
+      const messageLi = document.createElement('li')
+      messageLi.setAttribute('data-testid', 'message');
+      console.log(messageLi, 'messageLi')
       messageLi.innerHTML = message;
+      console.log('messageLi', messageLi)
+      console.log('estive aqui')
       document.querySelector('#messages').appendChild(messageLi);
     });
+    
+    document.querySelector('#nicknameUser').addEventListener('click', (event) =>{
+      const nick = document.querySelector('#nickname').value;
+      console.log(nick, 'nick')
+      sessionStorage.setItem('nickname', nick);
+      const newNick = document.querySelector(`#${socket.id}`)
+      newNick.innerHTML = nick;
+      socket.emit('newNickname', { id: socket.id, nickname: nick})
+    });
+
+    socket.on('newNickname', ({ id, nickname }) => {
+      console.log(nickname)
+      const newNick = document.querySelector(`#${id}`)
+      newNick.innerHTML = nickname;
+    })
+
     </script>
 </body>
 </html>
