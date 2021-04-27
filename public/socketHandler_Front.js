@@ -2,6 +2,27 @@ const io = window.io('http://localhost:3000');
 
 const button = document.querySelector('#sendButton');
 const messageList = document.querySelector('#messagesList');
+const nicknameButton = document.querySelector('#nicknameButton');
+const usersList = document.querySelector('#online-users');
+
+const initialNickname = document.querySelector('#userName');
+initialNickname.innerText = window.window.globalVariables.NICKNAME;
+
+const appendUser = (nickname) => {
+  const li = document.createElement('li');
+  li.innerText = nickname;
+  li.setAttribute('data-testid', 'online-user');
+  usersList.appendChild(li);
+};
+
+nicknameButton.addEventListener('click', () => {
+  const nicknameInput = document.querySelector('#nicknameInput');
+  const nicknameDisplay = document.querySelector('#userName');
+  window.window.globalVariables.NICKNAME = nicknameInput.value;
+  io.emit('updateNickname', { nickname: nicknameInput.value });
+  nicknameDisplay.innerText = window.window.globalVariables.NICKNAME;
+  nicknameInput.value = '';
+});
 
 button.addEventListener('click', () => {
   const { NICKNAME: nickname } = window.window.globalVariables;
@@ -20,4 +41,17 @@ const renderMessage = (message) => {
   messageList.appendChild(newMessage);
 };
 
+const renderUsers = (users) => {
+  users.forEach(({ nickname }) => {
+    appendUser(nickname);
+  });
+};
+
+const renderNewUser = ({ nickname }) => {
+  appendUser(nickname);
+};
+
+io.emit('login', { nickname: initialNickname.innerText });
 io.on('message', (message) => renderMessage(message));
+io.on('getUsers', (users) => renderUsers(users));
+io.on('newUser', (user) => renderNewUser(user));
