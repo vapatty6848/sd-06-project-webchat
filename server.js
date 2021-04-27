@@ -1,43 +1,42 @@
-// Faça seu código aqui
 const express = require('express');
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
-const PORT = 3000;
 const http = require('http').createServer(app);
-const cors = require('cors');
 
 const io = require('socket.io')(http, {
   cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
+    origin: 'http://localhost:3000', // url aceita pelo cors
+    methods: ['GET', 'POST'], // Métodos aceitos pela url
   },
 });
 
-const model = require('./models/messages');
-
 app.use(cors());
 
+const { addMessages, getAllMsgs } = require('./models/messages');
+
 app.set('view engine', 'ejs');
-app.set('views', './views');
+app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(`${__dirname}/views/`));
 
-app.get('/', (req, res) => {
-  res.render('index');
-});
+let allUsers = [];
 
-const users = [];
+const addNewUser = ({ nickname, socket }) => {
+  allUsers.push({ id: socket.id, nickname });
+  console.log(allUsers);
 
-const addNewUser = (socket, nickname) => {
-  const newUser = {
-    id: socket.id,
-    nickname,
-  };
-  users.push(newUser);
+  io.emit('updateOnlineUsers', allUsers);
 };
 
-const addNickname = (nickname, socket) => {
-  const index = users.findIndex((user) => user.id === socket.id);
-  users[index].nickname = nickname;
+const changeNickname = ({ newNickname, socket }) => {
+  allUsers.map((user) => {
+    if (user.id === socket.id) Object.assign(user, { id: user.id, nickname: newNickname });
+
+    return user;
+  });
+
+  io.emit('updateOnlineUsers', allUsers);
 };
 
 const getTime = () => {
@@ -47,59 +46,35 @@ const getTime = () => {
   return timeFormated;
 };
 
-const changeNickname = (newNickname, socket) => {
-  const index = users.findIndex((user) => user.id === socket.id);
-  users[index].nickname = newNickname;
+const handleChatMessage = async ({ nickname, chatMessage }) => {
+  const timestamp = getTime();
+  const result = `${timestamp} ${nickname} ${chatMessage}`;
+  await addMessages({ nickname, chatMessage, timestamp });
+  io.emit('message', result);
 };
 
-const getNickname = (socket) => {
-  const index = users.findIndex((user) => user.id === socket.id);
-  return users[index].nickname;
-};
+io.on('connection', async (socket) => {
+  socket.on('newUser', ({ nickname }) => addNewUser({ nickname, socket }));
 
-const getRandomString = () => {
-  const length = 16;
-  const randomChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < length; i += 1) {
-    result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-  }
-  return result;
-};
+  socket.on('message', async ({ nickname, chatMessage }) =>
+    handleChatMessage({ nickname, chatMessage }));
 
-const removeDisconnected = (socket) => {
-  const index = users.findIndex((user) => user.id === socket.id);
-  users.splice(index, 1);
-};
+    socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
 
-io.on('connection', (socket) => {
-  const stringNickname = getRandomString();
-  socket.emit('userConnected', { stringNickname, users }); addNewUser(socket, stringNickname);
-  socket.broadcast.emit('connected', stringNickname);
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    addNickname(nickname, socket);
-    const time = getTime();
-    const response = `${time} ${getNickname(socket)} ${chatMessage}`;
-    io.emit('message', response);
-    await model.createMessage(chatMessage, getNickname(socket), time);
-  });
-  socket.on('changeNickname', ({ newNickname }) => {
-    changeNickname(newNickname, socket);
-    io.emit('changeNickname', users);
-  });
   socket.on('disconnect', () => {
-    removeDisconnected(socket);
-    socket.broadcast.emit('desconectar', users);
+    const onlineUsers = allUsers.filter((user) => user.id !== socket.id);
+    allUsers = onlineUsers;
+    io.emit('updateOnlineUsers', allUsers);
   });
 });
 
 app.get('/', async (_req, res) => {
-  const msgs = await model.getAllMsgs();
+  const msgs = await getAllMsgs();
   const renderMsgs = msgs.map((message) => 
     `${message.timestamp} ${message.nickname} ${message.chatMessage}`);
   return res.render('index', { renderMsgs });
 });
 
-http.listen(PORT, () => {
-  console.log(`Servidor ouvindo na porta ${PORT}`);
+http.listen(3000, () => {
+  console.log('Servidor ouvindo na porta 3000');
 });
