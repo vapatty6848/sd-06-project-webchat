@@ -108,6 +108,7 @@
 
     document.querySelector('#nickname-button').addEventListener('click', () => {
       const newNickname = document.querySelector('#nickname-box').value;
+      console.log(newNickname);
       if (newNickname !== '') {
         const oldNickname = document.querySelector(`#${socket.id}`);
         oldNickname.innerText = newNickname;

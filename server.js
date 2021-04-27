@@ -16,7 +16,7 @@ const messageModel = require('./models/messageModel');
 
 app.use(cors());
 
-let users = [];
+const users = [];
 
 const now = new Date();
 const timestamp = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}
@@ -37,9 +37,8 @@ const onChangeNickname = ({ nickname, newNickname }) => {
 };
 
 const onDisconnect = (socket) => {
-  const usersOn = users.filter((user) => user.id !== socket.id);
-
-  users = usersOn;
+  const index = users.findIndex((user) => user.id === socket.id);
+  users.splice(index, 1);
 
   io.emit('updateUsers', users);
 };
@@ -48,8 +47,9 @@ io.on('connection', (socket) => {
   socket.on('connectUser', ({ nickname }) => onConnectUser({ nickname, socket }));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    const msg = await messageModel.create(chatMessage, nickname, timestamp);
-    io.emit('message', `${msg.timestamp} ${msg.nickname} ${msg.message}`);
+    // const msg = await messageModel.create(chatMessage, nickname, timestamp);
+    messageModel.create(chatMessage, nickname, timestamp);
+    io.emit('message', `${timestamp} ${nickname} ${chatMessage}`);
   });
 
   socket.on('changeNickname', ({ nickname, newNickname }) => {
