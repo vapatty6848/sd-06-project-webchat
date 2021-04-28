@@ -54,6 +54,7 @@ function nameChange(socket, oldNick, nick) {
 }
 
 function userConnected(socket, nick) {
+  // console.log(userList);
   userList.push(nick);
     socket.emit('createUserList', { nick, userList });
     socket.broadcast.emit('createListForOthers', userList);

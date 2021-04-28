@@ -106,20 +106,7 @@
     }
 
     socket.on('connect', async () => {
-      
-      // COLOCA DE VOLTA O LOCALSTORAGE E CRIA USUARIOS NO BANCO!!!!!!!!!!!!!!!!!!!!!!!!
-      // const storageUser = localStorage.getItem('user');
-      // if(storageUser) {
-      //   nick = storageUser;
-      //   // console.log(storageUser);
-      // } else {
-      //   nick = socket.id.substr(1, 16);
-      //   localStorage.setItem('user', nick);
-      // }
-      
       nick = socket.id.substr(1, 16);
-      // getAllMessages();
-      
       userSpan.innerText = nick;
       
       socket.emit('userConnected', nick);
