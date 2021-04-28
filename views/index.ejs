@@ -61,7 +61,7 @@
       const newNickname = nicknameInput.value;
       console.log(myUser)
       if (newNickname) {
-        myUser.nickname 
+        myUser.nickname = newNickname
 
         socket.emit('updateNickname', {id: myUser.id, nickname: newNickname});
         
