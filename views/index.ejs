@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Socket.IO - trybe</title>
+  <link rel="stylesheet"  href="/views/index.css"> 
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  
+  <h1>Socket IO</h1>
+  <h2>messages</h2>
+  <form action="" class="message">
+    <input id="mensagemInput" data-testid="message-box" autocomplete="off" />
+    <button type="submit" data-testid="send-button">Send</button>
+  </form>
+  <ul id="messages">
+    <% messages.forEach((message) => { %>
+      <li data-testid="message"><%= message %></li>
+    <% }); %>
+  </ul>
+
+  
+
+  
+  
+  <h2>users</h2>
+  <form class="nickname">
+    <input id="editar" data-testid="nickname-box" autocomplete="off"/>
+    <button type="submit" data-testid="nickname-button">editar nickname</button>
+  </form>
+
+  <ul id="online-users">
+
+  </ul>
+  <script>
+    let nickname = '<%= generateNickname()%>'
+    const socket = io('http://localhost:3000/');    
+    const id = socket.id
+    const myUser = {nickname, id}
+    let onlineUsers = [];
+    const form = document.querySelector('form.message')
+    const nicknameForm = document.querySelector('form.nickname')
+    const nicknameInput = document.querySelector('#editar')
+    const inputMessage = document.querySelector('#mensagemInput')
+  
+    form.addEventListener('submit', (e) =>{
+      e.preventDefault();
+      
+      socket.emit('message', ({chatMessage: inputMessage.value, nickname: myUser.nickname}));
+      inputMessage.value = ''
+      return false;
+    });
+
+    nicknameForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const newNickname = nicknameInput.value;
+
+      if (newNickname) {
+        myUser.nickname = newNickname;
+        nickname= newNickname
+
+        socket.emit('updateNickname', myUser);
+
+        const [user ,...otherUsers] = onlineUsers;
+        user.nickname = newNickname;
+        onlineUsers = [ user, ...otherUsers];
+        refreshUsers(onlineUsers);
+      }
+});
+
+    const formatMessage = (message, nickname) => {
+      const timeStamp = '<%= fromNow()%>'
+      const formatedMessage = `${timeStamp}-${nickname}: ${message}`
+    }
+
+    const createMessage = (message, nickname) => {
+      const formatedMessage = message
+      console.log(message, nickname, 'message and nicknaem')
+      console.log(formatedMessage, 'formateed')
+      const messagesUl = document.querySelector('#messages');
+      const messageContainer = document.createElement('div');
+      const messageText = document.createElement('p');
+      messageContainer.classList.add('message');
+      messageText.innerText = formatedMessage;
+      messageText.classList.add('message-text');
+      messageText.setAttribute('data-testid', 'message');
+      messageContainer.appendChild(messageText);
+      messagesUl.appendChild(messageContainer);
+    }
+
+    const clearUsers = () => {
+      const users = document.querySelectorAll('.user')
+      users.forEach(user => user.remove())
+    }
+
+    const createUser = (userName) => {
+      const userList = document.querySelector('#online-users')
+      const userContainer = document.createElement('li')
+      userContainer.classList.add('user')
+      userContainer.setAttribute('data-testid', 'online-user')
+      userContainer.innerText= userName
+      userList.appendChild(userContainer)
+    }
+
+    const addUsers = (users) => {
+      console.log(users)
+      users.forEach(user => createUser(user.nickname))
+    }
+
+    const refreshUsers = (updatedUsers) => {
+      clearUsers()
+      addUsers(updatedUsers)
+    }
+
+    socket.on('message',  (message) => createMessage(message, myUser.nickname))
+    
+    socket.emit('newUser', myUser)
+
+
+    socket.on('users',  (users) => {
+      onlineUsers = users
+      refreshUsers(users)
+    })
+
+  </script>
+</body>
+
+</html>
