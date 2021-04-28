@@ -24,7 +24,13 @@
     </div>
     <div class="chat-container">
       <div class="chat-box">
-        <ul id="messagesUl"></ul>
+        <!-- <ul id="messagesUl"></ul> -->
+        <ul id="messagesUl">
+          <% messages.forEach((message) => { %>
+            <!-- <% console.log(message) %> -->
+            <li data-testid="message"><%= message.timestamp %> <%= message.nickname %> <%= message.message %></li>
+          <% }) %>
+        </ul>
       </div>
       <form id="message-form"  action="">
         <input data-testid="message-box" id="messageInput" autocomplete="off" autofocus />
@@ -64,14 +70,12 @@
       return newUser;
     }
     
-    // MUDEI ELE, VAI TER QUE MUDAR QUANDO ESCREVE MENSAGEM NOVA
-    const createMessage = ({ message, nickname, timestamp }) => {
-      const userMessage = `${timestamp} - ${nickname}: ${message}`;
-      
+    const createMessage = (message) => {
+      // const userMessage = `${timestamp} - ${nickname}: ${message}`;
       
       const messagesUl = document.querySelector('#messagesUl');
       const li = document.createElement('li');
-      li.innerText = userMessage;
+      li.innerText = message;
       li.setAttribute('data-testid', 'message');
       messagesUl.appendChild(li);
     };
@@ -95,6 +99,9 @@
         createMessage({ message, nickname, timestamp });
       });
       
+      // const { message, nickname, timestamp } = messages[messages.length - 1]
+      // createMessage({ message, nickname, timestamp });
+      
       updateScroll();
     }
 
@@ -111,7 +118,7 @@
       // }
       
       nick = socket.id.substr(1, 16);
-      getAllMessages();
+      // getAllMessages();
       
       userSpan.innerText = nick;
       
@@ -177,19 +184,20 @@
     const messageForm = document.querySelector('#message-form');
     const messageInput = document.querySelector('#messageInput');
     
-    const saveMessageInDB = async({ message, nickname, timestamp }) => {
-      return await fetch('http://localhost:3000/', {
-        method: 'POST',
-        body: JSON.stringify({ message, nickname, timestamp }),
-        headers: { 'Content-type': 'application/json' },
-      })
-    };
+    // const saveMessageInDB = async({ message, nickname, timestamp }) => {
+    //   return await fetch('http://localhost:3000/', {
+    //     method: 'POST',
+    //     body: JSON.stringify({ message, nickname, timestamp }),
+    //     headers: { 'Content-type': 'application/json' },
+    //   })
+    // };
 
     messageForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
       socket.emit('message', { chatMessage: messageInput.value, nickname: nick });
       // saveMessageInDB(message);
+      // getAllMessages();
       messageInput.value = '';
       return false;
     });
@@ -197,21 +205,17 @@
     socket.on('addClassOnTop', ({ nick, userList }) => {
       const userLi = document.querySelector('li');
       // console.log(userLi.innerText === nick);
-      console.log(nick)
-      console.log(userList)
+      // console.log(nick)
+      // console.log(userList)
       userLi.setAttribute('data-testid', 'online-user');
     });
 
-    socket.on('message', (message) => {
-      const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-      const time = new Date().toLocaleTimeString();
-      const timestamp = `${date} ${time}`;
+    socket.on('messages', ({ userMessage, timestamp, nickname }) => {
+      // const payload = { message: getMessage, nickname: nick, timestamp };
       
-      const getMessage = message.split(': ')[1];
-      const payload = { message: getMessage, nickname: nick, timestamp };
-      
-      saveMessageInDB(payload);
-      createMessage(payload);
+      // saveMessageInDB(payload);
+      createMessage(userMessage);
+      // getAllMessages();
     });
     
     socket.on('reload', () => {

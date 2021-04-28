@@ -5,6 +5,7 @@ const http = require('http').createServer(app);
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const fetch = require('node-fetch')
 
 const io = require('socket.io')(http, {
   cors: {
@@ -18,15 +19,24 @@ app.use(express.json());
 
 let userList = [];
 
-function generateUserMessage(chatMessage, nickname, socket, io2) {
+const saveMessageInDB = (message) => {
+  return fetch('http://localhost:3000/', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+    headers: { 'Content-type': 'application/json' },
+  });
+};
+
+function generateUserMessage(chatMessage, nickname, socket) {
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
   const time = new Date().toLocaleTimeString();
   const timestamp = `${date} ${time}`;
   
-  const userMessage = `${timestamp} - ${nickname}: ${chatMessage}`;
+  const userMessage = `${timestamp} ${nickname} ${chatMessage}`;
+  saveMessageInDB(userMessage);
   
-  io2.emit('message', userMessage);
-  // io2.emit('reload');
+  io.emit('messages', { userMessage, timestamp, nickname });
+  // socket.broadcast.emit('reload');
 }
 
 function removeUserFromList(id) {
@@ -54,7 +64,7 @@ function userConnected(socket, nick) {
 
 function updateUserList(newUserList) {
   userList = newUserList;
-  console.log(newUserList);
+  // console.log(newUserList);
 }
 
 function onDisconnect(nick, socket) {
@@ -84,7 +94,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('message', ({ chatMessage, nickname }) => {
-    generateUserMessage(chatMessage, nickname, socket, io);
+    generateUserMessage(chatMessage, nickname, socket);
   });
 });
 
@@ -97,5 +107,6 @@ app.use(express.static(path.join(__dirname, '/views/')));
 
 app.use('/', chatController);
 app.use('/users', usersController);
+app.use(express.json());
 
 http.listen(process.env.PORT || 3000, () => console.log('Server open...'));
