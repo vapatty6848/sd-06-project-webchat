@@ -5,13 +5,117 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <script src="socket.io/socket.oi.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font: 13px Helvetica, Arial;
+    }
+    form {
+      background: #000;
+      padding: 3px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    form input {
+      border: 0;
+      padding: 10px;
+      width: 90%;
+      margin-right: 0.5%;
+    }
+    form button {
+      width: 9%;
+      background: rgb(130, 224, 255);
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+    }
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #messages li {
+      padding: 5px 10px;
+    }
+    #mensagens li:nth-child(odd) {
+      background: #eee;
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body>
   <h1>WebChat</h1>
+  <br><br>
+  <input type="text" id="nicknameInput" data-testid="nickname-box">
+  <button type="button" id="buttonNickname" data-testid="nickname-button">Mudar nickname</button>
+  <ul id="nicknames"></ul>
+
+  <form action="">
+    <input type="text" id="messageInput" data-testid="message-box">
+    <button type="submit" data-testid="send-button">Enviar</button>
+  </form>
+  <ul id="messages"></ul>
+
   <script>
     const socket = io();
-    socket.emit('message', 'Rolou!!');
+
+    const form = document.querySelector('form');
+    const inputMessage = document.querySelector('#messageInput');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // emitindo evento para o backend
+      socket.emit('message', { chatMessage: inputMessage.value, nickname });
+      inputMessage.value = '';
+      return false;
+    });
+    const createMessage = (response) => {
+      const messagesList = document.querySelector('#messages');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerText = response;
+      messagesList.appendChild(li);
+    }
+    socket.on('message', (msg) => createMessage(msg));
+
+    const addNickname = (nickname) => {
+      const listNickname = document.querySelector('#nicknames');
+      const userLi = document.createElement('li');
+      userLi.setAttribute('data-testid', 'online-user');
+      userLi.innerText = nickname;
+      listNickname.appendChild(userLi);
+    }
+    let nickname = '';
+    socket.on('connected', (newNickName) => {
+      nickname = newNickName;
+      addNickname(newNickName);
+    });
+
+    const buttonNickname = document.querySelector('#buttonNickname');
+    buttonNickname.addEventListener('click', () => {
+      const newNickname = document.querySelector('#nicknameInput');
+      socket.emit('changeNickname', { newNickname: newNickname.value });
+      nickname = newNickname.value;
+      newNickname.value = '';
+    });
+    const changeNickname = (users) => {
+      const listNickname = document.querySelector('#nicknames');
+      listNickname.innerHTML = '';
+      users.forEach((user) => {
+        const userLi = document.createElement('li');
+        userLi.setAttribute('data-testid', 'online-user');
+        userLi.innerText = user.nickname;
+        listNickname.appendChild(userLi);
+      })
+    }
+    socket.on('changeNickname', (users) => changeNickname(users));
+
   </script>
 </body>
+
 </html>
