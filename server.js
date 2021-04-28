@@ -67,7 +67,6 @@ function updateUserList(newUserList) {
 }
 
 function onDisconnect(socket) {
-  
   removeUserFromList(socket.id);
     socket.broadcast.emit('createListForOthers', userList);
     socket.broadcast.emit('addClassOnTop', { userList });
