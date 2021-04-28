@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <title>Projeto WebChat</title>
+  <style>
+    #input-nickName {
+      float: left;
+      width: 45%
+    }
+    #div-nickName {
+      border: 1px solid black;
+      width: 45%;
+      float: left;
+      margin: 5px;
+    }
+    #div-mensagens {
+      border: 1px solid black;
+      float: right;
+      width: 50%
+    }
+    #input-mensagens {
+      float: right;
+      margin-top: 0px;
+      text-align: center;
+      width: 100%
+    }
+    #input-mensagens input {
+      clear: both;
+      width: 100%;
+    }
+    #input-mensagens button {
+      position: absolute;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+</head>
+<body>
+  <h1>Iniciando WebChat</h1>
+  <div id="input-nickName">
+    <input id="nickNameInput" autoComplete="off" placeholder="Insira seu NickName" />
+    <button id="nickNameButton">Salvar NickName</button>
+  </div>
+
+  <div id="div-mensagens">
+    <h3>Mensagens:</h3>
+    <ul id="ul-mensagens"></ul>
+  </div>
+
+  <div id="div-nickName">
+    <h3>Nicknames:</h3>
+    <ul id="ul-nickName">
+    </ul >
+  </div>
+
+  <div id="input-mensagens">
+    <input id="mensageInput" autoComplete="off" placeholder="Digite uma nova mensagem"/>
+    <button id="mensageButton">Send</button>
+  </div>
+
+  <script>
+    const socket = io();
+    const inputMessage = document.querySelector('#mensageInput')
+    const inputNickName = document.querySelector('#nickNameInput')
+    const buttonMensage = document.querySelector('#mensageButton')
+    const buttonNickName = document.querySelector('#nickNameButton')
+
+    const createMessage = (message) => {
+      const ulListMessages = document.querySelector('#ul-mensagens');
+      const newLiMessages = document.createElement('li');
+      newLiMessages.innerText = message;
+      ulListMessages.appendChild(newLiMessages);
+    }
+
+    const createNickName = (message) => {
+      const ulListNickName = document.querySelector('#ul-nickName');
+      const newLiNickName = document.createElement('li');
+      newLiNickName.innerText = message;
+      ulListNickName.appendChild(newLiNickName);
+    }
+
+    buttonMensage.addEventListener('click', () => {
+      socket.emit('mensagem', inputMessage.value);
+      const newText = inputMessage.value
+      createMessage(newText);
+      inputMessage.value = '';
+    })
+
+    buttonNickName.addEventListener('click', () => {
+      socket.emit('nickName', inputNickName.value);
+      const newText = inputNickName.value
+      createNickName(newText);
+      inputNickName.value = '';
+    })
+
+  </script>
+</body>
+</html>
