@@ -18,7 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 let userList = [];
-let myNickname = '';
+// let myNickname = '';
 
 const saveMessageInDB = (message) => fetch('http://localhost:3000/', {
     method: 'POST',
@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
   console.log('Conectado');
   
   socket.on('userConnected', (nick) => {
-    myNickname = nick;
+    // myNickname = nick;
     userConnected(socket, nick);
   });
   
