@@ -10,7 +10,7 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   }
 });
-const model = require('./models');
+const model = require('./models/model');
 
 app.use(cors());
 app.set('view engine', 'ejs');
