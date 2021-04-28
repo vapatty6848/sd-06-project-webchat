@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Bacaninha</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>Bate-papo Bacaninha</h1>
+    <form>
+      <input
+        data-testid="nickname-box" 
+        id="nickname-box"
+        placeholder="Nickname"
+      />
+      <button
+      type="button"
+      data-testid="nickname-button"
+      id="nickname-save"
+    >
+      Save nickname
+    </button>
+    </form>
+    <form>
+      <input
+        data-testid="message-box"
+        id="message-box"
+        placeholder="Message"
+      />
+      <button
+        type="button"
+        data-testid="send-button"
+        id="send-button"
+      >
+        Send
+      </button>
+    </form>
+      <ul id="allUsers"></ul>
+      <ul id="allMessages">
+        <% renderMsgs.forEach((message) => { %>
+          <li data-testid="message"><%= message %></li>
+        <% }); %>
+      </ul>
+  </body>
+
+  <script>
+    const socket = io();
+    let nickname = ''
+
+    const newMessage = (response) => {
+      const allMessages = document.querySelector('#allMessages');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerText = response;
+      allMessages.appendChild(li);
+    }
+
+    const button = document.querySelector('#send-button');
+    button.addEventListener('click', () => {
+      const inputMessage = document.querySelector('#message-box');
+      socket.emit('message', { chatMessage: inputMessage.value, nickname });
+      inputMessage.value = '';
+      return false;
+    });
+
+    const buttonNickname = document.querySelector('#nickname-save');
+    buttonNickname.addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box');
+      socket.emit('changeNickname', newNickname.value);
+      nickname = newNickname.value;
+      newNickname.value = '';
+    });
+
+    const getRandomString = () => {
+      const length = 16;
+      const random = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let result = '';
+      for (let i = 0; i < length; i += 1) {
+        result += random.charAt(Math.floor(Math.random() * random.length));
+      }
+      return result;
+    };
+
+    socket.on('connect', () => {
+      nickname = getRandomString();
+      socket.emit('newUser', { nickname });
+    });
+
+    socket.on('message', (message) => newMessage(message));
+
+    socket.on('onlineUsers', (allUsers) => {
+      const notOnline =  allUsers.filter((user) => user.id !== socket.id);
+      const firstUser = allUsers.filter((user) => user.id === socket.id);
+      const concatUsers = firstUser.concat(notOnline);
+      nickname = allUsers.find((user) => user.id === socket.id).nickname
+      
+      const onlineUsersList = document.querySelector('#allUsers');
+      while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
+      concatUsers.forEach((user) => {
+        const renderUsers = document.createElement('li');
+    
+        renderUsers.setAttribute('data-testid', 'online-user');
+        renderUsers.innerHTML = user.nickname;
+        document.querySelector('#allUsers').appendChild(renderUsers);
+      });
+    });
+
+  </script>
+</html>
