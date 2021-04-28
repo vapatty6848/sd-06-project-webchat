@@ -27,6 +27,7 @@ io.on('connection', (socket) => {
     );
   });
   socket.emit('ola', ':)' );
+  socket.broadcast.emit('mensagemServer', { mensagem: 'new user is online'});
 });
 
 http.listen(3000, () => {

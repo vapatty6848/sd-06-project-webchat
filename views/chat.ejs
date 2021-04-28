@@ -28,6 +28,7 @@
       messagesUl.appendChild(li);
     };
     socket.on('ola', (mensagem) => createMessage(mensagem));
+    socket.on('mensagemServer', (objeto) => createMessage(objeto.mensagem));
   </script>
 </body>
 
