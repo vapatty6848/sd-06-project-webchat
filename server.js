@@ -5,10 +5,12 @@ const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
 
+const PORT = 3000;
+
 const io = require('socket.io')(http, {
   cors: {
-    origin: 'http://localhost:3000', // url aceita pelo cors
-    methods: ['GET', 'POST'], // Métodos aceitos pela url
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'], 
   },
 });
 
@@ -20,23 +22,23 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(`${__dirname}/views/`));
 
-let allUsers = [];
+let users = [];
 
 const addNewUser = ({ nickname, socket }) => {
-  allUsers.push({ id: socket.id, nickname });
-  console.log(allUsers);
+  users.push({ id: socket.id, nickname });
+  console.log(users);
 
-  io.emit('updateOnlineUsers', allUsers);
+  io.emit('updateOnlineUsers', users);
 };
 
 const changeNickname = ({ newNickname, socket }) => {
-  allUsers.map((user) => {
+  users.map((user) => {
     if (user.id === socket.id) Object.assign(user, { id: user.id, nickname: newNickname });
 
     return user;
   });
 
-  io.emit('updateOnlineUsers', allUsers);
+  io.emit('updateOnlineUsers', users);
 };
 
 const getTime = () => {
@@ -62,9 +64,9 @@ io.on('connection', async (socket) => {
     socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
 
   socket.on('disconnect', () => {
-    const onlineUsers = allUsers.filter((user) => user.id !== socket.id);
-    allUsers = onlineUsers;
-    io.emit('updateOnlineUsers', allUsers);
+    const onlineUsers = users.filter((user) => user.id !== socket.id);
+    users = onlineUsers;
+    io.emit('updateOnlineUsers', users);
   });
 });
 
@@ -75,6 +77,6 @@ app.get('/', async (_req, res) => {
   return res.render('index', { renderMsgs });
 });
 
-http.listen(3000, () => {
-  console.log('Servidor ouvindo na porta 3000');
+http.listen(PORT, () => {
+  console.log(`Servidor ouvindo na porta ${PORT}`);
 });
