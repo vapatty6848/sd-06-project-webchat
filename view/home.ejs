@@ -41,6 +41,23 @@
   <script>
   const socket = io();
 
+  const generateRandomNick = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let randomNick = '';
+    for (let i = 0; i < 16; i += 1) {
+        randomNick += characters[Math.floor(Math.random() * characters.length)];
+    }
+    return randomNick;
+  };
+
+  let nickname; 
+  
+  socket.on('connect', () => {
+    nickname = generateRandomNick();
+    socket.emit('connectedUser', nickname);
+    console.log(`${nickname}`);
+  });
+ 
   const buttonSendMsg = document.querySelector('#sendMessage');
   const textMessage = document.querySelector('#textMessage');
   const displayMessage = document.querySelector('#displayMessage');
@@ -51,7 +68,7 @@
 
   const renderMessages = (message) => {
     const msgItem = document.createElement('li');
-    msgItem.innerHTML = `${message.timeSend} - ${message.nickname} disse: ${message.chatMessage}`;
+    msgItem.innerHTML = message;
     msgItem.setAttribute('data-testid','message');
     displayMessage.append(msgItem);
   }
@@ -59,32 +76,32 @@
   buttonSendMsg.addEventListener('click', (event) => {
     event.preventDefault();
     const chatMessage = textMessage.value;
-    const nickname = textNickname.value;
-    const timeSend = moment().format('DD-MM-YYYY HH:mm:ss A');
-    let messageObject = { chatMessage, nickname, timeSend };
 
-    renderMessages(messageObject);
-
-    socket.emit('toBackMsg', messageObject);
+    socket.emit('message', {chatMessage, nickname});
+    console.log('message from front: ', {chatMessage, nickname});
     textMessage.value = '';
     textNickname.value = '';
   });
 
   buttonSendNick.addEventListener('click', (event) => {
     event.preventDefault();
-    const nickname = textNickname.value;
+    nickname = textNickname.value;
 
-    socket.emit('nickname', nickname);
+    socket.emit('updatedUser', nickname);
   });
 
-  socket.on('toFrontMsg', (messageFromBack) => {
-    renderMessages(messageFromBack);
+  socket.on('message', (message) => {
+    renderMessages(message);
   });
 
-  socket.on('toFrontNick', (nickFromBack) => {
+  socket.on('nickname', (arrayUsers) => {
     const nickItem = document.createElement('li');
-    nickItem.innerHTML = nickFromBack;
-    displayNickname.appendChild(nickItem); 
+    displayNickname.innerHTML = '';
+    arrayUsers.forEach( user => {
+      nickItem.innerHTML = user.nickname;
+      nickItem.setAttribute('data-testid', 'online-user');
+      displayNickname.appendChild(nickItem); 
+    });
   });
   </script>
 </body>
