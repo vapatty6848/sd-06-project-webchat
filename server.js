@@ -26,6 +26,7 @@ io.on('connection', (socket) => {
       'bye bye'
     );
   });
+  socket.emit('ola', ':)' );
 });
 
 http.listen(3000, () => {
