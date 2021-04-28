@@ -5,7 +5,7 @@ const http = require('http').createServer(app);
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
-const fetch = require('node-fetch')
+const fetch = require('node-fetch');
 
 const io = require('socket.io')(http, {
   cors: {
@@ -19,15 +19,13 @@ app.use(express.json());
 
 let userList = [];
 
-const saveMessageInDB = (message) => {
-  return fetch('http://localhost:3000/', {
+const saveMessageInDB = (message) => fetch('http://localhost:3000/', {
     method: 'POST',
     body: JSON.stringify({ message }),
     headers: { 'Content-type': 'application/json' },
   });
-};
 
-function generateUserMessage(chatMessage, nickname, socket) {
+function generateUserMessage(chatMessage, nickname) {
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
   const time = new Date().toLocaleTimeString();
   const timestamp = `${date} ${time}`;
