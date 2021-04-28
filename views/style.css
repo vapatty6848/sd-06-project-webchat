@@ -1,0 +1,63 @@
+body {
+  margin: 0;
+}
+
+.container {
+  height: 100vh;
+  width: 100vw;
+}
+
+.profile {
+  border: 1px solid red;
+  box-sizing: border-box;
+  float: left;
+  height: 100%;
+  width: 20%;
+}
+
+.users {
+  border: 1px solid green;
+  box-sizing: border-box;
+  float: left;
+  height: 100%;
+  width: 20%;
+}
+
+.chat-container {
+  border: 1px solid blue;
+  box-sizing: border-box;
+  float: left;
+  height: 100%;
+  padding: 30px;
+  width: 60%;
+}
+
+.chat-container form {
+  margin-left: 12px;
+  margin-top: 20px;
+  width: 97%;
+}
+
+.chat-container form input {
+  font-size: 23px;
+  padding: 10px;
+  width: 80%;
+}
+
+.chat-container form button {
+  font-size: 20px;
+  margin-left: 0;
+  margin-top: -8px;
+  padding: 12px 0;
+  vertical-align: middle;
+  width: 70px;
+}
+
+.chat-box {
+  border: 1px solid;
+  height: 500px;
+  margin: auto;
+  overflow: hidden;
+  overflow-y: scroll;
+  width: 95%;
+}

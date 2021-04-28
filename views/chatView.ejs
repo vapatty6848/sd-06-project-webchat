@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" />
+  <title>Chat View</title>
+</head>
+<body>
+  <div class="container">
+    <div class="profile">
+      <div class="profile-pic"></div>
+      <div class="username-container">
+        <span id="username"></span>
+        <form id="user-form">
+          <input data-testid="nickname-box" id="name-input" />
+          <button data-testid="nickname-button">Set</button>
+        </form>
+      </div>
+    </div>
+    <div class="users">
+      <ul id="usersUl"></ul>
+    </div>
+    <div class="chat-container">
+      <div class="chat-box">
+        <!-- <ul id="messagesUl"></ul> -->
+        <ul id="messagesUl">
+          <% messages.forEach((message) => { %>
+            <!-- <% console.log(message) %> -->
+            <li data-testid="message"><%= message.timestamp %> <%= message.nickname %> <%= message.message %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <form id="message-form"  action="">
+        <input data-testid="message-box" id="messageInput" autocomplete="off" autofocus />
+        <button data-testid="send-button">Send</button>
+      </form>
+    </div>
+  </div>
+  
+  <script src="socket.io/socket.io.js"></script>
+  <!-- <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script> -->
+  <script src="script.js"></script>
+  <script>
+    const socket = io();
+
+    // profile
+    const userSpan = document.querySelector('#username');
+    const userForm = document.querySelector('#user-form');
+    const userInput = document.querySelector('#name-input');
+    const usersUl = document.querySelector('#usersUl');
+
+    const createUserInList = (username) => {
+      const li = document.createElement('li');
+      li.innerText = username;
+      li.setAttribute('data-testid', 'online-user');
+      usersUl.appendChild(li);
+      // console.log(username)
+    };
+    
+    const createUser = async () => {
+      const body = {};
+      
+      const newUser = await fetch('http://localhost:3000/users', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+      
+      return newUser;
+    }
+    
+    const createMessage = (message) => {
+      // const userMessage = `${timestamp} - ${nickname}: ${message}`;
+      
+      const messagesUl = document.querySelector('#messagesUl');
+      const li = document.createElement('li');
+      li.innerText = message;
+      li.setAttribute('data-testid', 'message');
+      messagesUl.appendChild(li);
+    };
+    
+    // pra rolar até o fim das mensagens
+    updateScroll = () => {
+      const chatBox = document.getElementsByClassName('chat-box')[0];
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    const getAllMessages = async () => {
+      const messagesUl = document.querySelector('#messagesUl');
+      messagesUl.innerHTML = '';
+      
+      const messages = await fetch('http://localhost:3000/messages')
+        .then(response => response.json())
+      // console.log(messages)
+      
+      messages.forEach((DBmessage) => {
+        const { message, nickname, timestamp } = DBmessage;
+        createMessage({ message, nickname, timestamp });
+      });
+      
+      // const { message, nickname, timestamp } = messages[messages.length - 1]
+      // createMessage({ message, nickname, timestamp });
+      
+      updateScroll();
+    }
+
+    socket.on('connect', async () => {
+      nick = socket.id.substr(1, 16);
+      userSpan.innerText = nick;
+      
+      socket.emit('userConnected', nick);
+    });
+     ///////////////////
+    socket.on('getAllUsers', async () => {
+      socket.emit('sendBackUser', nick);
+    })
+    
+    socket.on('createUserList', ({ nick, userList }) => {
+      usersUl.innerHTML = '';
+      
+      const indexOfUser = userList.indexOf(nick);
+      const user = userList[indexOfUser]
+      userList.splice(indexOfUser, 1)
+      userList.unshift(user);
+      
+      // socket.emit('updateUserList', userList)
+      
+      userList.forEach((user) => createUserInList(user));
+      
+      // add data-testid ao primeiro li
+      // const userInList = document.querySelector('li');
+      // userInList.setAttribute('data-testid', 'online-user');
+    });
+    
+    socket.on('createListForOthers', (userList) => {
+      usersUl.innerHTML = '';
+      
+      const nick = document.querySelector('#username').innerHTML;
+      const indexOfUser = userList.indexOf(nick);
+      const user = userList[indexOfUser]
+      userList.splice(indexOfUser, 1)
+      userList.unshift(user);
+      
+      userList.forEach((user) => createUserInList(user));
+      
+      // add data-testid ao primeiro li
+      // const userInList = document.querySelector('li');
+      // userInList.setAttribute('data-testid', 'online-user');
+    })
+
+    socket.on('reloadUsersList', (userList) => {
+      usersUl.innerHTML = '';
+      userList.forEach((user) => createUserInList(user));
+      
+      // const userLi = document.querySelector('li');
+      // userLi.setAttribute('data-testid', 'online-user');
+    });
+
+    userForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const oldNick = nick;
+      
+      nick = userInput.value;
+      userSpan.innerText = nick;
+      userInput.value = '';
+      // const oldNick = localStorage.getItem('user');
+      socket.emit('userChangedName', { oldNick, nick });
+      // localStorage.clear();
+      // localStorage.setItem('user', nick);
+      return false;
+    });
+
+    // messages
+    const messageForm = document.querySelector('#message-form');
+    const messageInput = document.querySelector('#messageInput');
+    
+    // const saveMessageInDB = async({ message, nickname, timestamp }) => {
+    //   return await fetch('http://localhost:3000/', {
+    //     method: 'POST',
+    //     body: JSON.stringify({ message, nickname, timestamp }),
+    //     headers: { 'Content-type': 'application/json' },
+    //   })
+    // };
+
+    messageForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      socket.emit('message', { chatMessage: messageInput.value, nickname: nick });
+      // saveMessageInDB(message);
+      // getAllMessages();
+      messageInput.value = '';
+      return false;
+    });
+    
+    socket.on('addClassOnTop', ({ nick, userList }) => {
+      const userLi = document.querySelector('li');
+      // console.log(userLi.innerText === nick);
+      // console.log(nick)
+      // console.log(userList)
+      userLi.setAttribute('data-testid', 'online-user');
+    });
+
+    socket.on('messages', ({ userMessage, timestamp, nickname }) => {
+      // const payload = { message: getMessage, nickname: nick, timestamp };
+      
+      // saveMessageInDB(payload);
+      createMessage(userMessage);
+      // getAllMessages();
+    });
+    
+    socket.on('reload', () => {
+      getAllMessages()
+    })
+  </script>
+</body>
+</html>
