@@ -2,6 +2,7 @@ const express = require('express');
 
 const app = express();
 const cors = require('cors');
+const path = require('path');
 const moment = require('moment');
 const http = require('http').createServer(app);
 
@@ -14,40 +15,34 @@ const io = require('socket.io')(http, {
   },
 });
 
-const { getAllMessages } = require('./models/chat');
-
 app.use(cors());
 
-app.set('view engine', 'ejs');
-app.set('views', './views');
+// const { getAllMessages } = require('./models/chat');
 
-app.get('/', async (_req, res) => {
-  const messages = await getAllMessages();
-  res.status(200).render('index', { messages });
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+app.get('/', (_req, res) => {
+  res.render('index');
 });
 
-const onlineUsers = [];
+const allUsers = [];
 
 const addNewUser = (socket) => {
   const newUser = {
     id: socket.id,
   };
-  onlineUsers.push(newUser);
+  allUsers.push(newUser);
 };
 
-const addNickname = (nickname, socket) => {
-  const index = onlineUsers.findIndex((user) => user.id === socket.id);
-  onlineUsers[index].nickname = nickname;
-};
-
-const changeNickname = (newNickname, socket) => {
-  const index = onlineUsers.findIndex((user) => user.id === socket.id);
-  onlineUsers[index].nickname = newNickname;
+const handleNickname = (newNickname, socket) => {
+  const index = allUsers.findIndex((user) => user.id === socket.id);
+  allUsers[index].nickname = newNickname;
 };
 
 const getNickname = (socket) => {
-  const index = onlineUsers.findIndex((user) => user.id === socket.id);
-  return onlineUsers[index].nickname;
+  const index = allUsers.findIndex((user) => user.id === socket.id);
+  return allUsers[index].nickname;
 };
 
 const timestamp = () => {
@@ -68,24 +63,24 @@ const getRandom = () => {
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} connected.`);
   addNewUser(socket);
-  console.log(onlineUsers);
+  console.log(allUsers);
   io.emit('connected', getRandom());
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    addNickname(nickname, socket);
+    handleNickname(nickname, socket);
     const response = `${timestamp()} ${getNickname(socket)} ${chatMessage}`;
     io.emit('message', response);
   });
 
   socket.on('changeNickname', ({ newNickname }) => {
-    changeNickname(newNickname, socket);
-    io.emit('changeNickname', onlineUsers);
+    handleNickname(newNickname, socket);
+    io.emit('changeNickname', allUsers);
   });
 
   socket.on('disconnect', () => {
     console.log(`User ${socket.id} has disconnected.`);
-    delete onlineUsers[socket.id];
-    io.emit('updateUser', { onlineUsers });
+    delete allUsers[socket.id];
+    io.emit('updateUser', { allUsers });
   });
 });
 
