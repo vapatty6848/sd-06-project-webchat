@@ -30,10 +30,10 @@ function generateUserMessage(chatMessage, nickname) {
   const time = new Date().toLocaleTimeString();
   const timestamp = `${date} ${time}`;
   
-  const userMessage = `${timestamp} ${nickname} ${chatMessage}`;
-  saveMessageInDB(userMessage);
+  const message = `${timestamp} ${nickname} ${chatMessage}`;
+  saveMessageInDB(message);
   
-  io.emit('messages', { userMessage, timestamp, nickname });
+  io.emit('message', message);
   // socket.broadcast.emit('reload');
 }
 
@@ -54,7 +54,6 @@ function nameChange(socket, oldNick, nick) {
 }
 
 function userConnected(socket, nick) {
-  // console.log(userList);
   userList.push(nick);
     socket.emit('createUserList', { nick, userList });
     socket.broadcast.emit('createListForOthers', userList);

@@ -95,8 +95,8 @@
       // console.log(messages)
       
       messages.forEach((DBmessage) => {
-        const { message, nickname, timestamp } = DBmessage;
-        createMessage({ message, nickname, timestamp });
+        const { message } = DBmessage;
+        createMessage(message);
       });
       
       // const { message, nickname, timestamp } = messages[messages.length - 1]
@@ -108,6 +108,7 @@
     socket.on('connect', async () => {
       nick = socket.id.substr(1, 16);
       userSpan.innerText = nick;
+      getAllMessages();
       
       socket.emit('userConnected', nick);
     });
@@ -201,11 +202,11 @@
       userLi.setAttribute('data-testid', 'online-user');
     });
 
-    socket.on('messages', ({ userMessage, timestamp, nickname }) => {
+    socket.on('message', (message) => {
       // const payload = { message: getMessage, nickname: nick, timestamp };
       
       // saveMessageInDB(payload);
-      createMessage(userMessage);
+      createMessage(message);
       // getAllMessages();
     });
     
