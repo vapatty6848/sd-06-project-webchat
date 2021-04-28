@@ -10,12 +10,11 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   }
 });
+const model = require('./models');
 
 app.use(cors());
-
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '../views/chat.ejs');
-});
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
 io.on('connection', (socket) => {
   console.log(
@@ -31,6 +30,11 @@ io.on('connection', (socket) => {
   socket.on('mensagem', (msg) => {
     io.emit('mensagemServer', { mensagem: msg });
   });
+});
+
+app.get('/', (_req, res) => {
+  const msgs = model.get();
+  res.render('chat', { msgs });
 });
 
 http.listen(3000, () => {
