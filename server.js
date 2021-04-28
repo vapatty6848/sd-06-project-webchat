@@ -10,25 +10,22 @@ const io = require('socket.io')(HTTP, {
     methods: ['GET', 'POST'],
   },
 });
-const { addMessages } = require('./models/messages');
+
+const { newMessages, allMessages } = require('./models/messages');
 
 app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
-app.use(express.static('public'));
 
 app.get('/', async (_req, res) => {
-  res.render('../views/');
+  const messageList = await allMessages();
+  res.render('../views/', { messageList });
 });
 
 io.on('connection', (socket) => {
-  console.log(`User ${socket.id} connected.`);
-  socket.on('disconnect', () => console.log(`User ${socket.id} disconnected.`));
-
   socket.on('message', async ({ chatMessage, nickname }) => {
     const messageTime = moment().format('DD-MM-yyyy HH:mm:ss a'); // DD-MM-yyyy HH:mm:ss
-    console.log(messageTime);
-    await addMessages({ chatMessage, nickname, messageTime });
+    await newMessages({ chatMessage, nickname, messageTime });
     const result = `${messageTime} - ${nickname} - ${chatMessage}`;
     io.emit('message', result);
   });

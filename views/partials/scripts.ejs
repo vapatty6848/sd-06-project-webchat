@@ -1,4 +1,27 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io('http://localhost:3000');
+  let nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+  document.getElementById('randomNickName').innerHTML = nickname
+
+  document.getElementById('sendButton').addEventListener('click', () => {
+    console.log('click');
+    let chatMessage =  document.getElementById('inputMsg').value;
+    let currentNickname = document.getElementById('randomNickName').innerHTML
+    socket.emit('message', { chatMessage, nickname:currentNickname });
+  })
+
+
+  socket.on('message', (result) => {
+    let list = document.getElementById("list");
+    let listItem = document.createElement("li");
+    listItem.appendChild(document.createTextNode(result))
+    listItem.setAttribute('data-testid', 'message');
+    list.appendChild(listItem)
+    console.log(result)
+  })
+  document.getElementById('changeNick').addEventListener('click', () => {
+    document.getElementById('randomNickName').innerHTML = document.getElementById('nick').value
+  })
+
 </script>

@@ -2,10 +2,11 @@ const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 const DB_NAME = process.env.DB_NAME || 'webchat';
-const DB_URL = process.env.DB_URL || 'mongodb://localhost:27017/webchat';
+const DB_URL = process.env.DB_URL || 'mongodb://localhost:27017';
 let schema = null;
 
 async function connection() {
+  console.log(DB_URL);
   if (schema) return Promise.resolve(schema);
   return MongoClient
     .connect(DB_URL, {
