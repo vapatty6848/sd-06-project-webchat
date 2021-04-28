@@ -21,13 +21,16 @@ io.on('connection', (socket) => {
   console.log(
     'Usuário conectado'
   );
+  socket.emit('ola', ':)' );
+  socket.broadcast.emit('mensagemServer', { mensagem: 'new user is online'});
   socket.on('disconnect', () => {
     console.log(
       'bye bye'
     );
   });
-  socket.emit('ola', ':)' );
-  socket.broadcast.emit('mensagemServer', { mensagem: 'new user is online'});
+  socket.on('mensagem', (msg) => {
+    io.emit('mensagemServer', { mensagem: msg });
+  });
 });
 
 http.listen(3000, () => {
