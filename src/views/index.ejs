@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  <title>Web_Chat</title>
+  </head>
+  <body>
+      <div>
+        <input data-testid="nickname-box" id="nickname" type="text" placeholder="Insira seu nickname" />
+        <button data-testid="nickname-button" id="saveNickname" onclick="changeNickname()"> Salvar</button>
+        <ul id="users_list">
+        </ul>
+      </div>
+      <div>
+        <ul id="message_list">
+          <% messages.forEach(msg => { %>
+          <li data-testid="message"><%= `${msg.timestamp} - ${msg.nickname}: ${msg.chatMessage}` %></li>
+          <%})%>
+        </ul>
+      </div>
+      <div>
+        <input placeholder="Digite uma nova mensagem aqui" id="input" type="text" data-testid="message-box" />
+        <button onclick="send()" data-testid="send-button">Enviar</button>
+      </div>
+    <script>
+      let nickname = randomName(16);
+      const input =  document.getElementById('input')
+      const socket = io();
+      const send = () => {
+        socket.emit('message', { chatMessage: input.value, nickname })
+        input.value = '';
+      };
+      socket.on('message', (msg) => {
+        const messagesUl = document.querySelector('#message_list');
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerText = msg;
+        messagesUl.appendChild(li);
+      });
+
+      function randomName(length) {
+          var result = [];
+          var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          var charactersLength = characters.length;
+          for ( var i = 0; i < length; i++ ) {
+            result.push(characters.charAt(Math.floor(Math.random() * 
+            charactersLength)));
+        }
+        return result.join('');
+      }
+      socket.emit('user', nickname)
+      socket.on('usersList', (user) => {
+        const usersList = document.getElementById('users_list');
+        usersList.innerHTML = '';
+        user.forEach(user => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerText = user;
+        usersList.appendChild(li);
+        })
+      })
+      const changeNickname = () => {
+        const nicknameD = document.getElementById('nickname').value;
+        nickname = nicknameD;
+        socket.emit('change-nick', nicknameD)
+      }
+    </script>
+  </body>
+</html>
