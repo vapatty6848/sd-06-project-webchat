@@ -49,8 +49,6 @@ const handleChangeNickname = (listOfUsers, nickname, idFromClient) => {
 };
 
 const saveMessageToDatabase = (message, today, now) => {
-  // const { today, now } = createDateString();
-
   MessageModel.createMessage({ nickname: message.nickname,
     message: message.chatMessage,
     timestamp: `${today} ${now}` });
@@ -77,37 +75,13 @@ io.on('connection', (socket) => {
   socket.on('message', (message) => {
     const { today, now } = createDateString();
     io.emit('message', `${today} ${now}: ${message.nickname}: ${message.chatMessage}`);
-    // MessageModel.createMessage({ nickname: message.nickname,
-    //   message: message.chatMessage,
-    //   timestamp: `${today} ${now}` });
     saveMessageToDatabase(message, today, now);
   });
 
   socket.on('disconnect', () => {
-    // const userToBeRemoved = users.find((user) => user.socketId === socket.id);
-    // const identifierList = users.map((user) => user.nickname);
-    // const identifierToBeRemoved = userToBeRemoved ? userToBeRemoved.nickname : 'error';
-    // const identifierIndex = identifierList.indexOf(identifierToBeRemoved);
-    // users.splice(identifierIndex === -1 ? null : identifierIndex, 1); 
     users = removeUserFromList(users, socket.id);
     io.emit(PUBLIC_NICKNAME, users);
   });
-  // socket.on('disconnect', () => {
-  //   const userToBeRemoved = users.find((user) => user.socketId === socket.id);
-  //   const identifierList = users.map((user) => user.nickname);
-  //   const identifierToBeRemoved = userToBeRemoved ? userToBeRemoved.nickname : 'error';
-  //   const identifierIndex = identifierList.indexOf(identifierToBeRemoved);
-  //   users.splice(identifierIndex === -1 ? null : identifierIndex, 1); 
-  //   io.emit(PUBLIC_NICKNAME, users);
-  // });
-
-    // console.log('identifierIndex', identifierIndex);
-    // console.log('socket', identifierToBeRemoved);
-    // console.log('userToBeRemoved', userToBeRemoved);
-    // console.log('identifierList', identifierList);
-    // console.log('users antes', users);
-    // users.splice(identifierIndex === -1 ? null : identifierIndex, 1); // esta com erro, é necessario tratar o estado inicial em que nao ha ninguem p remover e o index é -1
-    // console.log('users depois', users);
 });
 
 app.set('view engine', 'ejs');
