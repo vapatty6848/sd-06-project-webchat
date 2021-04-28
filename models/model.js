@@ -5,3 +5,7 @@ const get = () => {
     msg: 'let thy will be done'
   };
 };
+
+module.exports = {
+  get,
+}
