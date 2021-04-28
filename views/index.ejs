@@ -39,8 +39,9 @@
     let nickname = '<%= generateNickname()%>'
     const socket = io('http://localhost:3000/');    
     const id = socket.id
+    console.warn(socket)
     const myUser = {nickname, id}
-    let onlineUsers = [];
+    
     const form = document.querySelector('form.message')
     const nicknameForm = document.querySelector('form.nickname')
     const nicknameInput = document.querySelector('#editar')
@@ -58,19 +59,16 @@
       e.preventDefault();
 
       const newNickname = nicknameInput.value;
-
+      console.log(myUser)
       if (newNickname) {
-        myUser.nickname = newNickname;
-        nickname= newNickname
+        myUser.nickname 
 
-        socket.emit('updateNickname', myUser);
-
-        const [user ,...otherUsers] = onlineUsers;
-        user.nickname = newNickname;
-        onlineUsers = [ user, ...otherUsers];
-        refreshUsers(onlineUsers);
+        socket.emit('updateNickname', {id: myUser.id, nickname: newNickname});
+        
       }
 });
+
+
 
     const formatMessage = (message, nickname) => {
       const timeStamp = '<%= fromNow()%>'
@@ -79,8 +77,6 @@
 
     const createMessage = (message, nickname) => {
       const formatedMessage = message
-      console.log(message, nickname, 'message and nicknaem')
-      console.log(formatedMessage, 'formateed')
       const messagesUl = document.querySelector('#messages');
       const messageContainer = document.createElement('div');
       const messageText = document.createElement('p');
@@ -107,24 +103,37 @@
     }
 
     const addUsers = (users) => {
-      console.log(users)
       users.forEach(user => createUser(user.nickname))
     }
 
     const refreshUsers = (updatedUsers) => {
       clearUsers()
-      addUsers(updatedUsers)
+      const [...newUsers] = updatedUsers
+      const index = newUsers.findIndex(user => user.id === socket.id)
+      const user = updatedUsers.find(user => user.id === socket.id)
+      newUsers.splice(index, 1)
+      newUsers.unshift(user)
+      addUsers(newUsers)
     }
 
     socket.on('message',  (message) => createMessage(message, myUser.nickname))
     
-    socket.emit('newUser', myUser)
 
 
     socket.on('users',  (users) => {
-      onlineUsers = users
       refreshUsers(users)
     })
+
+    socket.on('updateNickname', (users) => {
+      refreshUsers(users)
+    })
+
+    socket.on('connect', () => {
+      console.log('cheguei no front')
+      socket.emit('newUser', myUser)
+
+    })
+    
 
   </script>
 </body>
