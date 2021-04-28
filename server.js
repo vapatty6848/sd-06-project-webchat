@@ -3,9 +3,24 @@
 
 const app = require('express')();
 const http = require('http').createServer(app);
+const cors = require('cors');
+const io = require('socket.io')(http, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  }
+});
+
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '../views/chat.ejs');
+});
+
+io.on('connection', (socket) => {
+  console.log(
+    'Usuário conectado'
+  );
 });
 
 http.listen(3000, () => {
