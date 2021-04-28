@@ -20,9 +20,9 @@ app.set('views', './views');
 io.on('connection', (socket) => {
   
   socket.on('message', (msg) => {
-    const now = moment('DD-MM-YYYY hh:mm:ss');
+    const now = moment(Date()).format('DD-MM-YYYY hh:mm:ss');
     console.log(now);
-    io.emit('message', `dd-mm-yyyy hh:mm:ss ${msg.nickname} ${msg.chatMessage}`);
+    io.emit('message', `${now} ${msg.nickname} ${msg.chatMessage}`);
   });
 });
 
