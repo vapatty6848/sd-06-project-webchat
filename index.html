@@ -20,16 +20,17 @@
     }
     #input-mensagens {
       float: right;
-      margin-top: 0px;
       text-align: center;
       width: 100%
     }
     #input-mensagens input {
       clear: both;
-      width: 100%;
+      margin: 5px;
+      width: 80%;
     }
     #input-mensagens button {
       position: absolute;
+      margin: 5px;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
@@ -91,6 +92,11 @@
       createNickName(newText);
       inputNickName.value = '';
     })
+
+    socket.on('mesages', (message) => createMessage(message));
+    socket.on('nickNames', (nickName) => createNickName(nickName));
+    socket.on('newConnection', ({ message }) => createMessage(message));
+    socket.on('serverMessage', ({ message }) => createMessage(message));
 
   </script>
 </body>

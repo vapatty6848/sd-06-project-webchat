@@ -19,8 +19,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('mensagem', (msg) => {
-    console.log(`Alguém disse: ${msg}`);
+    io.emit('serverMessage', { message: msg });
   });
+
+  socket.on('nickName', (msg) => {
+    console.log(`${msg} entrou`);
+  });
+
+  socket.emit('mesages', 'Seja bem vindo');
+
+  socket.broadcast.emit('newConnection', { message: 'Nova conexão' });
+  socket.broadcast.emit('serverMessage', { message: 'Algo' });
 });
 
 app.get('/', (_req, res) => {
