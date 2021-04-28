@@ -21,6 +21,11 @@ io.on('connection', (socket) => {
   console.log(
     'Usuário conectado'
   );
+  socket.on('disconnect', () => {
+    console.log(
+      'bye bye'
+    );
+  });
 });
 
 http.listen(3000, () => {
