@@ -18,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 let userList = [];
+let myNickname = '';
 
 const saveMessageInDB = (message) => fetch('http://localhost:3000/', {
     method: 'POST',
@@ -39,6 +40,9 @@ function generateUserMessage(chatMessage, nickname) {
 
 function removeUserFromList(id) {
   const indexOfUser = userList.indexOf(id);
+  // console.log(userList);
+  // console.log(id);
+  // console.log(userList.indexOf(id));
     userList.splice(indexOfUser, 1);
     io.emit('reloadUsersList', userList);
 }
@@ -65,17 +69,18 @@ function updateUserList(newUserList) {
   // console.log(newUserList);
 }
 
-function onDisconnect(socket) {
-  removeUserFromList(socket.id);
+function onDisconnect(socket, myNick) {
+  removeUserFromList(myNick);
     socket.broadcast.emit('createListForOthers', userList);
     socket.broadcast.emit('addClassOnTop', { userList });
-    console.log('Desconectado');
+    console.log('Usuário desconectado');
 }
 
 io.on('connection', (socket) => {
   console.log('Conectado');
   
   socket.on('userConnected', (nick) => {
+    myNickname = nick;
     userConnected(socket, nick);
   });
   
@@ -84,7 +89,8 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => {
-    onDisconnect(socket);
+    const myNick = socket.id.substr(1, 16);
+    onDisconnect(socket, myNick);
   });
   
   socket.on('userChangedName', ({ oldNick, nick }) => {

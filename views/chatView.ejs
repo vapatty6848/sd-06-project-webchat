@@ -152,7 +152,11 @@
 
     socket.on('reloadUsersList', (userList) => {
       usersUl.innerHTML = '';
-      userList.forEach((user) => createUserInList(user));
+      console.log(userList);
+      userList.forEach((user) => {
+        console.log(user);
+        createUserInList(user)
+      });
       
       // const userLi = document.querySelector('li');
       // userLi.setAttribute('data-testid', 'online-user');
