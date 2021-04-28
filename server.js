@@ -54,6 +54,23 @@ io.on('connection', (socket) => {
       message: message.chatMessage,
       timestamp: `${today} ${now}` });
   });
+
+  socket.on('disconnect', () => {
+    const userToBeRemoved = users.find(user => user.socketId === socket.id)
+    const identifierList = users.map(user => user.nickname)
+    const identifierToBeRemoved = userToBeRemoved ? userToBeRemoved.nickname : 'error'
+    const identifierIndex = identifierList.indexOf(identifierToBeRemoved)
+    console.log('identifierIndex', identifierIndex)
+    console.log('socket', identifierToBeRemoved)
+    console.log('userToBeRemoved', userToBeRemoved)
+    console.log('identifierList', identifierList)
+    
+    console.log('users antes', users)
+    users.splice(identifierIndex === -1 ? null : identifierIndex, 1) //esta com erro, é necessario tratar o estado inicial em que nao ha ninguem p remover e o index é -1
+    console.log('users depois', users)
+    io.emit('public-nickname', users);
+  })
+
 });
 
 app.set('view engine', 'ejs');

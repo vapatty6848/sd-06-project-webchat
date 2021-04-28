@@ -33,7 +33,17 @@
         let users = [];
         let messages = [];
 
-        socket.on('public-nickname', (nicknameListFromServer, nicknameFromServer) => {
+        window.onbeforeunload = () => {
+            // const typedNickname = document.querySelector('#new-nickname').value;
+            // socket.emit('change-nickname', typedNickname, socket.id);
+            window.alert('coruja')
+            console.log('console')
+            socket.disconnect();
+            return false;
+        };
+
+        // socket.on('public-nickname', (nicknameListFromServer, nicknameFromServer) => {
+        socket.on('public-nickname', (nicknameListFromServer) => {
             document.querySelector('#user-names').innerHTML = ''
             const topUser = nicknameListFromServer.find(user => user.socketId === socket.id)
 
@@ -70,6 +80,9 @@
             const typedNickname = document.querySelector('#new-nickname').value;
             socket.emit('change-nickname', typedNickname, socket.id);
         });
+
+        // socket.on('disconnect', 'to saindo')
+
     </script>
 </body>
 </html>
