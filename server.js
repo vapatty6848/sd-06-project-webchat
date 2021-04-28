@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
 
 app.get('/', (_req, res) => {
   const msgs = model.get();
-  res.render('chat', { msgs });
+  res.render('/views/chat', { msgs });
 });
 
 http.listen(3000, () => {
