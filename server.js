@@ -5,7 +5,7 @@ const app = require('express')();
 const http = require('http').createServer(app);
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(__dirname + '../views/chat.ejs');
 });
 
 http.listen(3000, () => {
