@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('message', ({ chatMessage, nickname }) => {
-    generateUserMessage(chatMessage, nickname, socket);
+    generateUserMessage(chatMessage, nickname);
   });
 });
 
