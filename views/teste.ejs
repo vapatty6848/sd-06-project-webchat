@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -13,9 +13,10 @@
       <h2>usuários ativos</h2>
     </div>
     <ul id="online-user">
-      <!-- <% users.forEach((user) => {%>
+      <li data-testid="online-user"><%= nick %></li>
+      <% users.forEach((user) => {%>
         <li data-testid="online-user"><%= user.nickname %></li>
-      <% })%> -->
+      <% })%>
     </ul>
     <input
     type="text"
@@ -63,20 +64,22 @@
   <script>
     const socket = io();
     
-    let nickname = '';
+    let nickname = '<%= nick %>';
+    console.log('nick', nickname)
     
     const usrOnLine = document.querySelector('#online-user');
     socket.on('connect', () => {
-      nickname = (socket.id).slice(0, 16);
       socket.emit('online-users', nickname);
       usrOnLine.innerHTML = nickname;
     });
+
     const btnMsg = document.querySelector('#send-button');
     btnMsg.addEventListener('click', () => {
       const inputMsg = document.querySelector('#message-box');
       const chatMsg = inputMsg.value;
       socket.emit('message', {chatMessage: chatMsg, nickname});
     })
+
     const btnUsr = document.querySelector('#nickname-button');
     btnUsr.addEventListener('click', () => {
       const inputUsr = document.querySelector('#nickname-box');
@@ -86,6 +89,8 @@
       console.log('nick', Newnickname);
       socket.emit('updateNickname', Newnickname)
     })
+
+
     socket.on('message', (message) => {
       console.log('msg', message);
       const msgList = document.querySelector('#ul-message');
@@ -95,6 +100,7 @@
       console.log('oi', typeof liMsg);
       msgList.appendChild(liMsg);
     })
+
     socket.on('updateUsers', (users) => {
       console.log('usr', users);
       const onlineUsr = document.querySelector('#online-user');
@@ -102,12 +108,14 @@
       const me = users.find(user => user.id === socket.id);
       const others = users.filter(user => user.id !== socket.id);
       [me, ...others].forEach((user) =>{
+        
         const liUsr = document.createElement('li');
         liUsr.innerHTML = user.nickname;
-        liUsr.setAttribute('data-testid', 'online-user');
+        liUsr.setAttribute('data-testid', 'online-user')
         onlineUsr.appendChild(liUsr);
       })
+
     })
   </script>
 </body>
-</html>
+</html> -->
