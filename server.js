@@ -22,7 +22,7 @@ function userDate() {
   return timeFormated;
 }
 
-let randonUserLast = `user_${Math.random().toString().substr(2, 11)}`; 
+const randonUserLast = `user_${Math.random().toString().substr(2, 11)}`; 
 let users = [];
 
 function newUserNickname({ newNickname, socket }) {
@@ -36,7 +36,6 @@ function newUserNickname({ newNickname, socket }) {
   console.log('linha 33', users, userNick);
   io.emit('updateUsers', users);
 }
-console.log (randonUserLast);
 
 io.on('connection', (socket) => {
   socket.on('conectado', (nickname) => {
