@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
   socket.on('newUser', () => {
     const nickname = createHash(hashLength);
     io.emit('nickname', nickname);
-  })
+  });
 });
 
 app.get('/', (_req, res) => {
