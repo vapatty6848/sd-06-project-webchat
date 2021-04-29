@@ -15,44 +15,11 @@ const io = require('socket.io')(httpServer, {
     method: ['GET', 'POST'],
   },
 });
-// const modelMessages = require('./models/messagesConnection');
+const { saveMessage, messagesGetAll } = require('./models/messagesConnection');
 
 app.use(cors());
 
 let clients = [];
-
-// const addNewUser = (socket, nickname) => {
-//   const newUser = {
-//     id: socket.id,
-//     nickname,
-//   };
-//   clients.push(newUser);
-// };
-
-// const addNickname = (nickname, socket) => {
-//   const index = clients.findIndex((user) => user.id === socket.id);
-//   clients[index].nickname = nickname;
-// };
-
-// const changeNickname = (newNickname, socket) => {
-//   const index = clients.findIndex((user) => user.id === socket.id);
-//   clients[index].nickname = newNickname;
-// };
-
-// const getNickname = (socket) => {
-//   const index = clients.findIndex((user) => user.id === socket.id);
-//   return clients[index].nickname;
-// };
-
-// const getRandomChars = () => {
-//   const length = 16;
-//   const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   let result = '';
-//   for (let i = 0; i < length; i += 1) {
-//     result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-//   }
-//   return result;
-// };
 
 const getTime = () => {
   const time = new Date();
@@ -62,8 +29,9 @@ const getTime = () => {
   return timeFormated;
 };
 
-const formatedMessage = ({ chatMessage, nickname }) => {
+const formatedMessage = async ({ chatMessage, nickname }) => {
   const result = `${getTime()} ${nickname} ${chatMessage}`;
+  await saveMessage(getTime(), nickname, chatMessage);
   io.emit('message', result);
 };
 
@@ -88,10 +56,20 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Usuário ${socket.id} desconectado`);
+    const exit = clients.find((user) => user.id === socket.id);
+    const index = clients.indexOf(exit);
+    clients = clients.splice(index, 1); 
   });
 });
 
-app.get('/', (req, res) => res.render('index'));
+app.get('/', async (_req, res) => {
+  const allMessages = await messagesGetAll();
+  console.log('allmessages:', allMessages);
+  const messages = allMessages.map(
+    (msg) => `${msg.timestamp} ${msg.nickname} ${msg.message}`,
+  );
+  res.render('index', { messages }); 
+});
 
 httpServer.listen(port, () => {
   console.log(`servidor rodando na porta ${port}`);
