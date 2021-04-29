@@ -27,11 +27,13 @@
     const createMessage = (message) => {
       const messagesUl = document.querySelector('#mensagens');
       const li = document.createElement('li');
+      console.log(message);
       li.innerText = message;
       messagesUl.appendChild(li);
     };
-    socket.on('ola', (mensagem) => createMessage(mensagem));
-    socket.on('message', (objeto) => createMessage(objeto.mensagem));
+    socket.on('message', (objeto) => {
+      console.log(objeto);
+      createMessage(objeto)});
   </script>
 </body>
 
