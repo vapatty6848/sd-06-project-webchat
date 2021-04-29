@@ -58,8 +58,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
-    io.emit('updateUsers', users); 
-    // toda vez que atualiza envia
+    io.emit('updateUsers', users); // toda vez que atualiza envia
   });
 });
 
@@ -68,7 +67,7 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
-  const randonUser =  randonUserLast;
+  const randonUser = randonUserLast;
  
   res.render('home', { listAll, users, randonUser });
 });
