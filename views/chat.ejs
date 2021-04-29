@@ -8,17 +8,19 @@
 
 <body>
   <ul id="mensagens"></ul>
+  <ul id="usuarios"></ul>
   <form action="">
     <input id="mensagemInput" autocomplete="off" /><button>Send</button>
   </form>
   <script>
     const socket = io();
     const form = document.querySelector('form');
+    let nickname = '';
     const inputMessage = document.querySelector('#mensagemInput');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       socket.emit('message', {
-        nickname: '1',
+        nickname: nickname,
         chatMessage: inputMessage.value,
       });
       inputMessage.value = ''
@@ -31,9 +33,22 @@
       li.innerText = message;
       messagesUl.appendChild(li);
     };
+    const addNewUser = (user) => {
+      const usersUl = document.querySelector('#usuarios');
+      const li = document.createElement('li');
+      li.innerHTML = user;
+      li.setAttribute("data-testid", "online-user");
+      usersUl.appendChild(li);
+    };
     socket.on('message', (objeto) => {
       console.log(objeto);
-      createMessage(objeto)});
+      createMessage(objeto)
+    });
+    socket.emit('newUser');
+    socket.on('nickname', (hash) => {
+      nickname = hash;
+      addNewUser(nickname);
+    });
   </script>
 </body>
 
