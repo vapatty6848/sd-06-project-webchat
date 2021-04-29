@@ -22,27 +22,26 @@ function userDate() {
   return timeFormated;
 }
 
-const randonUserLast = `user_${Math.random().toString().substr(2, 11)}`; 
+let randonUserLast = `user_${Math.random().toString().substr(2, 11)}`;
 let users = [];
 
 function newUserNickname({ newNickname, socket }) {
-  const userNick = users.map((user) => {
-    if (user.socketId === socket.id) {
-      return { ...user, nickname: newNickname };
-    } // verifica se o nick existe e atualiza ou mantem
-    return user;
-  });
-  users = userNick;
-  console.log('linha 33', users, userNick);
+  const index = users.findIndex((user) => user.socketId === socket.id);
+  const userIndex = users.splice(index, 1, { nickname: newNickname, socketId: socket.id });
   io.emit('updateUsers', users);
+}
+
+function newUser(nickname, socket) {
+  randonUserLast = `user_${Math.random().toString().substr(2, 11)}`;
+  const newUser = { socketId: socket.id, nickname };
+  return users.push(newUser);
 }
 
 io.on('connection', (socket) => {
   socket.on('conectado', (nickname) => {
-    const newUser = { socketId: socket.id, nickname };
-    users.push(newUser);   
-    io.emit('updateUsers', users); // toda vez que atualizar ele envia 
-  });  
+    newUser(nickname, socket);
+    io.emit('updateUsers', users); // toda vez que atualizar ele envia
+  });
   socket.on('message', async ({ chatMessage, nickname }) => {
     const times = userDate();
     io.emit('message', `${times} -  ${nickname}: ${chatMessage}`);
@@ -64,7 +63,7 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
   const randonUser = randonUserLast;
- 
+
   res.render('home', { listAll, users, randonUser });
 });
 
