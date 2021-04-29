@@ -9,28 +9,41 @@
 <body>
   <ul id="mensagens"></ul>
   <ul id="usuarios"></ul>
-  <form action="">
-    <input id="mensagemInput" autocomplete="off" /><button>Send</button>
+  <form action="" id="nicknameForm">
+    <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" />
+    <button data-testid="nickname-button">Send</button>
+  </form>
+  <form action="" id="messageForm">
+    <input data-testid="message-box" id="messageInput" autocomplete="off" />
+    <button data-testid="send-button">Send</button>
   </form>
   <script>
     const socket = io();
-    const form = document.querySelector('form');
+    const nicknameForm = document.querySelector('#nicknameForm');
+    const messageForm = document.querySelector('#messageForm');
     let nickname = '';
-    const inputMessage = document.querySelector('#mensagemInput');
-    form.addEventListener('submit', (e) => {
+    const inputNickname = document.querySelector('#nicknameInput');
+    const inputMessage = document.querySelector('#messageInput');
+    messageForm.addEventListener('submit', (e) => {
       e.preventDefault();
       socket.emit('message', {
         nickname: nickname,
         chatMessage: inputMessage.value,
       });
-      inputMessage.value = ''
+      inputMessage.value = '';
+      return false;
+    });
+    nicknameForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      nickname = inputNickname.value;
+      inputNickname.value = ''
       return false;
     });
     const createMessage = (message) => {
       const messagesUl = document.querySelector('#mensagens');
       const li = document.createElement('li');
-      console.log(message);
       li.innerText = message;
+      li.setAttribute("data-testid", "message");
       messagesUl.appendChild(li);
     };
     const addNewUser = (user) => {
