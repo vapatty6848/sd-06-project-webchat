@@ -1,10 +1,10 @@
-const sample = {
-  user: 'me',
-  time: 'unknow',
-  msg: 'let thy will be done',
-};
+const connection = require('./connection');
 
-const get = () => sample;
+const get = async () => {
+  const msgs = await connection()
+    .then((db) => db.collection('messages').find().toArray());
+  return msgs;
+};
 
 module.exports = {
   get,

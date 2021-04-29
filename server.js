@@ -31,8 +31,8 @@ io.on('connection', (socket) => {
   });
 });
 
-app.get('/', (_req, res) => {
-  const msgs = model.get();
+app.get('/', async (_req, res) => {
+  const msgs = await model.get();
   console.log(msgs);
   res.render('chat', { msgs });
 });
