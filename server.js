@@ -14,6 +14,7 @@ const io = require('socket.io')(httpServer, {
   },
 });
 const { saveMsg, getAll } = require('./models/chatMsg');
+const connection = require('./models/connection');
 
 app.use(cors());
 
@@ -35,22 +36,25 @@ function newUserNickname({ newNickname, socket }) {
   users = userNick;
   console.log('linha 33', users, userNick);
   io.emit('updateUsers', users);
-}
-
-io.on('connection', (socket) => {
-  randonUserLast = `user_${Math.random().toString().substr(2, 11)}`;
+};
+function conection(socket) {
   socket.on('conectado', (nickname) => {
     const newUser = { socketId: socket.id, nickname };
     users.push(newUser);   
     io.emit('updateUsers', users); // toda vez que atualizar ele envia 
   }); 
+}
+
+io.on('connection', (socket) => {
+  randonUserLast = `user_${Math.random().toString().substr(2, 11)}`;
+  conection(socket);
   socket.on('message', async ({ chatMessage, nickname }) => {
     const times = userDate();
     io.emit('message', `${times} -  ${nickname}: ${chatMessage}`);
     saveMsg({ nickname, chatMessage, times });
   });
   socket.on('updateNickname', (newNickname) => {
-    newUserNickname({ newNickname, socket })}); // chama função de atuaização do nickname
+    newUserNickname({ newNickname, socket });}); // cham a função de atuaização do nickname
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
