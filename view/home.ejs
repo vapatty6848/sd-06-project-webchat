@@ -100,6 +100,10 @@
 
   socket.on('nickname', (arrayUsers) => {
     displayNickname.innerHTML = '';
+    const currentUser = arrayUsers.find((user) => user.id === socket.id);
+    const currentUserIndex = arrayUsers.indexOf(currentUser);
+    arrayUsers.splice(currentUserIndex, 1);
+    arrayUsers.splice(0, 0, currentUser);
     arrayUsers.forEach( user => {
       const nickItem = document.createElement('li');
       nickItem.innerText = user.nickname;

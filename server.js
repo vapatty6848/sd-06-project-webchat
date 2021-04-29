@@ -48,9 +48,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Usuário ${socket.id} desconectado`);
-    const chatOut = arrayUsers.find((user) => user.id === socket.id);
-    const chatOutIndex = arrayUsers.indexOf(chatOut);
-    arrayUsers = arrayUsers.splice(chatOutIndex, 1); 
+    const onlineUsers = arrayUsers.filter((user) => user.id !== socket.id);
+    arrayUsers = onlineUsers;
+    io.emit('nickname', arrayUsers);
   });
 });
 httpServer.listen(PORT, () => console.log(`on PORT ${PORT}`));
