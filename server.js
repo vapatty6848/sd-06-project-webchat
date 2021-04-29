@@ -21,7 +21,10 @@ function userDate() {
   const timeFormated = moment().format('DD-MM-yyyy h:mm:ss A');
   return timeFormated;
 }
+
+let randonUserLast = `user_${Math.random().toString().substr(2, 11)}`; 
 let users = [];
+
 function newUserNickname({ newNickname, socket }) {
   const userNick = users.map((user) => {
     if (user.socketId === socket.id) {
@@ -30,27 +33,34 @@ function newUserNickname({ newNickname, socket }) {
     return user;
   });
   users = userNick;
-  console.log('linha 32', users, userNick);
+  console.log('linha 33', users, userNick);
   io.emit('updateUsers', users);
 }
 
 io.on('connection', (socket) => {
-  const randonUser = `user_${Math.random().toString().substr(2, 11)}`;
-  const newUser = { socketId: socket.id, nickname: randonUser };
-  users.push(newUser);
-  io.emit('updateUsers', users);
+  randonUserLast = `user_${Math.random().toString().substr(2, 11)}`;
+  socket.on('conectado', (nickname) => {
+    const newUser = { socketId: socket.id, nickname };
+    users.push(newUser);   
+    io.emit('updateUsers', users); 
+    //toda vez que atualizar ele envia 
+  })
+  
   socket.on('message', async ({ chatMessage, nickname }) => {
     const times = userDate();
     io.emit('message', `${times} -  ${nickname}: ${chatMessage}`);
-    await saveMsg({ nickname, chatMessage, times });
+    saveMsg({ nickname, chatMessage, times });
   });
+
   socket.on('updateNickname', (newNickname) => {
     newUserNickname({ newNickname, socket });
-  });
+  }); // cham a função de atuaização do nickname
+
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
-    io.emit('updateUsers', users);
+    io.emit('updateUsers', users); 
+    //toda vez que atualiza envia
   });
 });
 
@@ -59,6 +69,9 @@ app.set('views', './views'); // local das paginas serem mostradas arquivos que v
 
 app.get('/', async (_req, res) => {
   const listAll = await getAll();
-  res.render('home', { listAll, users });
+  const randonUser =  randonUserLast;
+ 
+  res.render('home', { listAll, users, randonUser});
 });
+
 httpServer.listen(port, () => console.log(`${port}`));
