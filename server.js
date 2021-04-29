@@ -42,9 +42,8 @@ io.on('connection', (socket) => {
   socket.on('conectado', (nickname) => {
     const newUser = { socketId: socket.id, nickname };
     users.push(newUser);   
-    io.emit('updateUsers', users); 
-    //toda vez que atualizar ele envia 
-  })
+    io.emit('updateUsers', users); // toda vez que atualizar ele envia 
+  });
   
   socket.on('message', async ({ chatMessage, nickname }) => {
     const times = userDate();
@@ -60,7 +59,7 @@ io.on('connection', (socket) => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
     io.emit('updateUsers', users); 
-    //toda vez que atualiza envia
+    // toda vez que atualiza envia
   });
 });
 
@@ -71,7 +70,7 @@ app.get('/', async (_req, res) => {
   const listAll = await getAll();
   const randonUser =  randonUserLast;
  
-  res.render('home', { listAll, users, randonUser});
+  res.render('home', { listAll, users, randonUser });
 });
 
 httpServer.listen(port, () => console.log(`${port}`));
