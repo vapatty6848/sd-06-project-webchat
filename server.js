@@ -15,71 +15,79 @@ const io = require('socket.io')(httpServer, {
     method: ['GET', 'POST'],
   },
 });
+// const modelMessages = require('./models/messagesConnection');
 
 app.use(cors());
 
-const clients = [];
+let clients = [];
 
-const addNewUser = (socket) => {
-  const newUser = {
-    id: socket.id,
-  };
-  clients.push(newUser);
-};
+// const addNewUser = (socket, nickname) => {
+//   const newUser = {
+//     id: socket.id,
+//     nickname,
+//   };
+//   clients.push(newUser);
+// };
 
-const addNickname = (nickname, socket) => {
-  const index = clients.findIndex((user) => user.id === socket.id);
-  clients[index].nickname = nickname;
-};
+// const addNickname = (nickname, socket) => {
+//   const index = clients.findIndex((user) => user.id === socket.id);
+//   clients[index].nickname = nickname;
+// };
 
-const changeNickname = (newNickname, socket) => {
-  const index = clients.findIndex((user) => user.id === socket.id);
-  clients[index].nickname = newNickname;
-};
+// const changeNickname = (newNickname, socket) => {
+//   const index = clients.findIndex((user) => user.id === socket.id);
+//   clients[index].nickname = newNickname;
+// };
 
-const getNickname = (socket) => {
-  const index = clients.findIndex((user) => user.id === socket.id);
-  console.log(clients[index].nickname);
-  return clients[index].nickname;
-};
+// const getNickname = (socket) => {
+//   const index = clients.findIndex((user) => user.id === socket.id);
+//   return clients[index].nickname;
+// };
 
-const getRandomChars = () => {
-  const length = 16;
-  const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i += 1) {
-    result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-  }
-  return result;
-};
+// const getRandomChars = () => {
+//   const length = 16;
+//   const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//   let result = '';
+//   for (let i = 0; i < length; i += 1) {
+//     result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+//   }
+//   return result;
+// };
 
 const getTime = () => {
   const time = new Date();
-  const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
-    .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+  const timeFormated = `${time.getDate()}-${
+    time.getMonth() + 1
+  }-${time.getFullYear()} ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
   return timeFormated;
+};
+
+const formatedMessage = ({ chatMessage, nickname }) => {
+  const result = `${getTime()} ${nickname} ${chatMessage}`;
+  io.emit('message', result);
 };
 
 // escuta nova conexão
 io.on('connection', (socket) => {
-  console.log(`Usuário ${socket.id} conectado`);
-  addNewUser(socket);
-  console.log(clients);
-  io.emit('connected', getRandomChars());
-// escuta messagens
-socket.on('message', ({ chatMessage, nickname }) => {
-  addNickname(nickname, socket);
-  const result = `${getTime()} ${getNickname(socket)} ${chatMessage}`;
-  io.emit('message', result);
-  });
+  console.log(`Novo usuário conectado: ${socket.id}`);
 
-  socket.on('changeNickname', ({ newNickname }) => {
-    changeNickname(newNickname, socket);
-    io.emit('changeNickname', clients);
+  socket.on('connectedClient', (nickname) => {
+    clients.push({ id: socket.id, nickname });
+    io.emit('nickname', clients);
+  });
+  
+  // escuta messagens
+  socket.on('message', (msg) => formatedMessage(msg));
+
+  socket.on('changeNickname', (newNickname) => {
+    const chat = clients.find((user) => user.id === socket.id);
+    chat.nickname = newNickname;
+    clients = clients.map((user) => (user.id === socket.id ? chat : user));
+    io.emit('nickname', clients);
   });
 
   socket.on('disconnect', () => {
-    console.log('disconnect');
+    console.log(`Usuário ${socket.id} desconectado`);
   });
 });
 
