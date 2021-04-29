@@ -4,26 +4,33 @@ const app = express();
 const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer);
 const moment = require('moment');
+const { createMessage, getAllMessages } = require('./models/messageModel');
 
 const PORT = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 app.set('views', './view');
 
-app.get('/', (_req, res) => {
-  res.render('home', {}); 
-});
-
 let arrayUsers = [];
 
-const formatMessage = ({ chatMessage, nickname }) => {
+app.get('/', async (_req, res) => {
+  const allMessages = await getAllMessages();
+  console.log('allmessages:', allMessages);
+  const messages = allMessages.map(
+    (message) => `${message.time} ${message.nickname} ${message.message}`,
+  );
+  res.render('home', { messages }); 
+});
+
+const formatMessage = async ({ chatMessage, nickname }) => {
   const time = moment().format('DD-MM-YYYY HH:mm:ss A');
-  const message = `${time}  ${nickname} ${chatMessage}`;
+  const message = `${time} ${nickname} ${chatMessage}`;
+  await createMessage(time, nickname, chatMessage);
   io.emit('message', message);
 };
 
 io.on('connection', (socket) => {
-  console.log(`Novo usuário conectado: ${socket.id}`);
+  // console.log(`Novo usuário conectado: ${socket.id}`);
   
   socket.on('message', (message) => formatMessage(message));
 
@@ -41,6 +48,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Usuário ${socket.id} desconectado`);
+    const chatOut = arrayUsers.find((user) => user.id === socket.id);
+    const chatOutIndex = arrayUsers.indexOf(chatOut);
+    arrayUsers = arrayUsers.splice(chatOutIndex, 1); 
   });
 });
 httpServer.listen(PORT, () => console.log(`on PORT ${PORT}`));

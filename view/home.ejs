@@ -22,11 +22,15 @@
   </button>
   
   <h2>Usuários</h2>
-  <ul id="displayNickname"> 
+  <ul id="displayNickname">
   </ul>
   
   <h2>Chitchat</h2>
-  <ul id='displayMessage'></ul>
+  <ul id='displayMessage'>
+    <% messages.forEach((message) => { %>
+      <li  data-testid="message"> <%=message %></li>
+    <% }); %> 
+  </ul>
   
   <input
     data-testid="message-box"
@@ -95,10 +99,10 @@
   });
 
   socket.on('nickname', (arrayUsers) => {
-    const nickItem = document.createElement('li');
     displayNickname.innerHTML = '';
     arrayUsers.forEach( user => {
-      nickItem.innerHTML = user.nickname;
+      const nickItem = document.createElement('li');
+      nickItem.innerText = user.nickname;
       nickItem.setAttribute('data-testid', 'online-user');
       displayNickname.appendChild(nickItem); 
     });
