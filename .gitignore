@@ -1,3 +1,7 @@
 node_modules
 .env
 .vscode
+.rascunhoscss.css
+.template/chat.html
+.template/chat.js
+.template/style.css
