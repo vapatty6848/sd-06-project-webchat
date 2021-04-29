@@ -70,23 +70,13 @@
       newNickname.value = '';
     });
 
-    const getRandomString = () => {
-      const length = 16;
-      const random = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      let result = '';
-      for (let i = 0; i < length; i += 1) {
-        result += random.charAt(Math.floor(Math.random() * random.length));
-      }
-      return result;
-    };
-
     socket.on('connect', () => {
-      nickname = getRandomString();
+      nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
       socket.emit('newUser', { nickname });
     });
 
     socket.on('message', (message) => newMessage(message));
-
+/* <<<<<<<<< */
     socket.on('onlineUsers', (allUsers) => {
       const notOnline =  allUsers.filter((user) => user.id !== socket.id);
       const firstUser = allUsers.filter((user) => user.id === socket.id);
@@ -103,6 +93,6 @@
         document.querySelector('#allUsers').appendChild(renderUsers);
       });
     });
-
+/* >>>>>>>>> Pedaço de código utilizado do código do André Sartoreto, em que o mesmo me explicou */
   </script>
 </html>
