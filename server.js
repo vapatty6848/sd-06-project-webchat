@@ -50,8 +50,7 @@ io.on('connection', (socket) => {
     saveMsg({ nickname, chatMessage, times });
   });
   socket.on('updateNickname', (newNickname) => {
-    newUserNickname({ newNickname, socket });
-  }); // cham a função de atuaização do nickname
+    newUserNickname({ newNickname, socket })}); // chama função de atuaização do nickname
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
