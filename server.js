@@ -18,15 +18,17 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 
 app.get('/', async (_req, res) => {
-  const messageList = await allMessages();
+  const messageObject = await allMessages();
+  const messageList = messageObject.map((msg) => `${msg.date} ${msg.nickname} ${msg.chatMessage}`);
   res.render('../views/', { messageList });
+  console.log(messageObject);
 });
 
 io.on('connection', (socket) => {
   socket.on('message', async ({ chatMessage, nickname }) => {
-    const messageTime = moment().format('DD-MM-yyyy HH:mm:ss a'); // DD-MM-yyyy HH:mm:ss
-    await newMessages({ chatMessage, nickname, messageTime });
-    const result = `${messageTime} - ${nickname} - ${chatMessage}`;
+    const messageDate = moment().format('DD-MM-yyyy HH:mm:ss a'); // DD-MM-yyyy HH:mm:ss
+    await newMessages({ nickname, chatMessage, date: messageDate });
+    const result = `${messageDate} - ${nickname} - ${chatMessage}`;
     io.emit('message', result);
   });
 });

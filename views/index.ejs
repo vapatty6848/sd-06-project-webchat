@@ -13,8 +13,8 @@
   <input data-testid="nickname-box" id="nick"></input>
   <button data-testid="nickname-button" id="changeNick">Change Nickname</button>
   <ul id="list"> 
-    <% messageList.forEach(({ chatMessage }) => {%>
-      <li data-testid="message"><%= chatMessage %></li>
+    <% messageList.forEach(( msg ) => {%>
+      <li data-testid="message"><%= msg %></li>
     <%}); %>
   </ul>
   <input data-testid="message-box" id="inputMsg"></input>
