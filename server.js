@@ -43,18 +43,15 @@ io.on('connection', (socket) => {
     const newUser = { socketId: socket.id, nickname };
     users.push(newUser);   
     io.emit('updateUsers', users); // toda vez que atualizar ele envia 
-  });
-  
+  }); 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const times = userDate();
     io.emit('message', `${times} -  ${nickname}: ${chatMessage}`);
     saveMsg({ nickname, chatMessage, times });
   });
-
   socket.on('updateNickname', (newNickname) => {
     newUserNickname({ newNickname, socket });
   }); // cham a função de atuaização do nickname
-
   socket.on('disconnect', () => {
     const usersOn = users.filter((us) => us.socketId !== socket.id);
     users = usersOn;
