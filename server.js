@@ -22,10 +22,8 @@ const hashLength = 16;
 io.on('connection', (socket) => {
   socket.on('message', (msg) => {
     const now = moment(Date()).format('DD-MM-YYYY hh:mm:ss');
-    let msgToDB = {...msg};
+    const msgToDB = { ...msg };
     msgToDB.timestamp = now;
-    // console.log('msgToDB', msgToDB);
-
     model.create(msgToDB);
     io.emit('message', `${now} ${msg.nickname} ${msg.chatMessage}`);
   });
@@ -37,12 +35,9 @@ io.on('connection', (socket) => {
 
 app.get('/', async (_req, res) => {
   const msgs = await model.get();
-  console.log('app-get', msgs);
-  
   res.render('chat', { msgs });
 });
 
 http.listen(3000, () => {
   console.log('Servidor ouvindo na porta 3000');
 });
-
