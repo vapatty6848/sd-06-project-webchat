@@ -7,7 +7,15 @@
 </head>
 
 <body>
-  <ul id="mensagens"></ul>
+  <ul id="mensagens">
+    <% msgs.forEach((message) => { %>
+      <li data-testid="message">
+        <%= message.timestamp %>
+        <%= message.nickname %>
+        <%= message.chatMessage %>
+      </li>
+    <% }) %>
+  </ul>
   <ul id="usuarios"></ul>
   <form action="" id="nicknameForm">
     <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" />
