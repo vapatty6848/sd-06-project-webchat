@@ -31,7 +31,6 @@
     }
 
     const showAllMessages = (message) => {
-      // console.log(message)
       const txt = document.createElement('p');
       txt.setAttribute('data-testid', 'message');
       txt.innerText = message;
@@ -41,7 +40,6 @@
     socket.on('usersOnline', (users) => {
       document.querySelector('#userList').innerHTML = '';
       users.map((use) => {
-        // console.log(use)
         showId(use)
       });
     });
@@ -58,26 +56,19 @@
     });
 
     socket.on('message', (msg, objectMessage, currentUser) => {
-      
-      console.log(objectMessage)
-      console.log('nickname', objectMessage.nickname)
-      console.log('usuario atual', currentUser)
       showAllMessages(msg);
     });
 
     socket.on('listMessages', (messages) => {
       document.querySelector('#msgList').innerHTML = '';
       messages.forEach((msg) => {
-        // console.log(msg.message.timestamp)
         const parseMessage = `${msg.message.timestamp} ${msg.message.nickname} ${msg.message.message}`
         showAllMessages(parseMessage);
       });
     });
 
     document.querySelector('#changeNickname').addEventListener('click', () => {
-      // console.log('entrou')
       const newNick = document.querySelector('#nickName').value;
-      console.log(newNick)
       socket.emit('editNickName', newNick)
     });
   </script>

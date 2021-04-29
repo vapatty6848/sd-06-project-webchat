@@ -50,6 +50,7 @@ const getHour = () => {
 };
 
 const connectedUser = [];
+
 const allMessages = async () => {
   await viewConnection.getMessages().then((resp) => io.emit('listMessages', resp));
 };
@@ -62,31 +63,34 @@ const insertMsg = async (message, date) => {
   });
 };
 
-// const socketEdit = () => {
-  
-// }
-
-io.on('connection', (socket) => {
-  socket.id = socket.id.substring(0, 16);
-  connectedUser.push(socket.id);
-  io.emit('usersOnline', connectedUser);
-  socket.emit('initial', socket.id);
-  allMessages();
-  socket.on('disconnect', () => {
-    connectedUser.splice(connectedUser.indexOf(socket.id), 1);
-    io.emit('usersOnline', connectedUser);
-  });
-  socket.on('editNickName', (newNickName) => {
-    connectedUser.splice(connectedUser.indexOf(socket.id), 1, newNickName);
-    socket.id = newNickName;
-    io.emit('usersOnline', connectedUser, socket.id);
-  });
+const socketMessage = (socket) => {
   socket.on('message', async (message) => {
     const date = getDate();
-    const msg = `${date.day}-${date.month}-${date.year} ${getHour()} ${message.nickname}: ${message.chatMessage}`;
+    const parseDate = `${date.day}-${date.month}-${date.year}`;
+    const msg = `${parseDate} ${getHour()} ${message.nickname}: ${message.chatMessage}`;
     insertMsg(message, date);
     io.emit('message', msg, message, socket.id);
   });
+};
+
+io.on('connection', (socket) => {
+  let randomId = socket.id.substring(0, 16);
+  connectedUser.push(randomId);
+  io.emit('usersOnline', connectedUser);
+  socket.emit('initial', randomId);
+  allMessages();
+  socket.on('editNickName', (newNickName) => {
+    connectedUser.splice(connectedUser.indexOf(randomId), 1, newNickName);
+    randomId = newNickName;
+    console.log('novo nickname', randomId);
+    io.emit('usersOnline', connectedUser);
+  });
+  socket.on('disconnect', () => {
+    console.log(randomId, 'saiu');
+    connectedUser.splice(connectedUser.indexOf(randomId), 1);
+    io.emit('usersOnline', connectedUser);
+  });
+  socketMessage(socket);
 });
 
 http.listen(PORT, () => console.log(`ouvindo na porta: ${PORT}`));
