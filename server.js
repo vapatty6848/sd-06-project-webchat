@@ -36,6 +36,7 @@ function newUserNickname({ newNickname, socket }) {
   console.log('linha 33', users, userNick);
   io.emit('updateUsers', users);
 }
+console.log (randonUserLast);
 
 io.on('connection', (socket) => {
   socket.on('conectado', (nickname) => {
