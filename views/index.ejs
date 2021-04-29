@@ -8,7 +8,10 @@
     <title>Web Chat</title>
 </head>
 <body>
-  <div id="userList">
+  <div>
+    <p>On-Line</p>
+    <ul id="userList">
+    </ul>
   </div>
   <h2>Conversa</h2>
   <div id="msgList">
@@ -17,38 +20,65 @@
   <button type="button" id="send" data-testid="send-button">Enviar</button>
   <input type="text", name="nickname", id="nickName" data-testid="nickname-box"/>
   <button data-testid="nickname-button" id="changeNickname">adicionar nickname</button>
+  
   <script>
     const socket = io();
-    let uId = null;
-    const connectedUser = [];
-
     const showId = (userId) => {
-      const txt = document.createElement('p');
+      const txt = document.createElement('li');
       txt.setAttribute('data-testid', 'online-user');
       txt.innerText = userId;
       document.querySelector('#userList').appendChild(txt);
     }
-    
-    socket.on('showUser', (id) => {
-      showId(id);
-      uId = id;
-    });
 
-    socket.on('message', (msg) => {
-      console.log(msg)
+    const showAllMessages = (message) => {
+      // console.log(message)
       const txt = document.createElement('p');
       txt.setAttribute('data-testid', 'message');
-      txt.innerText = msg;
+      txt.innerText = message;
       document.querySelector('#msgList').appendChild(txt);
+    }
+
+    socket.on('usersOnline', (users) => {
+      document.querySelector('#userList').innerHTML = '';
+      users.map((use) => {
+        // console.log(use)
+        showId(use)
+      });
     });
-    document.querySelector('#send').addEventListener('click', () => {
-      const newMsg = document.querySelector('#userMessage').value;
-      socket.emit('message', { nickname: uId, chatMessage: newMsg })
+
+    socket.on('initial', (id) => {
+      let nick = id;
+      document.querySelector('#changeNickname').addEventListener('click', () => {
+      nick = document.querySelector('#nickName').value;
+    });
+      document.querySelector('#send').addEventListener('click', () => {
+        const newMsg = document.querySelector('#userMessage').value;
+        socket.emit('message', { nickname: nick, chatMessage: newMsg });
+      });
+    });
+
+    socket.on('message', (msg, objectMessage, currentUser) => {
+      
+      console.log(objectMessage)
+      console.log('nickname', objectMessage.nickname)
+      console.log('usuario atual', currentUser)
+      showAllMessages(msg);
+    });
+
+    socket.on('listMessages', (messages) => {
+      document.querySelector('#msgList').innerHTML = '';
+      messages.forEach((msg) => {
+        // console.log(msg.message.timestamp)
+        const parseMessage = `${msg.message.timestamp} ${msg.message.nickname} ${msg.message.message}`
+        showAllMessages(parseMessage);
+      });
     });
 
     document.querySelector('#changeNickname').addEventListener('click', () => {
+      // console.log('entrou')
       const newNick = document.querySelector('#nickName').value;
-      uId = newNick;
+      console.log(newNick)
+      socket.emit('editNickName', newNick)
     });
   </script>
 </body>
