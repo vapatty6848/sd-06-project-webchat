@@ -99,8 +99,6 @@
     }); // mudar o nickname 
 
     socket.on('message', (message) => {
-      const msg = listAll;
-  
       const msgLi = document.createElement('li');
       msgLi.setAttribute('data-testid', 'message');
       msgLi.innerHTML = message;
