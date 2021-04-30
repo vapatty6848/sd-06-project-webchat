@@ -25,7 +25,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.get('/', async (_req, res) => {
   const allMessages = await getAllMessages();
   const renderMessages = allMessages
-    .map((message) => `${message.timestamp} ${message.nickname} ${message.chatMessage}`);
+    .map((message) => `${message.timeMessage} ${message.nickname} ${message.chatMessage}`);
   res.render('index', { renderMessages });
 });
 
@@ -60,6 +60,7 @@ const getRandom = () => {
 
 const handleChatMessage = async ({ nickname, chatMessage }) => {
   const timeMessage = timestamp();
+
   await createMessage({ nickname, chatMessage, timeMessage });
   const response = `${timeMessage} ${nickname} ${chatMessage}`;
   io.emit('message', response);
