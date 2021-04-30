@@ -17,7 +17,9 @@
             box-sizing: border-box;
         }
 
-        #chat {
+        .chat {
+            width: 60%;
+            margin: 0 auto;
             height: 100%;
             display: flex;
             justify-content: center;
@@ -26,14 +28,17 @@
         }
 
         input {
+            display: flex;
             width: 850px;
             border: 1px solid #ddd;
             height: 50px;
-            padding: 0 20px;
+            padding: 20px;
             font-size: 14px;
         }
 
         .btn {
+            display: flex;
+            justify-content: center;
             width: 300px;
             height: 50px;
             font-size: 14px;
@@ -42,55 +47,126 @@
             line-height: 50px;
             font-weight: bold;
             color: #FFF;
-            margin-top: 10px;
             cursor: pointer;
             font-family: "montserrat";
         }
 
-
         .messages {
-            width: 820px;
+            width: 65%;
             height: 400px;
-            margin: 20px;
+            margin: 20px 0 20px 20px;
             border: 1px solid #ddd;
+            background-color: #ddd;
             padding: 20px;
+            font-family: "montserrat";
         }
 
         .nickNames {
-            width: 300px;
+            width: 35%;
             height: 400px;
-            margin: 20px 0;
+            margin: 20px 0 20px;
             border: 1px solid #ddd;
+            background-color: #ddd;
             padding: 20px;
+            font-family: "montserrat";
         }
 
         .divUl {
             display: flex;
             flex-direction: row;
+            width: 700px;
         }
-    
+
+        .box1,
+        .box2 {
+            display: flex;
+            flex-direction: row;
+            width: 700px;
+            align-content: center;
+        }
     </style>
     <title>Web chat</title>
     <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
-    <form id="chat">
-        <div>
-            <input type="text"data-testid="nickname-box" placeholder="Insira o seu nickName">
-            <button type="button" class="btn btn1" data-testid="nickname-button">Salvar</button>
+    <form class="chat">
+        <div class="box1">
+            <input id="inputNickname" type="text" data-testid="nickname-box" placeholder="Insira o seu nickName">
+            <button id="buttonNickname" class="btn" type="button" class="btn btn1"
+                data-testid="nickname-button">Salvar</button>
         </div>
         <div class="divUl">
-            <ul class="nickNames"></ul>
-            <ul class="messages "></ul>
+            <ul id="ulNicknames" class="nickNames"></ul>
+            <ul id="ulMessages" class="messages "></ul>
         </div>
-        <div>
-            <input type="text" data-testid="message-box" placeholder="Digite uma nova mensagem aqui">
-            <button type="button" class="btn btn2" data-testid="send-button">Enviar</button>
+        <div class="box2">
+            <input id="inputMessage" type="text" data-testid="message-box" placeholder="Digite uma nova mensagem aqui">
+            <button id="buttonMessage" class="btn" type="button" class="btn btn2"
+                data-testid="send-button">Enviar</button>
         </div>
     </form>
     <script>
         const socket = io();
+        const inputNickname = document.querySelector('#inputNickname');
+        const buttonNickname = document.querySelector('#buttonNickname');
+        const inputMessage = document.querySelector('#inputMessage');
+        const buttonMessage = document.querySelector('#buttonMessage');
+        let newUser;
+
+        function getNewColor() {
+            var symbols, color;
+            symbols = "0123456789ABCDEF";
+            color = "#";
+            for (let index = 0; index < 6; index++) {
+                color = color + symbols[Math.floor(Math.random() * 6)];
+                document.body.style.background = color;
+            }
+        }
+
+        // Requisito-2
+        socket.on('connect', () => {
+            const initialNickname = `nickName-${Math.random().toString().substr(2, 7)}`;
+            const nickname = initialNickname;
+            newUser = { nickname }
+            createLiNickname(newUser);
+            getNewColor();
+            socket.emit('user', nickname);
+        });
+
+        const createLiNickname = (user) => {
+            const liUser = document.createElement('liUser');
+            liUser.innerText = user.nickname;
+            liUser.setAttribute('data-testid', 'online-user')
+            const ulNicknames = document.querySelector('#ulNicknames');
+            ulNicknames.appendChild(liUser);
+        }
+
+        const createLiMessage = (message) => {
+            const liMessage = document.createElement('li');
+            liMessage.innerText = message;
+            liMessage.setAttribute('data-testid', 'message')
+            const ulMessages = document.querySelector('#ulMessages');
+            ulMessages.appendChild(liMessage);
+        };
+
+        buttonMessage.addEventListener('click', () => {
+            const { nickname } = newUser;
+            socket.emit('message', ({
+                chatMessage: inputMessage.value,
+                nickname,
+            }));
+            inputMessage.value = '';
+            return false;
+        });
+
+        buttonNickname.addEventListener('click', () => {
+            newUser.nickname = inputNickname.value;
+            socket.emit('userUpdate', newUser);
+            return false;
+        });
+
+        socket.on('message', (messageString) => createLiMessage(messageString));
     </script>
 </body>
 
