@@ -31,6 +31,10 @@ io.on('connection', (socket) => {
     const nickname = createHash(hashLength);
     io.emit('nickname', nickname);
   });
+  socket.on('updateUser', (nickname) => {
+    // model.updateUser(nickname);
+    // manipular array
+  });
 });
 
 app.get('/', async (_req, res) => {

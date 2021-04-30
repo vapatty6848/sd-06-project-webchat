@@ -44,7 +44,8 @@
     nicknameForm.addEventListener('submit', (e) => {
       e.preventDefault();
       nickname = inputNickname.value;
-      inputNickname.value = ''
+      socket.emit('updateUser', nickname);
+      inputNickname.value = '';
       return false;
     });
     const createMessage = (message) => {
