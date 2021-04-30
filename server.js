@@ -17,13 +17,16 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 
-// const { getAllMessages } = require('./models/chat');
+const { getAllMessages, createMessage } = require('./models/chat');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-app.get('/', (_req, res) => {
-  res.render('index');
+app.get('/', async (_req, res) => {
+  const allMessages = await getAllMessages();
+  const renderMessages = allMessages
+    .map((message) => `${message.timestamp} ${message.nickname} ${message.chatMessage}`);
+  res.render('index', { renderMessages });
 });
 
 const allUsers = [];
@@ -38,11 +41,6 @@ const addNewUser = (socket) => {
 const handleNickname = (newNickname, socket) => {
   const index = allUsers.findIndex((user) => user.id === socket.id);
   allUsers[index].nickname = newNickname;
-};
-
-const getNickname = (socket) => {
-  const index = allUsers.findIndex((user) => user.id === socket.id);
-  return allUsers[index].nickname;
 };
 
 const timestamp = () => {
@@ -60,6 +58,13 @@ const getRandom = () => {
   return result;
 };
 
+const handleChatMessage = async ({ nickname, chatMessage }) => {
+  const timeMessage = timestamp();
+  await createMessage({ nickname, chatMessage, timeMessage });
+  const response = `${timeMessage} ${nickname} ${chatMessage}`;
+  io.emit('message', response);
+};
+
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} connected.`);
   addNewUser(socket);
@@ -67,9 +72,7 @@ io.on('connection', (socket) => {
   io.emit('connected', getRandom());
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    handleNickname(nickname, socket);
-    const response = `${timestamp()} ${getNickname(socket)} ${chatMessage}`;
-    io.emit('message', response);
+    handleChatMessage({ nickname, chatMessage });
   });
 
   socket.on('changeNickname', ({ newNickname }) => {
