@@ -12,24 +12,24 @@ const io = require('socket.io')(http, {
 app.use(cors());
 
 io.on('connection', (socket) => {
-  console.log('Alguém se conectou');
+  // console.log('Alguém se conectou');
 
-  socket.on('disconnect', () => {
-    console.log('Alguém desconectou');
+  // socket.on('disconnect', () => {
+  //   console.log('Alguém desconectou');
+  // });
+
+  socket.on('mensagem', (info) => {
+    io.emit('mesage', info);
   });
 
-  socket.on('mensagem', (msg) => {
-    io.emit('serverMessage', { message: msg });
+  socket.on('nickName', (user) => {
+    io.emit('user', user);
   });
 
-  socket.on('nickName', (msg) => {
-    console.log(`${msg} entrou`);
-  });
+  // socket.emit('mesage', 'Seja bem vindo');
 
-  socket.emit('mesages', 'Seja bem vindo');
-
-  socket.broadcast.emit('newConnection', { message: 'Nova conexão' });
-  socket.broadcast.emit('serverMessage', { message: 'Algo' });
+  // socket.broadcast.emit('newConnection', { message: 'Nova conexão' });
+  // socket.broadcast.emit('serverMessage', { message: 'Algo' });
 });
 
 app.get('/', (_req, res) => {

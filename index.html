@@ -60,43 +60,51 @@
 
   <script>
     const socket = io();
-    const inputMessage = document.querySelector('#mensageInput')
-    const inputNickName = document.querySelector('#nickNameInput')
-    const buttonMensage = document.querySelector('#mensageButton')
-    const buttonNickName = document.querySelector('#nickNameButton')
-
-    const createMessage = (message) => {
-      const ulListMessages = document.querySelector('#ul-mensagens');
-      const newLiMessages = document.createElement('li');
-      newLiMessages.innerText = message;
-      ulListMessages.appendChild(newLiMessages);
+    const inputMessage = document.querySelector('#mensageInput');
+    const inputNickName = document.querySelector('#nickNameInput');
+    const buttonMensage = document.querySelector('#mensageButton');
+    const buttonNickName = document.querySelector('#nickNameButton');
+    let user = 'Anônimo'
+    const addLeftZero = (number) => {
+      const param = number.toString();
+      if(param.length < 2) { return `0${number}` }
+      else return number
     }
 
-    const createNickName = (message) => {
+    const createMessage = (info) => {
+      const ulListMessages = document.querySelector('#ul-mensagens');
+      const newAppendNickName = document.createElement('li');
+      const messageTime = new Date();
+
+      const date = `${addLeftZero(messageTime.getDate())}-${addLeftZero(messageTime.getMonth())}-${messageTime.getFullYear()}`;
+      const time = `${addLeftZero(messageTime.getHours())}:${addLeftZero(messageTime.getMinutes())}:${addLeftZero(messageTime.getSeconds())}`;
+      newAppendNickName.innerText = `${date} ${time} ${info.nickname} ${info.chatMessage}`;
+      ulListMessages.appendChild(newAppendNickName);
+    }
+
+    const createNickName = (user) => {
       const ulListNickName = document.querySelector('#ul-nickName');
       const newLiNickName = document.createElement('li');
-      newLiNickName.innerText = message;
+      newLiNickName.innerText = user;
       ulListNickName.appendChild(newLiNickName);
     }
 
     buttonMensage.addEventListener('click', () => {
-      socket.emit('mensagem', inputMessage.value);
-      const newText = inputMessage.value
-      createMessage(newText);
+      const info = { chatMessage: inputMessage.value, nickname: user, time: new Date() }
+      socket.emit('mensagem', info);
       inputMessage.value = '';
     })
 
     buttonNickName.addEventListener('click', () => {
       socket.emit('nickName', inputNickName.value);
-      const newText = inputNickName.value
-      createNickName(newText);
+      const newUser = inputNickName.value;
+      user = newUser;
       inputNickName.value = '';
     })
 
-    socket.on('mesages', (message) => createMessage(message));
-    socket.on('nickNames', (nickName) => createNickName(nickName));
-    socket.on('newConnection', ({ message }) => createMessage(message));
-    socket.on('serverMessage', ({ message }) => createMessage(message));
+    socket.on('mesage', (info) => createMessage(info));
+    socket.on('user', (user) => createNickName(user));
+    // socket.on('newConnection', ({ message }) => createMessage(message));
 
   </script>
 </body>
