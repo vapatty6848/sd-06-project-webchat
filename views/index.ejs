@@ -40,6 +40,14 @@
 
     const dataTestId = 'data-testid';
 
+    const addUser = (nickname) => {
+      const listUsers = document.querySelector('#allUsers');
+      const li = document.createElement('li');
+      li.setAttribute(dataTestId, 'online-user');
+      li.innerText = nickname;
+      listUsers.appendChild(li);
+    }
+
     const createMessage = (response) => {
       const allMessages = document.querySelector('#allMessages');
       const li = document.createElement('li');
@@ -56,6 +64,18 @@
       inputMessage.value = '';
       return false;
     });
+
+    const changeNickname = (users) => {
+      const allUsers = document.querySelector('#allUsers');
+      
+      allUsers.innerHTML = '';
+      users.forEach((user) => {
+        const li = document.createElement('li');
+        li.setAttribute(dataTestId, 'online-user');
+        li.innerText = user.nickname;
+        allUsers.appendChild(li);
+      });
+    }
     
     const buttonNickname = document.querySelector('#nickname-save');
     
@@ -73,6 +93,8 @@
     });
     
     socket.on('message', (message) => createMessage(message));
+    
+    socket.on('changeNickname', (user) => changeNickname(user));
 
     socket.on('updateOnlineUsers', (allUsers) => {
       const notOnline =  allUsers.filter((user) => user.id !== socket.id);
