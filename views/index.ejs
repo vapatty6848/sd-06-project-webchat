@@ -40,14 +40,6 @@
 
     const dataTestId = 'data-testid';
 
-    const addUser = (nickname) => {
-      const listUsers = document.querySelector('#allUsers');
-      const li = document.createElement('li');
-      li.setAttribute(dataTestId, 'online-user');
-      li.innerText = nickname;
-      listUsers.appendChild(li);
-    }
-
     const createMessage = (response) => {
       const allMessages = document.querySelector('#allMessages');
       const li = document.createElement('li');
@@ -64,18 +56,6 @@
       inputMessage.value = '';
       return false;
     });
-
-    const changeNickname = (users) => {
-      const allUsers = document.querySelector('#allUsers');
-      
-      allUsers.innerHTML = '';
-      users.forEach((user) => {
-        const li = document.createElement('li');
-        li.setAttribute(dataTestId, 'online-user');
-        li.innerText = user.nickname;
-        allUsers.appendChild(li);
-      });
-    }
     
     const buttonNickname = document.querySelector('#nickname-save');
     
@@ -90,10 +70,25 @@
       nickname = nicknameGenerated;
       addUser(nicknameGenerated);
       console.log('as mensagens tao aqui', msgs);  
+    });
+    
+    socket.on('message', (message) => createMessage(message));
+
+    socket.on('updateOnlineUsers', (allUsers) => {
+      const notOnline =  allUsers.filter((user) => user.id !== socket.id);
+      const firstUser = allUsers.filter((user) => user.id === socket.id);
+      const concatUsers = firstUser.concat(notOnline);
+      nickname = allUsers.find((user) => user.id === socket.id).nickname
       
-      socket.on('message', (message) => createMessage(message));
-      
-      socket.on('changeNickname', (user) => changeNickname(user));
+      const onlineUsersList = document.querySelector('#allUsers');
+      while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
+      concatUsers.forEach((user) => {
+        const renderUsers = document.createElement('li');
+    
+        renderUsers.setAttribute(dataTestId, 'online-user');
+        renderUsers.innerHTML = user.nickname;
+        document.querySelector('#allUsers').appendChild(renderUsers);
+      });
     });
   </script>
 </html>
