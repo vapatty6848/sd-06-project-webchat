@@ -29,7 +29,7 @@ app.get('/', async (_req, res) => {
   res.render('index', { renderMessages });
 });
 
-const allUsers = [];
+let allUsers = [];
 
 const addNewUser = (socket) => {
   const newUser = {
@@ -84,7 +84,9 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`User ${socket.id} has disconnected.`);
     delete allUsers[socket.id];
-    io.emit('updateUser', { allUsers });
+    const newAllUsers = allUsers.filter((user) => user.id !== socket.id);
+    allUsers = newAllUsers;
+    io.emit('updateOnlineUsers', allUsers);
   });
 });
 
