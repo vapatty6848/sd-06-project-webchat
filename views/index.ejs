@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebChat Project</title>
+  </head>
+  <body>
+    <h1>WebChat</h1>
+    <h3>Connected users</h3>
+
+    <ul id="users"></ul>
+
+    <form action="" id="nicknameForm">
+      <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" /><button data-testid="nickname-button">Salvar</button>
+    </form>
+
+    <h3>MESSAGES</h3>
+
+    <ul id="messages">
+      <% messages.forEach((msg) => { %>
+        <li data-testid="message"><%= `${msg.timestamp} ${msg.nickname} ${msg.message}` %></li>
+      <% }) %>
+    </ul>
+
+    <form action="" id="messageForm">
+      <input data-testid="message-box" id="messageInput" autocomplete="off" /><button data-testid="send-button">Enviar</button>
+    </form>
+    <%- include ('./scripts/Client.ejs') %>
+  </body>
+</html>
