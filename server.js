@@ -12,12 +12,17 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   },
 });
+
 const model = require('./models/model');
 
 app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views');
+
 const hashLength = 16;
+
+// sugestão do Gabriel Coruja: usar um array para atualizar nicks (req 4)
+let users = [];
 
 io.on('connection', (socket) => {
   socket.on('message', (msg) => {
@@ -29,9 +34,12 @@ io.on('connection', (socket) => {
   });
   socket.on('newUser', () => {
     const nickname = createHash(hashLength);
+    users.push({ id: socket.id, nickname: nickname });
     io.emit('nickname', nickname);
   });
   socket.on('updateUser', (nickname) => {
+    console.log('update socket', socket);
+    console.log('update nickname', nickname);
     // model.updateUser(nickname);
     // manipular array
   });
