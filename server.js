@@ -17,10 +17,10 @@ const Messages = require('./models/messages');
 app.use(cors());
 
 app.get('/', async (req, res) => {
-  const htmlPath = path.join(__dirname, '/views/index.ejs');
+  const views = path.join(__dirname, '/views/index.ejs');
   const users = await Users.getAll();
   const messages = await Messages.getAll();
-  res.render(htmlPath, { users, messages });
+  res.render(views, { users, messages });
 });
 
 const formatedDate = moment().format('DD-MM-yyyy HH:mm:ss a');

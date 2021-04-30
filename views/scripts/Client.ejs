@@ -1,29 +1,14 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io('http://localhost:3000');
-
-  const userNickname = document.querySelector('#user-nickname');
+  const socket = io();
+  const userNickname = document.querySelector('#user-nickname')
   const messageForm = document.querySelector('#messageForm');
-  const nicknameInput = document.querySelector('#nicknameForm');
+  const nicknameForm = document.querySelector('#nicknameForm');
   const inputMessage = document.querySelector('#messageInput');
   const inputNickname = document.querySelector('#nicknameInput');
-
   let currentUser;
 
-  socket.on('connect', () => {
-    const nickname = createRandomNick(16);
-    mainUser = { nickname };
-    socket.emit('userLogin', nickname);
-  });
-
-  socket.on('usersConnected', (users) => {
-    currentUser = usersConnected.find(user => user.nickname === mainUser.nickname);
-    listUsers(usersConnected);
-  })
-
-  socket.on('message', (message) => createMessage(message));
-
-  const createRandomNick = (length) => {
+  const createRandomNickname = (length) => {
     const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i += 1) {
@@ -35,6 +20,7 @@
   nicknameForm.addEventListener('submit', (e) => {
     e.preventDefault();
     currentUser.nickname = inputNickname.value;
+    console.log(currentUser);
     socket.emit('updatedUser', currentUser);
   })
   
@@ -65,7 +51,18 @@
   const listUsers = (users) => {
     const usersUl = document.querySelector('#users');
     usersUl.innerHTML = '';
-    createUserLiElement(mainUser);
-    users.filter(user => user.id !== mainUser.id).forEach(user => createUserLiElement(user));
+    createUserLiElement(currentUser);
+    users.filter(user => user.id !== currentUser.id).forEach(user => createUserLiElement(user));
   }
+
+  socket.on('connect', () => {
+    const nickname = createRandomNickname(16);
+    currentUser = { nickname };
+    socket.emit('userLogin', nickname);
+  });
+  socket.on('usersConnected', (users) => {
+    currentUser = users.find(user => user.nickname === currentUser.nickname);
+    listUsers(users);
+  })
+  socket.on('message', (message) => createMessage(message));
 </script>
