@@ -14,7 +14,7 @@ const chatController = require('./controllers/chatController');
 
 app.use(cors());
 
-app.use('/styles', express.static(path.join(__dirname, 'views', 'styles')));
+// app.use('/styles', express.static(path.join(__dirname, 'views', 'styles')));
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
