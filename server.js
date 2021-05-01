@@ -22,29 +22,26 @@ app.set('views', './views');
 const hashLength = 16;
 
 // sugestão do Gabriel Coruja: usar um array para atualizar nicks (req 4)
-let users = [];
+const users = [];
 
 io.on('connection', (socket) => {
   socket.on('message', (msg) => {
     const now = moment(Date()).format('DD-MM-YYYY hh:mm:ss');
     const msgToDB = { ...msg };
-    msgToDB.timestamp = now;
-    model.create(msgToDB);
+    msgToDB.timestamp = now; model.create(msgToDB);
     io.emit('message', `${now} ${msg.nickname} ${msg.chatMessage}`);
   });
   socket.on('newUser', () => {
     const nickname = createHash(hashLength);
-    const user = { id: socket.id, nickname: nickname };
+    const user = { id: socket.id, nickname };
     users.push(user);
     io.emit('nickname', user);
   });
   socket.on('updateUser', (nickname) => {
     // model.updateUser(nickname);
-    const user = { id: socket.id, nickname: nickname }
+    const user = { id: socket.id, nickname };
     const index = users.findIndex((elem) => elem.id === socket.id);
-    users.splice(index, 1);
-    users.push(user);
-    console.log('update', users);
+    users.splice(index, 1); users.push(user);
     io.emit('updateUserToEjs', user);
   });
 });
