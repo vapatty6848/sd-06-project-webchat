@@ -30,19 +30,17 @@ io.on('connection', (socket) => {
     const msgToDB = { ...msg };
     msgToDB.timestamp = now; model.create(msgToDB);
     io.emit('message', `${now} ${msg.nickname} ${msg.chatMessage}`);
-  });
-  socket.on('newUser', () => {
+  }); socket.on('newUser', () => {
     const nickname = createHash(hashLength);
     const user = { id: socket.id, nickname };
-    users.push(user);
-    io.emit('nickname', user);
-  });
-  socket.on('update', (nickname) => {
-    // model.updateUser(nickname);
+    users.push(user); io.emit('nickname', users);
+  }); socket.on('updateUser', (nickname) => {
     const user = { id: socket.id, nickname };
     const index = users.findIndex((elem) => elem.id === socket.id);
-    users.splice(index, 1); users.push(user); console.log(users);
-    io.emit('updateUser', user);
+    users[index] = user; io.emit('updateUser', user);
+  }); socket.on('disconnect', () => {
+    const exitUser = users.filter((user) => user.id !== socket.id);
+    io.emit('nickname', exitUser);
   });
 });
 

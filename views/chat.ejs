@@ -50,7 +50,7 @@
     nicknameForm.addEventListener('submit', (e) => {
       e.preventDefault();
       nickname = inputNickname.value;
-      socket.emit('update', nickname);
+      socket.emit('updateUser', nickname);
       inputNickname.value = '';
       return false;
     });
@@ -61,26 +61,35 @@
       li.setAttribute("data-testid", "message");
       messagesUl.appendChild(li);
     };
-    const addNewUser = (user) => {
+    
+    // codigo para requisito 4 consultado no PR#70 Isabela Rosa
+    // https://github.com/tryber/sd-06-project-webchat/blob/isabela-rosa-webchat/views/home.ejs
+
+    const addNewUser = (users) => {
       const usersUl = document.querySelector('#usuarios');
-      const li = document.createElement('li');
-      li.innerHTML = user.nickname;
-      li.setAttribute("data-testid", "online-user");
-      li.setAttribute("id", user.id);
-      usersUl.appendChild(li);
-    };
+      usersUl.innerHTML = '';
+      const ultimoElem = users.find((user) => user.id === socket.id);
+      let newArray = users.filter((elem) => elem.id !== socket.id);
+      newArray = [ultimoElem, ...newArray];
+      newArray.forEach(element => {
+        const li = document.createElement('li');
+        li.innerHTML = element.nickname;
+        li.setAttribute("data-testid", "online-user");
+        li.setAttribute("id", element.id);
+        usersUl.appendChild(li);
+      });
+      };
     socket.on('message', (objeto) => {
       createMessage(objeto)
     });
     socket.emit('newUser');
-    socket.on('nickname', (user) => {
-      addNewUser(user);
+    socket.on('nickname', (users) => {
+      addNewUser(users);
     });
     socket.on('updateUser', (user) => {
       const id = user.id;
       const li = document.getElementById(id);
-      li.remove();
-      addNewUser(user);
+      li.innerHTML = user.nickname;
     })
   </script>
 </body>
