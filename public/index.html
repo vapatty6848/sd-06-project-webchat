@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web chat</title>
+  </head>
+  <body>
+    <form id="nicknameForm">
+      <input type="text" id="nickname" placeholder="nickname" data-testid="nickname-box" />
+      <button id="nicknameSave" data-testid="nickname-button">Save</button>
+    </form>
+    <div id="chatMessages"></div>
+    <form id="chatForm">
+      <input
+        type="text"
+        id="message"
+        placeholder="send message"
+        required
+        data-testid="message-box"
+      />
+      <button id="sendMessage" data-testid="send-button">Send</button>
+    </form>
+    <ul id="userList"></ul>
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+      const nicknameForm = document.getElementById('nicknameForm');
+      const nicknameSaveBtn = document.getElementById('nicknameSave');
+      const chatMessages = document.getElementById('chatMessages');
+      const chatForm = document.getElementById('chatForm');
+      const usersList = document.getElementById('userList');
+
+      const socket = io();
+
+      let nickname = null;
+
+      const clearChat = () => {
+        while (chatMessages.firstChild) {
+          chatMessages.removeChild(chatMessages.lastChild);
+        }
+      };
+
+      const addMessage = (message) => {
+        const messageP = document.createElement('p');
+        messageP.setAttribute('data-testid', 'message');
+        messageP.innerText = message;
+        chatMessages.appendChild(messageP);
+      };
+
+      nicknameForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        nickname = event.target.elements.nickname.value;
+        socket.emit('changeNickname', nickname);
+      });
+
+      chatForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const chatMessage = event.target.elements.message.value;
+        socket.emit('message', { chatMessage, nickname });
+        event.target.elements.message.value = '';
+        event.target.elements.message.focus();
+      });
+
+      const generateRandomNickname = (length) => {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let str = '';
+        for (let i = 0; i < length; i += 1) {
+          str += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return str;
+      };  
+
+      socket.on('connect', () => {
+        const nickname = generateRandomNickname(16);
+        socket.emit('userConection', nickname);
+      });
+
+      socket.on('message', (message) => {
+        addMessage(message);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
+
+      socket.on('showOnlineUsers', (users) => {
+        usersList.innerHTML = '';
+        const usersKeys = Object.keys(users);
+        usersKeys.forEach((userKey) => {
+          const li = document.createElement('li');
+          const div = document.createElement('div');
+          div.innerText = `${users[userKey]}`;
+          div.setAttribute('data-testid', 'online-user');
+          li.appendChild(div);
+          usersList.appendChild(li);
+        });
+      });
+
+      socket.on('showMessageHistory', (messages) => {
+        messages.forEach(({ nickname, message, timestamp }) => {
+          let msg = `${timestamp} - ${nickname}: ${message}`;
+          addMessage(msg);
+        });
+      });
+    </script>
+  </body>
+</html>
