@@ -422,7 +422,6 @@ describe('4 - Informe a todos os clientes quem está online no momento', () => {
     await page2.waitForSelector(dataTestid('online-user'));
     //he sees his name first on the screen
     let client2Nicknames = await page2.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
-    console.log(client2Nicknames)
     expect(client2Nicknames.length).toBe(2);
     expect(client2Nicknames[0]).toMatch(/^[\w'-]{16}$/);
     expect(client2Nicknames[1]).toEqual(nickname);

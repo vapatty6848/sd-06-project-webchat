@@ -84,7 +84,14 @@
       socket.on('showOnlineUsers', (users) => {
         usersList.innerHTML = '';
         const usersKeys = Object.keys(users);
-        usersKeys.forEach((userKey) => {
+        const li = document.createElement('li');
+        const div = document.createElement('div');
+        div.innerText = `${users[socket.id]}`;
+        div.setAttribute('data-testid', 'online-user');
+        li.appendChild(div);
+        usersList.appendChild(li);
+
+        usersKeys.filter((key) => key !== socket.id).forEach((userKey) => {
           const li = document.createElement('li');
           const div = document.createElement('div');
           div.innerText = `${users[userKey]}`;
