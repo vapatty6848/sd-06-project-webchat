@@ -18,19 +18,19 @@ app.set('view engine', 'ejs');
 
 app.set('views', './views');
 
-app.use('/');
+app.use('/', () => console.log('funciona'));
 
 let users = [];
 
-const setNewOnlineUser = (socket, newUser) => {
+const setNewUser = (socket, newUser) => {
   socket.emit('setOnlineUsers', [{ id: socket.id, nickname: newUser }, ...users]);
   users.push({ id: socket.id, nickname: newUser });
   socket.broadcast.emit('userConnected', { nickname: newUser, users });
 };
 
 const setMessage = async (chatMessage, nickname) => {
-  const timestamp = new Date().toLocaleString().replace(/\//g, '-');
-  const message = `${timestamp} - ${nickname}: ${chatMessage}`;
+  const times = new Date().toLocaleString().replace(/\//g, '-');
+  const message = `${times} - ${nickname}: ${chatMessage}`;
   io.emit('message', message);
 };
 
@@ -51,7 +51,7 @@ const logOff = (socket) => {
 };
 
 io.on('connection', (socket) => {
-  socket.on('newUser', (newUser) => setNewOnlineUser(socket, newUser));
+  socket.on('newUser', (newUser) => setNewUser(socket, newUser));
   socket.on('message', ({ chatMessage, nickname }) => setMessage(chatMessage, nickname));
   socket.on('updateUserNick', (nickname) => setNickname(socket, nickname));
   socket.on('disconnect', () => logOff(socket));
