@@ -22,7 +22,7 @@ app.set('views', './views');
 const hashLength = 16;
 
 // sugestão do Gabriel Coruja: usar um array para atualizar nicks (req 4)
-const users = [];
+let users = [];
 
 io.on('connection', (socket) => {
   socket.on('message', (msg) => {
@@ -39,8 +39,8 @@ io.on('connection', (socket) => {
     const index = users.findIndex((elem) => elem.id === socket.id);
     users[index] = user; io.emit('updateUser', user);
   }); socket.on('disconnect', () => {
-    const exitUser = users.filter((user) => user.id !== socket.id);
-    io.emit('nickname', exitUser);
+    users = users.filter((user) => user.id !== socket.id);
+    io.emit('nickname', users);
   });
 });
 
