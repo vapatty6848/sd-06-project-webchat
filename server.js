@@ -34,20 +34,24 @@ io.on('connection', (socket) => {
   });
   socket.on('newUser', () => {
     const nickname = createHash(hashLength);
-    users.push({ id: socket.id, nickname: nickname });
-    io.emit('nickname', nickname);
+    const user = { id: socket.id, nickname: nickname };
+    users.push(user);
+    io.emit('nickname', user);
   });
   socket.on('updateUser', (nickname) => {
-    console.log('update socket', socket);
-    console.log('update nickname', nickname);
     // model.updateUser(nickname);
-    // manipular array
+    const user = { id: socket.id, nickname: nickname }
+    const index = users.findIndex((elem) => elem.id === socket.id);
+    users.splice(index, 1);
+    users.push(user);
+    console.log('update', users);
+    io.emit('updateUserToEjs', user);
   });
 });
 
 app.get('/', async (_req, res) => {
   const msgs = await model.get();
-  res.render('chat', { msgs });
+  res.render('chat', { msgs, users });
 });
 
 http.listen(3000, () => {

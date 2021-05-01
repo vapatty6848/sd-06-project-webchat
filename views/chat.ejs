@@ -16,7 +16,13 @@
       </li>
     <% }) %>
   </ul>
-  <ul id="usuarios"></ul>
+  <ul id="usuarios">
+    <% users.forEach((user) => { %>
+      <li data-testid="online-user">
+        <%= user.nickname %>
+      </li>
+    <% }) %>
+  </ul>
   <form action="" id="nicknameForm">
     <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" />
     <button data-testid="nickname-button">Send</button>
@@ -44,6 +50,7 @@
     nicknameForm.addEventListener('submit', (e) => {
       e.preventDefault();
       nickname = inputNickname.value;
+      console.log('event', nickname);
       socket.emit('updateUser', nickname);
       inputNickname.value = '';
       return false;
@@ -58,8 +65,9 @@
     const addNewUser = (user) => {
       const usersUl = document.querySelector('#usuarios');
       const li = document.createElement('li');
-      li.innerHTML = user;
+      li.innerHTML = user.nickname;
       li.setAttribute("data-testid", "online-user");
+      li.setAttribute("id", user.id);
       usersUl.appendChild(li);
     };
     socket.on('message', (objeto) => {
@@ -67,10 +75,16 @@
       createMessage(objeto)
     });
     socket.emit('newUser');
-    socket.on('nickname', (hash) => {
-      nickname = hash;
-      addNewUser(nickname);
+    socket.on('nickname', (user) => {
+      addNewUser(user);
     });
+    socket.on('updateUserToEjs', (user) => {
+      const id = user.id;
+      const li = document.getElementById(id);
+      console.log('update li', li);
+      li.remove();
+      addNewUser(user);
+    })
   </script>
 </body>
 
