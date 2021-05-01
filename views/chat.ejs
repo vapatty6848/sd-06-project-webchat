@@ -18,7 +18,7 @@
   </ul>
   <ul id="usuarios">
     <% users.forEach((user) => { %>
-      <li data-testid="online-user">
+      <li data-testid="online-user" id="<%= user.id %>">
         <%= user.nickname %>
       </li>
     <% }) %>
@@ -50,8 +50,7 @@
     nicknameForm.addEventListener('submit', (e) => {
       e.preventDefault();
       nickname = inputNickname.value;
-      console.log('event', nickname);
-      socket.emit('updateUser', nickname);
+      socket.emit('update', nickname);
       inputNickname.value = '';
       return false;
     });
@@ -71,17 +70,15 @@
       usersUl.appendChild(li);
     };
     socket.on('message', (objeto) => {
-      console.log(objeto);
       createMessage(objeto)
     });
     socket.emit('newUser');
     socket.on('nickname', (user) => {
       addNewUser(user);
     });
-    socket.on('updateUserToEjs', (user) => {
+    socket.on('updateUser', (user) => {
       const id = user.id;
       const li = document.getElementById(id);
-      console.log('update li', li);
       li.remove();
       addNewUser(user);
     })

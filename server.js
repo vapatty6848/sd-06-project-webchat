@@ -37,12 +37,12 @@ io.on('connection', (socket) => {
     users.push(user);
     io.emit('nickname', user);
   });
-  socket.on('updateUser', (nickname) => {
+  socket.on('update', (nickname) => {
     // model.updateUser(nickname);
     const user = { id: socket.id, nickname };
     const index = users.findIndex((elem) => elem.id === socket.id);
-    users.splice(index, 1); users.push(user);
-    io.emit('updateUserToEjs', user);
+    users.splice(index, 1); users.push(user); console.log(users);
+    io.emit('updateUser', user);
   });
 });
 
