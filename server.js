@@ -16,9 +16,13 @@ const io = require('socket.io')(httpServer, {
 
 app.use(cors());
 
-app.set('view engine', 'views');
-app.set('view', path.join(__dirname, 'views'));
-app.use(express.statis(`${__dirname}/views/`));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(`${__dirname}/views/`));
+
+app.get('/', (_req, res) => {
+  res.render('home');
+});
 
 const allUsers = [];
 
