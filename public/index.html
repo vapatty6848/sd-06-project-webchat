@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO - trybe</title>
+    <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          font: 13px Helvetica, Arial;
+        }
+        form {
+          background: #000;
+          padding: 3px;
+          position: fixed;
+          bottom: 0;
+          width: 100%;
+        }
+        form input {
+          border: 0;
+          padding: 10px;
+          width: 90%;
+          margin-right: 0.5%;
+        }
+        form button {
+          width: 9%;
+          background: rgb(130, 224, 255);
+          border: none;
+          padding: 10px;
+          cursor: pointer;
+        }
+        #mensagens {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+        }
+        #mensagens li {
+          padding: 5px 10px;
+        }
+        #mensagens li:nth-child(odd) {
+          background: #eee;
+        }
+    </style>
+  </head>
+  <body>
+    <ul id="mensagens"></ul>
+    <form>
+      <input data-testid="message-box" id="mensagemInput" autocomplete="off" />
+      <button data-testid="send-button" type="submit">Send</button>
+    </form>
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  <script>
+    // Connection
+    const socket = io();
+    const nickname = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 16);
+  
+    // GET FORM INPUT VALUE AND SEND IT
+    const form = document.querySelector('form')
+    const inputMessage = document.querySelector('#mensagemInput')
+    form.addEventListener('submit', (e) =>{
+      e.preventDefault();
+  
+      const messageObj = {
+        chatMessage: inputMessage.value,
+        nickname
+      };
+  
+      socket.emit('message', messageObj);
+      inputMessage.value = ''
+      return false;
+    })
+  
+    // CREATE AN MESSAGE ON THE MESSAGE LIST
+    const createMessage = (message, type = '') => {
+      const messagesUl = document.querySelector('#mensagens');
+      const li = document.createElement('li');
+      li.innerText = message;
+      li.setAttribute('data-testid', type === 'welcome' ? 'online-user' : 'message');
+      messagesUl.appendChild(li);
+    }
+  
+    // LISTEN EVENT ola AND CREATE A MESSAGE IF EVENT IS ACHIEVED
+    socket.on('welcome', (message) => createMessage(message, 'welcome'));
+  
+    // LISTEN EVENT mes AND CREATE A MESSAGE IF EVENT IS ACHIEVED
+    // IT IS NOT RECEIVED BY THE SENDER
+    socket.on('messageServer', (message) => createMessage(message));
+  </script>
+</html>
