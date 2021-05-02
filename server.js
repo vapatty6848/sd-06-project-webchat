@@ -2,13 +2,13 @@ const app = require('express')();
 const http = require('http').createServer(app);
 const cors = require('cors');
 
-app.get('/', async (req, res) => await res.sendFile(__dirname + '/public/index.html'));
+app.get('/', (req, res) => res.sendFile(__dirname.join('/public/index.html')));
 
 const io = require('socket.io')(http, {
   cors: {
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST']
-  }
+    methods: ['GET', 'POST'],
+  },
 });
 
 app.use(cors());
@@ -21,7 +21,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => console.log('Disconnected'));
 
   socket.on('message', (messageObj) => {
-    console.log(messageObj)
     const dateHour = new Date();
   
     let day = dateHour.getDate();
@@ -33,12 +32,10 @@ io.on('connection', (socket) => {
     const year = dateHour.getFullYear();
 
     const hour = dateHour.toLocaleTimeString();
-    const date = day + '-' + month + '-' + year;
+    const date = `${day}-${month}-${year}`;
     const message = `${date} ${hour} ${messageObj.nickname} ${messageObj.chatMessage}`;
-    console.log(message)
-
     io.emit('messageServer', message);
   });
 });
 
-http.listen(3000, () => console.log('Running on port 3000'))
+http.listen(3000, () => console.log('Running on port 3000'));
