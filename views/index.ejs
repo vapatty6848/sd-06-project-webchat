@@ -23,11 +23,34 @@
   
   <script>
     const socket = io();
-    const showId = (userId) => {
-      const txt = document.createElement('li');
-      txt.setAttribute('data-testid', 'online-user');
-      txt.innerText = userId;
-      document.querySelector('#userList').appendChild(txt);
+    
+    const showId = (use) => {
+      // const txt = document.createElement('li');
+      // txt.setAttribute('id', `${randomId}`);
+      // txt.setAttribute('data-testid', 'online-user');
+      // txt.className = 'user'
+      // txt.innerText = userId;
+      // document.querySelector('#userList').appendChild(txt);
+
+      // console.log('esse é do novo teste', use)
+        
+        if (use.nick) {
+          const nome = document.getElementById('userList');
+          console.log('nick changed entrou no if', use.rand);
+          const novoNome = document.getElementById(use.rand);
+          if(novoNome) novoNome.remove();
+
+          console.log('nick changed entrou no if objeto nome', nome);
+          // console.log('novo nome', novoNome);
+        }
+          const txt = document.createElement('li');
+          txt.setAttribute('id', `${use.nick || use.rand}`);
+          txt.setAttribute('data-testid', 'online-user');
+          txt.className = 'user'
+          txt.innerText = use.nick ? use.nick : use.rand;
+          const position = document.querySelector('#userList');
+          position.appendChild(txt);
+
     }
 
     const showAllMessages = (message) => {
@@ -37,21 +60,89 @@
       document.querySelector('#msgList').appendChild(txt);
     }
 
-    socket.on('usersOnline', (users) => {
-      document.querySelector('#userList').innerHTML = '';
+    socket.on('usersOnline', (users, randomId, newusersOnScreen) => {
+      
+      let display;
+      // document.querySelector('#userList').innerHTML = '';
+      // users.forEach((use) => {
+      //   use.rand
+      // });
       users.map((use) => {
-        showId(use)
+        if (use.nick) {
+          display = use.nick;
+        } else {
+          display = use.rand;
+        }
       });
+      // 
+      let usersOnScreen = [];
+      const teste = document.getElementsByClassName('user');
+      // console.log(teste)
+        for (user in teste) {
+          if (teste[user].innerText) {
+            usersOnScreen.push(teste[user].innerText);
+          }
+        }
+      console.log('usuarios na tela', usersOnScreen)
+      users.forEach((use, index) => { 
+        if (usersOnScreen.length > 0) {
+          index === 0 ? showId(use) : null;
+        } else {
+          showId(use);
+        }
+        //   if (users.length < usersOnScreen.length) {
+        //   console.log('entrou no o usuario da tela é maior');
+        //   if (use.nick) index === 0 ? showId(use.nick) : null;
+        //   if (use.rand) index === 0 ? showId(use.rand) : null;
+        // } else {
+        //   console.log('não entrou no o usuario da tela é maior ficou igual');
+        //   if (use.nick) index > 0 ? showId(use.nick) : null;
+        //   if (use.rand) index > 0 ? showId(use.rand) : null;
+        // }
+        // console.log('array de usuarios na tela', usersOnScreen);
+        // if (use.rand === randomId) {
+        //   position.insertBefore(txt, position.firstChild);
+        // } else {
+        //   position.appendChild(txt);
+        // }
+      });
+      
+      
+      // console.log('array de usuarios na tela atualizado', newusersOnScreen);
+      console.log('array de usuarios do back-end', users);
+      console.log('usuario unico', randomId);
+      // teste.forEach(use => console.log(use))
+      document.querySelector('#changeNickname').addEventListener('click', () => {
+      const newNick = document.querySelector('#nickName').value;
+      console.log(newNick)
+      // document.getElementById(`${randomId}`).remove();
+      // dummies.parentNode.removeChild(dummies);
+      // apelido.innerText = newNick;
+      // console.log('adicionado apelido', apelido)
+      socket.emit('editNickName', newNick);
+      // socket.emit('novo', users)
     });
+    const dummies = document.querySelector('#undefined')
+    console.log(dummies)
+    if(dummies) dummies.remove();
+    });
+
+    // socket.on('novo', (users) => {
+    //   console.log(users)
+    //   console.log(usersOnScreen);
+    //   users.map((use, index) => {
+    //       if (index < users.length -1) console.log('dentro do map nick', use);
+    //     })
+    // });
 
     socket.on('initial', (id) => {
       let nick = id;
-      document.querySelector('#changeNickname').addEventListener('click', () => {
-      nick = document.querySelector('#nickName').value;
-    });
       document.querySelector('#send').addEventListener('click', () => {
         const newMsg = document.querySelector('#userMessage').value;
         socket.emit('message', { nickname: nick, chatMessage: newMsg });
+      });
+      document.querySelector('#changeNickname').addEventListener('click', () => {
+      nick = document.querySelector('#nickName').value;
       });
     });
 
@@ -65,12 +156,35 @@
         const parseMessage = `${msg.message.timestamp} ${msg.message.nickname} ${msg.message.message}`
         showAllMessages(parseMessage);
       });
-    });
 
-    document.querySelector('#changeNickname').addEventListener('click', () => {
-      const newNick = document.querySelector('#nickName').value;
-      socket.emit('editNickName', newNick)
+      socket.on('userOff', (user) => {
+        console.log('usuario saiu', user)
+        if(user) {
+          const randomRemoved = document.getElementById(user.rand);
+          const nickRemoved = document.getElementById(user.nick);
+          randomRemoved ? randomRemoved.remove() : nickRemoved.remove();
+        }
+      })
     });
   </script>
 </body>
 </html>
+
+
+
+
+<!-- const newArray = users.filter((user) => user !== randomId);
+      console.log(newArray.length);
+      if (newArray.length < 1) {
+        const text = document.createElement('li');
+        text.innerText = randomId;
+        document.querySelector('#userList').appendChild(text);
+      } else {
+        newArray.map((use) => {
+          document.querySelector('#userList').innerHTML = '';
+          const text = document.createElement('li');
+          text.innerText = randomId;
+          document.querySelector('#userList').appendChild(text);
+          showId(use)
+        });
+      } -->

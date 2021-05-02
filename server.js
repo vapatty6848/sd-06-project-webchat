@@ -74,22 +74,30 @@ const socketMessage = (socket) => {
 };
 
 io.on('connection', (socket) => {
-  let randomId = socket.id.substring(0, 16);
-  connectedUser.push(randomId);
-  io.emit('usersOnline', connectedUser);
+  const randomId = socket.id.substring(0, 16);
+  connectedUser.unshift({ rand: randomId, nick: null });
+  io.emit('usersOnline', connectedUser, randomId);
+  // console.log('entrou', randomId);
   socket.emit('initial', randomId);
   allMessages();
   socket.on('editNickName', (newNickName) => {
-    connectedUser.splice(connectedUser.indexOf(randomId), 1, newNickName);
-    randomId = newNickName;
-    console.log('novo nickname', randomId);
+    // connectedUser.splice(connectedUser.indexOf(randomId), 1, newNickName);
+    // randomId = newNickName;
+    // console.log('novo nickname', randomId);
+    connectedUser.forEach((use) => {
+      const newNick = use;
+      if (newNick.rand === randomId) newNick.nick = newNickName;
+    });
     io.emit('usersOnline', connectedUser);
+    // io.emit('novo', connectedUser);
   });
   socket.on('disconnect', () => {
-    console.log(randomId, 'saiu');
-    connectedUser.splice(connectedUser.indexOf(randomId), 1);
-    io.emit('usersOnline', connectedUser);
+    // connectedUser.splice(connectedUser.indexOf(randomId), 1);
+    const removedUser = connectedUser.find((user) => user.rand === randomId);
+    connectedUser.splice(connectedUser.indexOf(removedUser), 1);
+    io.emit('userOff', removedUser);
   });
+  
   socketMessage(socket);
 });
 
