@@ -26,22 +26,23 @@ app.get('/', (_req, res) => {
 let users = [];
 const timestamp = dateFormat(new Date(), 'dd-mm-yyyy hh:MM:ss TT');
 
-// eslint-disable-next-line max-lines-per-function
-io.on('connection', (socket) => {
+const newUser = (nickname, socket) => {
   const userExists = users.find((user) => user.socketId === socket.id);
-  socket.on('newUser', (nickname) => {
-    if (userExists) {
-      userExists.name = nickname;
-      io.emit('updateUsers', users);
-      io.emit('logStatus', `Usuário ${nickname} conectou`);
-      return;
-    }
-
-    users.push({ socketId: socket.id, name: nickname });
-
+  if (userExists) {
+    userExists.name = nickname;
     io.emit('updateUsers', users);
     io.emit('logStatus', `Usuário ${nickname} conectou`);
-});
+    return;
+  }
+  
+  users.push({ socketId: socket.id, name: nickname });
+  
+  io.emit('updateUsers', users);
+  io.emit('logStatus', `Usuário ${nickname} conectou`);
+};
+
+io.on('connection', (socket) => {
+  socket.on('newUser', (nickname) => newUser(nickname, socket));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     io.emit('message', `${timestamp} - ${nickname}: ${chatMessage}`);
@@ -53,6 +54,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    const userExists = users.find((user) => user.socketId === socket.id);
     if (userExists) {
       io.emit('logStatus', `Usuário ${userExists.name} desconectou`);
     }
