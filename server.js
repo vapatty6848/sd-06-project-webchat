@@ -18,7 +18,7 @@ io.on('connection', (socket) => {
     const date = new Date().toLocaleString();
     let time = date.substring(13, 11);
     
-    if (parseInt(time) > 12) {
+    if (parseInt(time, 10) > 12) {
       time = 'PM';
     } else {
       time = 'AM';
@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
       
     const userMessage = `${date} ${time} - ${nickname}: ${chatMessage}`;
     const formattedMsg = userMessage.replace(/\//g, '-');
-    console.log(formattedMsg);
+    // console.log(formattedMsg);
     io.emit('message', formattedMsg); // emite para todos
     // socket.emit - apenas quem mandou recebe
     // socket.broadcast - todos recebem, menos quem mandou
