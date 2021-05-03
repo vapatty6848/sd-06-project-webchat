@@ -1,12 +1,14 @@
 const handleNewConnection = require('./handleNewConnection');
-const saveChatMeesage = require('./saveChatMeesage');
+const handleMessageSent = require('./handleMessageSent');
+const saveChatMessage = require('./saveChatMessage');
 const handleClientDisconnection = require('./handleClientDisconnection');
 const handleNicknameChange = require('./handleNicknameChange');
 const formatChatMessage = require('./formatChatMessage');
 
 module.exports = {
   handleNewConnection,
-  saveChatMeesage,
+  handleMessageSent,
+  saveChatMessage,
   handleClientDisconnection,
   handleNicknameChange,
   formatChatMessage,

@@ -7,212 +7,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WEB CHAT</title>
   <script src="/socket.io/socket.io.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font: 16px Helvetica, Arial;
-      padding: 15px;
-    }
-
-    #main-container {
-      display: flex;
-      flex-direction: row;
-      height: 400px;
-      margin: 10px 0 20px;
-    }
-
-    #info-container {
-      border: solid 1px blue;
-      padding: 10px;
-      width: 30%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #messages-container {
-      border: solid 1px blue;
-      margin-left: 15px;
-      padding: 10px;
-      width: 60%;
-    }
-
-    #messages-container li {
-      list-style-type: none;
-    }
-
-    #send-message-container {
-      width: 100%;
-    }
-
-    #users-container {
-      border: solid 1px blue;
-      margin-top: 15px;
-      padding: 10px;
-      width: 95%;
-      height: 80%;
-    }
-
-    #users li {
-      list-style-type: none;
-    }
-
-    #send-message-input {
-      height: 50px;
-      width: 60%;
-      padding: 5px;
-    }
-
-    #nickname-container input {
-      border: solid 1px blue;
-      padding: 5px;
-      width: 85%;
-    }
-
-  </style>
+  <link href="css/main.css" rel="stylesheet">
 </head>
 
 <body>
   <h1>BEM VINDO AO WEBCHAT</h1>
-  <div id="main-container">
-    <div id="info-container">
-      <div id="nickname-container">
-        <form id="change-nickname" action="">
+  <div class="main-container">
+    <div class="info-container">
+      <div class="nickname-container">
+        <form class="change-nickname" action="">
           <input
             type="text"
-            id="nickname-input"
+            class="nickname-input"
             name="nickname-input"
             data-testid="nickname-box"
             placeholder="Insira seu nickname"
           >
-          <button id="send-nickname-btn" data-testid="nickname-button">Salvar</button>
+          <button class="send-nickname-btn" data-testid="nickname-button">Salvar</button>
         </form>
       </div>
-      <div id="users-container">
-        <ul id="users">
+      <div class="users-container">
+        <ul class="users">
         </ul>
       </div>
     </div>
-    <div id="messages-container">
-      <ul id="messages">
+    <div class="messages-container">
+      <ul class="messages">
         <% messages.forEach((message) => { %>
           <li data-testid="message"><%= message %></li>
         <% }) %> 
       </ul>
     </div>
   </div>
-  <div id="send-message-container">
-    <form id="send-message" action="">
-      <input type="text" id="send-message-input" data-testid="message-box" placeholder="Digite uma nova mensagem">
-      <button id="send-message-btn" data-testid="send-button">Enviar</button>
+  <div class="send-message-container">
+    <form class="send-message" action="">
+      <input type="text" class="send-message-input" data-testid="message-box" placeholder="Digite uma nova mensagem">
+      <button class="send-message-btn" data-testid="send-button">Enviar</button>
     </form>
   </div>
-  <script>
-    const socket = io('http://localhost:3000/');
-    let userNickname = '';
-
-    // user connects
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const charList = chars.split('');
-    const charListLength = charList.length;
-
-    function sortCharIndex() {
-      return Math.round(Math.random() * (charListLength - 1));
-    }
-
-    function generateNickname(nicknameSize) {
-      const nicknameAggregator = [];
-      for (let i = 1; i <= nicknameSize; i += 1) {
-        const index = sortCharIndex();
-        const char = charList[index];
-        nicknameAggregator.push(char);
-      }
-      const nickname = nicknameAggregator.join('');
-      return nickname;
-    };
-
-    const randomNickname = generateNickname(16);
-    console.log('Random nickname', randomNickname);
-    userNickname = randomNickname;
-    socket.emit('newConnection', randomNickname);
-    
-
-    // Send message
-    const sendMessageForm = document.querySelector('#send-message');
-    sendMessageForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const messageInput = document.querySelector('#send-message-input');
-      const message = messageInput.value;
-      console.log('Nickname que mandou mensagem: ', userNickname);
-      console.log('Mensagem', message);
-      socket.emit('message', { chatMessage: message, nickname: userNickname });
-      messageInput.value = '';
-      return false;
-    });
-
-    // Change nickname
-    const nicknameForm = document.querySelector('#change-nickname');
-    nicknameForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const nicknameInput = document.querySelector('#nickname-input');
-      const newNickname = nicknameInput.value;
-      console.log(`${userNickname} mudou seu nickname para: ${newNickname}`);
-      const socketId = socket.id;
-      socket.emit('nickname.change', { socketId: socketId, newNickname: newNickname });
-      nicknameInput.value = '';
-      return false;
-    });
-
-
-    function showChatMessage(message) {
-      const messagesUl = document.querySelector('#messages');
-      const li = document.createElement('li');
-      li.setAttribute("data-testid", "message");
-      li.innerText = message;
-      messagesUl.appendChild(li);
-    }
-
-    // Hello - checks connection
-    socket.on('hello', (nickname) => {
-      console.log(`Hello!!!`);
-      console.log(`Your id is ${socket.id}.`);
-      console.log(`Your nickname is ${nickname}.`);
-    });
-
-    // Get messages from other users
-    socket.on('message', (message) => {
-      showChatMessage(message);
-    });
-
-    // A client joins the chat or changes the nickname
-    socket.on('usersUpdate', (users) => {
-      const sessionUser = users.find((user) => user.socketId === socket.id);
-      userNickname = sessionUser.nickname;
-      const filteredUsers = users.filter((user) => user.socketId !== socket.id);
-      const usersToDisplay = [sessionUser, ...filteredUsers];
-      /* const index = users.findIndex((u) => u.socketId === socket.id);
-      const filteredUser = users.find((u) => u.socketId === socket.id);
-      userNickname = filteredUser.nickname;
-      if (index !== -1) users.splice(index, 1);
-      users.unshift(filteredUser); */
-
-      const usersLi = document.querySelector('#users');
-      usersLi.innerHTML = "";
-      usersToDisplay.forEach((user) => {
-        const li = document.createElement('li');
-        li.innerText = user.nickname;
-        li.setAttribute("data-testid", "online-user");
-        if (user.nickname === userNickname) {
-          // atribute to highlight element
-        }
-        usersLi.appendChild(li);
-      });
-    });
-  </script>
+  <script src="js/main.js"></script>
 </body>
 
 </html>
