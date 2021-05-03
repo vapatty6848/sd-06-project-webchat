@@ -20,13 +20,12 @@ function generateNickname(nicknameSize) {
   }
   const nickname = nicknameAggregator.join('');
   return nickname;
-};
+}
 
 const randomNickname = generateNickname(16);
 console.log('Random nickname', randomNickname);
 userNickname = randomNickname;
 socket.emit('newConnection', randomNickname);
-
 
 // Send message
 const sendMessageForm = document.querySelector('#send-message');
@@ -49,23 +48,22 @@ nicknameForm.addEventListener('submit', (event) => {
   const newNickname = nicknameInput.value;
   console.log(`${userNickname} mudou seu nickname para: ${newNickname}`);
   const socketId = socket.id;
-  socket.emit('nickname.change', { socketId: socketId, newNickname: newNickname });
+  socket.emit('nickname.change', { socketId, newNickname });
   nicknameInput.value = '';
   return false;
 });
 
-
 function showChatMessage(message) {
   const messagesUl = document.querySelector('#messages');
   const li = document.createElement('li');
-  li.setAttribute("data-testid", "message");
+  li.setAttribute('data-testid', 'message');
   li.innerText = message;
   messagesUl.appendChild(li);
 }
 
 // Hello - checks connection
 socket.on('hello', (nickname) => {
-  console.log(`Hello!!!`);
+  console.log('Hello!!!');
   console.log(`Your id is ${socket.id}.`);
   console.log(`Your nickname is ${nickname}.`);
 });
@@ -81,18 +79,13 @@ socket.on('usersUpdate', (users) => {
   userNickname = sessionUser.nickname;
   const filteredUsers = users.filter((user) => user.socketId !== socket.id);
   const usersToDisplay = [sessionUser, ...filteredUsers];
-  /* const index = users.findIndex((u) => u.socketId === socket.id);
-  const filteredUser = users.find((u) => u.socketId === socket.id);
-  userNickname = filteredUser.nickname;
-  if (index !== -1) users.splice(index, 1);
-  users.unshift(filteredUser); */
 
   const usersLi = document.querySelector('#users');
-  usersLi.innerHTML = "";
+  usersLi.innerHTML = '';
   usersToDisplay.forEach((user) => {
     const li = document.createElement('li');
     li.innerText = user.nickname;
-    li.setAttribute("data-testid", "online-user");
+    li.setAttribute('data-testid', 'online-user');
     if (user.nickname === userNickname) {
       // atribute to highlight element
     }
