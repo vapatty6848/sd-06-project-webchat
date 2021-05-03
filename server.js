@@ -5,6 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const path = require('path');
+const moment = require('moment');
 
 const Messages = require('./models/Messages');
 
@@ -20,25 +21,31 @@ app.use('/', express.static(path.join(__dirname, 'public')));
 
 const users = {};
 
+const onUserConnection = (currentUser, socket) => {
+  users[socket.id] = currentUser;
+  io.emit('showOnlineUsers', users);
+};
+
+const onChangeNickname = (newNickname, socket) => {
+  users[socket.id] = newNickname;
+  io.emit('showOnlineUsers', users);
+};
+
 io.on('connection', async (socket) => {
   const messages = await Messages.get();
 
   io.emit('showMessageHistory', messages);
 
-  socket.on('userConection', (currentUser) => {
-    users[socket.id] = currentUser;
-    io.emit('showOnlineUsers', users);
-  });
+  socket.on('userConection', (user) => onUserConnection(user, socket));
 
-  socket.on('changeNickname', (nickname) => {
-    users[socket.id] = nickname;
-    io.emit('showOnlineUsers', users);
-  });
+  socket.on('changeNickname', (nickname) => onChangeNickname(nickname, socket));
 
-  socket.on('message', async ({ nickname, chatMessage: message }) => {
-    const newM = await Messages.create({ nickname, message });
-
-    io.emit('message', `${newM.timestamp} - ${newM.nickname || nickname}: ${newM.message}`);
+  socket.on('message', ({ nickname, chatMessage: message }) => {
+    Messages.create({ nickname, message });
+    io.emit(
+      'message',
+      `${moment(new Date()).format('DD-MM-yyyy hh:mm:ss')} - ${nickname}: ${message}`,
+    );
   });
 
   socket.on('disconnect', () => {
