@@ -65,7 +65,8 @@
       const chosenName = document.querySelector('#chooseName');
       const saveName = document.querySelector('#saveName');
       const nick = document.querySelector('#nickname');
-      console.log(chosenName);
+      const messagesUl = document.querySelector('#mensagens');
+      // console.log(chosenName);
       let nickname;
 
       nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
@@ -78,6 +79,7 @@
       })
       
       
+      
       form.addEventListener('submit', (e) =>{
         e.preventDefault();
 
@@ -88,14 +90,37 @@
       });    
       
       const createMessage = (message) => {
-        const messagesUl = document.querySelector('#mensagens');
         const li = document.createElement('li');
         li.setAttribute('data-testid', 'message')
         li.innerText = message;
         messagesUl.appendChild(li);
       }
 
-      socket.on('message', (msg) => createMessage(msg))
+      const allMessages = (messages) => {
+        console.log(messages);
+        const msgs = messages.map((el) => {
+          const { message, nickname, timestamp } = el.messages;
+          console.log(message, nickname, timestamp);
+
+          let time = timestamp.substring(13, 11);
+        
+          if (parseInt(time, 10) > 12) {
+            time = 'PM';
+          } else {
+            time = 'AM';
+          }
+      
+        const userMessage = `${timestamp} ${time} - ${nickname}: ${message}`;
+
+        createMessage(userMessage);
+        });
+      
+        
+      }
+
+      socket.on('message', (msg) => createMessage(msg));
+
+      socket.on('allMessages', (msg) => allMessages(msg))
 
     </script>
   </body>
