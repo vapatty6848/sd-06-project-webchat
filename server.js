@@ -31,10 +31,8 @@ const onChangeNickname = (newNickname, socket) => {
   io.emit('showOnlineUsers', users);
 };
 
-io.on('connection', async (socket) => {
-  const messages = await Messages.get();
-
-  io.emit('showMessageHistory', messages);
+io.on('connection', (socket) => {
+  Messages.get().then((messages) => io.emit('showMessageHistory', messages));
 
   socket.on('userConection', (user) => onUserConnection(user, socket));
 
