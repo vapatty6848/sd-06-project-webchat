@@ -28,10 +28,10 @@ userNickname = randomNickname;
 socket.emit('newConnection', randomNickname);
 
 // Send message
-const sendMessageForm = document.querySelector('#send-message');
+const sendMessageForm = document.querySelector('.send-message');
 sendMessageForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const messageInput = document.querySelector('#send-message-input');
+  const messageInput = document.querySelector('.send-message-input');
   const message = messageInput.value;
   console.log('Nickname que mandou mensagem: ', userNickname);
   console.log('Mensagem', message);
@@ -41,10 +41,10 @@ sendMessageForm.addEventListener('submit', (event) => {
 });
 
 // Change nickname
-const nicknameForm = document.querySelector('#change-nickname');
+const nicknameForm = document.querySelector('.change-nickname');
 nicknameForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const nicknameInput = document.querySelector('#nickname-input');
+  const nicknameInput = document.querySelector('.nickname-input');
   const newNickname = nicknameInput.value;
   console.log(`${userNickname} mudou seu nickname para: ${newNickname}`);
   const socketId = socket.id;
@@ -54,7 +54,7 @@ nicknameForm.addEventListener('submit', (event) => {
 });
 
 function showChatMessage(message) {
-  const messagesUl = document.querySelector('#messages');
+  const messagesUl = document.querySelector('.messages');
   const li = document.createElement('li');
   li.setAttribute('data-testid', 'message');
   li.innerText = message;
@@ -80,7 +80,7 @@ socket.on('usersUpdate', (users) => {
   const filteredUsers = users.filter((user) => user.socketId !== socket.id);
   const usersToDisplay = [sessionUser, ...filteredUsers];
 
-  const usersLi = document.querySelector('#users');
+  const usersLi = document.querySelector('.users');
   usersLi.innerHTML = '';
   usersToDisplay.forEach((user) => {
     const li = document.createElement('li');

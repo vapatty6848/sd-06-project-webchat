@@ -12,37 +12,37 @@
 
 <body>
   <h1>BEM VINDO AO WEBCHAT</h1>
-  <div id="main-container">
-    <div id="info-container">
-      <div id="nickname-container">
-        <form id="change-nickname" action="">
+  <div class="main-container">
+    <div class="info-container">
+      <div class="nickname-container">
+        <form class="change-nickname" action="">
           <input
             type="text"
-            id="nickname-input"
+            class="nickname-input"
             name="nickname-input"
             data-testid="nickname-box"
             placeholder="Insira seu nickname"
           >
-          <button id="send-nickname-btn" data-testid="nickname-button">Salvar</button>
+          <button class="send-nickname-btn" data-testid="nickname-button">Salvar</button>
         </form>
       </div>
-      <div id="users-container">
-        <ul id="users">
+      <div class="users-container">
+        <ul class="users">
         </ul>
       </div>
     </div>
-    <div id="messages-container">
-      <ul id="messages">
+    <div class="messages-container">
+      <ul class="messages">
         <% messages.forEach((message) => { %>
           <li data-testid="message"><%= message %></li>
         <% }) %> 
       </ul>
     </div>
   </div>
-  <div id="send-message-container">
-    <form id="send-message" action="">
-      <input type="text" id="send-message-input" data-testid="message-box" placeholder="Digite uma nova mensagem">
-      <button id="send-message-btn" data-testid="send-button">Enviar</button>
+  <div class="send-message-container">
+    <form class="send-message" action="">
+      <input type="text" class="send-message-input" data-testid="message-box" placeholder="Digite uma nova mensagem">
+      <button class="send-message-btn" data-testid="send-button">Enviar</button>
     </form>
   </div>
   <script src="js/main.js"></script>
