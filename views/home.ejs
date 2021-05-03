@@ -100,10 +100,8 @@
         console.log(messages);
         const msgs = messages.map((el) => {
           const { message, nickname, timestamp } = el.messages;
-          console.log(message, nickname, timestamp);
 
           let time = timestamp.substring(13, 11);
-        
           if (parseInt(time, 10) > 12) {
             time = 'PM';
           } else {
