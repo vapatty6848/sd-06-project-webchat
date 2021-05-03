@@ -27,8 +27,20 @@
       name="message"
       placeholder="message"
     />
-    <button type="button" data-testid="send-button">Enviar</button>
-    <button type="button" data-testid="nickname-button">Nick Name</button>
+    <button
+      type="button"
+      data-testid="send-button"
+      id="send-btn"
+    >
+      Enviar
+    </button>
+    <button
+      type="button"
+      data-testid="nickname-button"
+      id="nick-btn"
+    >
+      Nick Name
+    </button>
   </form>
 </body>
 <script>
@@ -43,5 +55,9 @@
     }
     return result;
   };
+
+  const nickBtn = document.querySelector('#nick-btn');
+  const sendBtn = document.querySelector('#send-btn');
+  
 </script>
 </html>
