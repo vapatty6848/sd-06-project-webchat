@@ -26,6 +26,7 @@
       data-testid="message-box"
       name="message"
       placeholder="message"
+      id="mensage-input"
     />
     <button
       type="button"
@@ -58,6 +59,9 @@
 
   const nickBtn = document.querySelector('#nick-btn');
   const sendBtn = document.querySelector('#send-btn');
-  
+
+  sendBtn.addEventListener('click', () => {
+    const mensageInput = document.querySelecto('#mensage-input');
+  });
 </script>
 </html>
