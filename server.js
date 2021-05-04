@@ -14,7 +14,7 @@ const io = require('socket.io')(httpServer, {
 });
 
 const messagesModel = require('./models/Messages');
-const usersModel = require('./models/Messages');
+const usersModel = require('./models/Users');
 
 app.get('/', (_req, res) => {
     const pathHTML = path.join(__dirname, 'views', '/index.html');
