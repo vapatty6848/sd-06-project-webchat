@@ -9,6 +9,7 @@
           box-sizing: border-box;
         }
         body {
+          display: flex;
           font: 13px Helvetica, Arial;
         }
         form {
@@ -16,7 +17,9 @@
           padding: 3px;
           position: fixed;
           bottom: 0;
-          width: 100%;
+          width: 80%;
+          height: 100%;
+          border: solid 2px blue;
         }
         form input {
           border: 0;
@@ -30,6 +33,18 @@
           border: none;
           padding: 10px;
           cursor: pointer;
+        }
+        .sideBar {
+          display: flex;
+          padding: 2px;
+          flex-direction: column;
+          border: solid 2px blue;
+          width: 20%;
+          height: 100%;
+        }
+        .onlineUsersBox {
+          display: flex;
+          flex-direction: column;
         }
         #mensagens {
           list-style-type: none;
@@ -45,18 +60,52 @@
     </style>
   </head>
   <body>
-    <ul id="mensagens"></ul>
-    <form>
-      <input data-testid="message-box" id="mensagemInput" autocomplete="off" />
-      <button data-testid="send-button" type="submit">Send</button>
-    </form>
+    <div class="sideBar">
+      <div>
+        <input data-testid="nickname-box" id="nicknameInput" autocomplete="off" />
+        <button data-testid="nickname-button" id="nickname-button">Save</button>
+      </div>
+      <ul id="online-users"></ul>
+    </div>
+    <div>
+      <ul id="mensagens"></ul>
+      <form>
+        <input data-testid="message-box" id="mensagemInput" autocomplete="off" />
+        <button data-testid="send-button" type="submit">Send</button>
+      </form>
+    <div>
   </body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   <script>
-    // Connection
+    function generateRandomNickname(length) {
+      const string = [];
+      var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+      var charactersLength = characters.length;
+      for ( var i = 0; i < length; i++ ) {
+        string.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+      }
+      return string.join('');
+    }
+
+    let nickname = generateRandomNickname(16);
     const socket = io();
-    const nickname = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 16);
+    socket.emit('setNickname', nickname);
+    
+     // GET NICKNAME INPUT VALUE AND SEND IT
+    const inputNickname = document.querySelector('#nicknameInput');
+    const buttonNickname = document.querySelector('#nickname-button');
+    buttonNickname.addEventListener('click', (e) =>{
+      e.preventDefault();
+      const oldNickname = nickname;
+      nickname = inputNickname.value;
+
+      const messageObj = { oldNickname, nickname };
   
+      socket.emit('nicknameChange', messageObj);
+      inputNickname.value = ''
+      return false;
+    });
+
     // GET FORM INPUT VALUE AND SEND IT
     const form = document.querySelector('form')
     const inputMessage = document.querySelector('#mensagemInput')
@@ -81,12 +130,21 @@
       li.setAttribute('data-testid', type === 'welcome' ? 'online-user' : 'message');
       messagesUl.appendChild(li);
     }
+
+    // CREATE AN MESSAGE ON THE MESSAGE LIST
+      const createOnlineUser = (message, type = '') => {
+      const messagesUl = document.querySelector('#mensagens');
+      const li = document.createElement('li');
+      li.innerText = message;
+      li.setAttribute('data-testid', type === 'welcome' ? 'online-user' : 'message');
+      messagesUl.appendChild(li);
+    }
   
     // LISTEN EVENT ola AND CREATE A MESSAGE IF EVENT IS ACHIEVED
     socket.on('welcome', (message) => createMessage(message, 'welcome'));
   
     // LISTEN EVENT mes AND CREATE A MESSAGE IF EVENT IS ACHIEVED
     // IT IS NOT RECEIVED BY THE SENDER
-    socket.on('messageServer', (message) => createMessage(message));
+    socket.on('message', (message) => createMessage(message));
   </script>
 </html>

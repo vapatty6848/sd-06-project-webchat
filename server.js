@@ -1,41 +1,13 @@
 const app = require('express')();
 const http = require('http').createServer(app);
+const path = require('path');
 const cors = require('cors');
+const chat = require('./chat');
 
-app.get('/', (req, res) => res.sendFile(__dirname.join('/public/index.html')));
-
-const io = require('socket.io')(http, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html')));
 
 app.use(cors());
 
-io.on('connection', (socket) => {
-  console.log('Connected');
-  socket.emit('welcome', 'Welcome!');
-
-  socket.broadcast.emit('newUser', { message: 'New user on chat!' });
-  socket.on('disconnect', () => console.log('Disconnected'));
-
-  socket.on('message', (messageObj) => {
-    const dateHour = new Date();
-  
-    let day = dateHour.getDate();
-    day = day < 10 ? `0${day}` : day;
-  
-    let month = dateHour.getMonth() + 1;
-    month = month < 10 ? `0${month}` : month;
-
-    const year = dateHour.getFullYear();
-
-    const hour = dateHour.toLocaleTimeString();
-    const date = `${day}-${month}-${year}`;
-    const message = `${date} ${hour} ${messageObj.nickname} ${messageObj.chatMessage}`;
-    io.emit('messageServer', message);
-  });
-});
+chat(http);
 
 http.listen(3000, () => console.log('Running on port 3000'));
