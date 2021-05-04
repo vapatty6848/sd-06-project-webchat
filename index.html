@@ -39,7 +39,7 @@
   <h1>Iniciando WebChat</h1>
   <div id="input-nickName">
     <input id="nickNameInput" autoComplete="off" placeholder="Insira seu NickName" data-testid="nickname-box"/>
-    <button id="nickNameButton" testid="nickname-button">Salvar NickName</button>
+    <button id="nickNameButton" data-testid="nickname-button">Salvar NickName</button>
   </div>
 
   <div id="div-mensagens">
@@ -65,18 +65,7 @@
     const buttonMensage = document.querySelector('#mensageButton');
     const buttonNickName = document.querySelector('#nickNameButton');
 
-    // const generatorNickName = (length) => {
-    //   let result = '';
-    //   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    //   const charactersLength = characters.length;
-    //   for (let index = 0; index < length; index += 1) {
-    //     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    //   }
-    //   return result;
-    // };
-
-    let user = '';
-    let userId = '';
+    let firstLoop = false;
 
     const createMessage = (msg) => {
       const ulListMessages = document.querySelector('#ul-mensagens');
@@ -85,49 +74,54 @@
       newAppend.innerText = msg;
       ulListMessages.appendChild(newAppend);
     }
-    
-    createOnlineNickNames = (arr) => {
-      arr.map(({ tagId, randomNickName }) => console.log(tagId, randomNickName));
-    }
 
-    const createNickName = (conex) => {
-      const { tagId, randomNickName } = conex;
-      // createOnlineNickNames(onChat);
-      // console.log('front', onChat);
+    const createNickNames = (onChat) => {
       const ulListNickName = document.querySelector('#ul-nickName');
-      const newLiNickName = document.createElement('li');
-      newLiNickName.innerText = randomNickName;
-      newLiNickName.setAttribute('data-testid', 'online-user');
-      newLiNickName.setAttribute('id', `${tagId}`);
-      ulListNickName.appendChild(newLiNickName);
-      userId = tagId;
-      user = randomNickName
+      ulListNickName.innerHTML = '';
+      if(firstLoop === false) {
+        sessionStorage.setItem('user', `${JSON.stringify(onChat[onChat.length - 1])}`);
+        firstLoop = true;
+      }
+      onChat.map(({id, nickName}) => {
+        const newLiNickName = document.createElement('li');
+        newLiNickName.innerText = nickName;
+        newLiNickName.setAttribute('data-testid', 'online-user');
+        newLiNickName.setAttribute('id', `${id}`);
+        ulListNickName.appendChild(newLiNickName);
+      })
     }
 
-    const alterNickName = (newUser) => {
-      const currentNickName = document.querySelector(`#${userId}`);
-      currentNickName.innerText = newUser;
-    }
+    // const alterNickName = (newUser) => {
+    //   const { nickName, id } = newUser
+    //   const currentNickName = document.querySelector(`#${id}`);
+    //   currentNickName.innerText = nickname;
+    //   inputNickName.value = '';
+    // }
 
     buttonMensage.addEventListener('click', () => {
-      const info = { chatMessage: inputMessage.value, nickname: user }
+      const user = JSON.parse(sessionStorage.getItem('user'));
+      const { nickName } = user;
+      console.log(user, nickName);
+      const info = { chatMessage: inputMessage.value, nickName };
       socket.emit('message', info);
       inputMessage.value = '';
     })
 
     buttonNickName.addEventListener('click', () => {
-      socket.emit('nickName', inputNickName.value);
-      // const newUser = inputNickName.value;
-      const newUser = { nickname: inputNickName.value, id: userId };
-      alterNickName(newUser);
+      const user = JSON.parse(sessionStorage.getItem('user'));
+      const { id } = JSON.parse(sessionStorage.getItem('user'));
+      const newUser = { nickname: inputNickName.value, id };
+      sessionStorage.setItem('user', `${JSON.stringify(newUser)}`);
+      // alterNickName(newUser)
       socket.emit('alterNickName', newUser);
       inputNickName.value = '';
     })
 
     socket.on('message', (msg) => createMessage(msg));
-    socket.on('nickName', (user) => createNickName(user));
-    socket.on('conex', (conex) => createNickName(conex));
-    socket.on('alterNickName', (newUser) => alterNickName(newUser));
+    socket.on('conexao', (onChat) => createNickNames(onChat));
+    // socket.on('alterUsers', (onChat) => createNickNames(onChat));
+    socket.on('alterNickName', (onChat) => createNickNames(onChat));
+    
   </script>
 </body>
 </html>

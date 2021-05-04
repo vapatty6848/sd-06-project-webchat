@@ -25,41 +25,53 @@ const formatHours = (now) => {
 
 let onChat = [];
 
+const messageFunction = (info) => {
+  const { nickName, chatMessage } = info;
+  const now = new Date();
+  const tmp = `${addLeftZero(now.getDate())}-${addLeftZero(now.getMonth())}-${now.getFullYear()}`;
+  const msg = `${tmp} ${formatHours(now)} - ${nickName}: ${chatMessage}`;
+  return msg;
+};
+
+const disconectFunction = (id) => {
+  onChat = onChat.filter((objOnChat) => objOnChat.id !== id);
+  return onChat;
+};
+
+const connectFunction = (id) => {
+  const obj = { id, nickName: id.toString().substr(0, 16) };
+  onChat.push(obj);
+  console.log(onChat);
+  return onChat;
+};
+
+const alterNickNameFunction = (newUser) => {
+  const { id, nickname } = newUser;
+  for (let index = 0; index < onChat.length; index += 1) {
+    if (onChat[index].id === id) {
+      onChat[index].nickName = nickname;
+    }
+  }
+  return onChat;
+};
+
 app.use(cors());
 
 io.on('connection', (socket) => {
-  const tagId = socket.id;
-  const randomNickName = tagId.toString().substr(0, 16);
-  const conex = { tagId, randomNickName };
-  onChat.push(conex);
-  // console.log(conex, onChat);
-  io.emit('conex', conex);
-  });
+  io.emit('conexao', connectFunction(socket.id));
 
-  io.on('connect', (socket) => {
   socket.on('alterNickName', (newUser) => {
-    io.emit('alterNickName', newUser);
+    io.emit('alterNickName', alterNickNameFunction(newUser));
   });
-  
+    
   socket.on('message', (info) => {
-    const now = new Date();
-    const dat = `${addLeftZero(now.getDate())}-${addLeftZero(now.getMonth())}-${now.getFullYear()}`;
-    const msg = `${dat} ${formatHours(now)} - ${info.nickname}: ${info.chatMessage}`;
-    io.emit('message', msg);
+    io.emit('message', messageFunction(info));
   });
   
   socket.on('disconnect', () => {
-    const del = socket.id;
-    onChat = onChat.filter((obj) => obj.tagId === del);
-    console.log('Alguém desconectou');
-  });
-
-  socket.on('nickName', (user) => {
-    io.emit('nickName', user);
+    io.emit('alterUsers', disconectFunction(socket.id));
   });
 });
-  // const formatedHours = formatHours(now);
-  // socket.emit('mesage', 'Seja bem vindo');
 
   // socket.broadcast.emit('newConnection', { message: 'Nova conexão' });
   // socket.broadcast.emit('serverMessage', { message: 'Algo' });
