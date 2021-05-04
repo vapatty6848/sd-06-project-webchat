@@ -7,6 +7,13 @@ const create = async (date, nickname, chatMessage) => {
     return (newMessage.ops[0]);
   };
 
+// Requisito-3
+const getAll = async () => {
+  const dbMessages = await connection()
+    .then((db) => db.collection('messages').find().toArray());
+  return dbMessages;
+};
   module.exports = {
     create,
+    getAll,
   };  

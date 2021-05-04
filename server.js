@@ -28,7 +28,7 @@ const timeString = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear(
   // Requisito 1
   const messageSocket = async (socket) => {
     socket.on('message', async ({ chatMessage, nickname }) => {
-      await messagesModel.create(timeString, nickname, chatMessage);
+      messagesModel.create(timeString, nickname, chatMessage);
       io.emit('message', `${timeString} ${nickname} ${chatMessage}`);
     });
   };
@@ -38,7 +38,7 @@ const usersArray = [];
   
 const userSocket = async (socket) => {
   socket.on('user', async (nickname) => { 
-    await usersModel.create(socket.id, nickname);
+    usersModel.create(socket.id, nickname);
     usersArray.push({ id: socket.id, nickname });
     io.emit('users', usersArray);
   });
@@ -46,7 +46,7 @@ const userSocket = async (socket) => {
 
 const updateUserNicknameSocket = async (socket) => {
   socket.on('userUpdate', async (user) => {
-    await usersModel.updateNickname(user);
+    usersModel.updateNickname(user);
     usersArray.map((userArray) => {
       const element = userArray;
       if (userArray.id === socket.id) element.nickname = user.nickname;
@@ -55,6 +55,11 @@ const updateUserNicknameSocket = async (socket) => {
     io.emit('users', usersArray);
   });
 };
+
+// Requisito 3
+const messagesController = require('./controller/messagesController');
+
+app.use('/', messagesController);
 
 io.on('connection', (socket) => {
     console.log(`socketId: ${socket.id} conected!`);

@@ -58,22 +58,22 @@
             z-index: 1;
         }
 
-        .btn::before{
+        .btn::before {
             content: "";
             position: absolute;
             left: var(--x);
             top: var(--y);
             transform: translate(-50%, -50%);
-            background-image: radial-gradient(circle closest-side,#ff7a00, transparent);
+            background-image: radial-gradient(circle closest-side, #ff7a00, transparent);
             width: 0;
             height: 0;
             transition: width 0.3s ease, height 0.3s ease;
-            z-index: -1; 
+            z-index: -1;
         }
 
-        .btn:hover::before{
-           width: 250px; 
-           height: 250px;
+        .btn:hover::before {
+            width: 250px;
+            height: 250px;
         }
 
         .messages {
@@ -157,7 +157,7 @@
             e.target.style.setProperty("--x", `${xPos}px`);
             e.target.style.setProperty("--y", `${yPos}px`);
         })
-        
+
         // Requisito-1
         socket.on('connect', () => {
             const initialNickname = `nickName-${Math.random().toString().substr(2, 7)}`;
@@ -200,8 +200,24 @@
             return false;
         });
 
-        // Requisito-3
         socket.on('message', (messageString) => createLiMessage(messageString));
+
+        // Requisito-3
+        window.onload = async () => {
+            const dbMessages = await fetch('http://localhost:3000/messages', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then((res) => res.json());
+            const ulMessages = document.querySelector('#ulMessages');
+            dbMessages.forEach((dbMessage) => {
+                const liMessage = document.createElement('li');
+                liMessage.setAttribute('data-testid', 'message');
+                liMessage.innerText = `${dbMessage.date} ${dbMessage.nickname} ${dbMessage.chatMessage}`;
+                ulMessages.appendChild(liMessage);
+            });
+        };
     </script>
 </body>
 
