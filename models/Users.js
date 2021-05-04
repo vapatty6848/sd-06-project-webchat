@@ -1,11 +1,13 @@
 const connection = require('./connection');
 
+// Requisito-1
 const create = async (id, nickname) => {
     const user = await connection()
       .then((db) => db.collection('users').insertOne({ id, nickname }));
     return (user.ops[0]);
   };
 
+  // Requisito-2
   const updateNickname = async ({ id, nickname }) => {
     const update = await connection()
       .then((db) => db.collection('users')

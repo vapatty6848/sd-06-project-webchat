@@ -49,6 +49,31 @@
             color: #FFF;
             cursor: pointer;
             font-family: "montserrat";
+
+            text-decoration: none;
+            font-weight: bolder;
+            font-size: 20px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before{
+            content: "";
+            position: absolute;
+            left: var(--x);
+            top: var(--y);
+            transform: translate(-50%, -50%);
+            background-image: radial-gradient(circle closest-side,#ff7a00, transparent);
+            width: 0;
+            height: 0;
+            transition: width 0.3s ease, height 0.3s ease;
+            z-index: -1; 
+        }
+
+        .btn:hover::before{
+           width: 250px; 
+           height: 250px;
         }
 
         .messages {
@@ -124,7 +149,16 @@
             }
         }
 
-        // Requisito-2
+        const btn = document.querySelector(".btn");
+        btn.addEventListener("mousemove", (e) => {
+            const xPos = e.pageX - e.target.offsetLeft;
+            const yPos = e.pagey - e.target.offsetTop;
+
+            e.target.style.setProperty("--x", `${xPos}px`);
+            e.target.style.setProperty("--y", `${yPos}px`);
+        })
+        
+        // Requisito-1
         socket.on('connect', () => {
             const initialNickname = `nickName-${Math.random().toString().substr(2, 7)}`;
             const nickname = initialNickname;
@@ -133,7 +167,7 @@
             getNewColor();
             socket.emit('user', nickname);
         });
-
+        // Requisito-2
         const createLiNickname = (user) => {
             const liUser = document.createElement('liUser');
             liUser.innerText = user.nickname;

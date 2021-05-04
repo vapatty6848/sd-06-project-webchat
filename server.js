@@ -46,7 +46,7 @@ const userSocket = async (socket) => {
 
 const updateUserNicknameSocket = async (socket) => {
   socket.on('userUpdate', async (user) => {
-    await usersModel.updateNickname(user);
+    usersModel.updateNickname(user);
     usersArray.map((userArray) => {
       const element = userArray;
       if (userArray.id === socket.id) element.nickname = user.nickname;
