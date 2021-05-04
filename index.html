@@ -99,10 +99,12 @@
     // }
 
     buttonMensage.addEventListener('click', () => {
-      const user = JSON.parse(sessionStorage.getItem('user'));
-      const { nickName } = user;
+      let user = JSON.parse(sessionStorage.getItem('user'));
+      let { nickName } = user;
       console.log(user, nickName);
-      const info = { chatMessage: inputMessage.value, nickName };
+      let newMsg = inputMessage.value;
+      let info = { chatMessage: newMsg, nickName };
+      console.log(user, info);
       socket.emit('message', info);
       inputMessage.value = '';
     })

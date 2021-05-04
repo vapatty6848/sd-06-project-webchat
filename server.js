@@ -27,6 +27,7 @@ let onChat = [];
 
 const messageFunction = (info) => {
   const { nickName, chatMessage } = info;
+  console.log('*******************', info);
   const now = new Date();
   const tmp = `${addLeftZero(now.getDate())}-${addLeftZero(now.getMonth())}-${now.getFullYear()}`;
   const msg = `${tmp} ${formatHours(now)} - ${nickName}: ${chatMessage}`;
@@ -65,6 +66,7 @@ io.on('connection', (socket) => {
   });
     
   socket.on('message', (info) => {
+    console.log(info, onChat);
     io.emit('message', messageFunction(info));
   });
   
