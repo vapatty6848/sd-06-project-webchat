@@ -91,20 +91,15 @@
       })
     }
 
-    // const alterNickName = (newUser) => {
-    //   const { nickName, id } = newUser
-    //   const currentNickName = document.querySelector(`#${id}`);
-    //   currentNickName.innerText = nickname;
-    //   inputNickName.value = '';
-    // }
-
     buttonMensage.addEventListener('click', () => {
       let user = JSON.parse(sessionStorage.getItem('user'));
-      let { nickName } = user;
-      console.log(user, nickName);
+      let { nickname } = user;
+      // 1
+      console.log(' Front 1', user);
       let newMsg = inputMessage.value;
-      let info = { chatMessage: newMsg, nickName };
-      console.log(user, info);
+      let info = { chatMessage: newMsg, nickname };
+      // 2
+      console.log('Front 2', user, info);
       socket.emit('message', info);
       inputMessage.value = '';
     })
@@ -114,14 +109,12 @@
       const { id } = JSON.parse(sessionStorage.getItem('user'));
       const newUser = { nickname: inputNickName.value, id };
       sessionStorage.setItem('user', `${JSON.stringify(newUser)}`);
-      // alterNickName(newUser)
       socket.emit('alterNickName', newUser);
       inputNickName.value = '';
     })
 
     socket.on('message', (msg) => createMessage(msg));
     socket.on('conexao', (onChat) => createNickNames(onChat));
-    // socket.on('alterUsers', (onChat) => createNickNames(onChat));
     socket.on('alterNickName', (onChat) => createNickNames(onChat));
     
   </script>

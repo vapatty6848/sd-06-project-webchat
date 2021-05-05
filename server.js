@@ -26,11 +26,11 @@ const formatHours = (now) => {
 let onChat = [];
 
 const messageFunction = (info) => {
-  const { nickName, chatMessage } = info;
-  console.log('*******************', info);
+  const { nickname, chatMessage } = info;
+  console.log('*****Server*******', info);
   const now = new Date();
   const tmp = `${addLeftZero(now.getDate())}-${addLeftZero(now.getMonth())}-${now.getFullYear()}`;
-  const msg = `${tmp} ${formatHours(now)} - ${nickName}: ${chatMessage}`;
+  const msg = `${tmp} ${formatHours(now)} - ${nickname}: ${chatMessage}`;
   return msg;
 };
 
