@@ -52,6 +52,15 @@
     <button id="saveName" data-testid="nickname-button">Salvar </button>
     <h2 data-testid="online-user" id="nickname"></h2>
 
+    <br />
+    <hr />
+    <br />
+    <h2>ONLINE</h2>
+    <ul id="users-online"></ul>
+    <br />
+    <hr />
+    <br />
+
     <ul id="mensagens"></ul>
 
     <form action="">
@@ -66,19 +75,22 @@
       const saveName = document.querySelector('#saveName');
       const nick = document.querySelector('#nickname');
       const messagesUl = document.querySelector('#mensagens');
-      // console.log(chosenName);
+      const usersUl = document.querySelector('#users-online');
+
       let nickname;
 
       nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
       nick.innerHTML = nickname;
+      const onlineUser = document.createElement('li');
+      onlineUser.setAttribute('data-testid', 'message')
+      onlineUser.innerText = nickname;
+      usersUl.appendChild(onlineUser);
 
       saveName.addEventListener('click', (e) => {
-        console.log(chosenName)
         nick.innerHTML = chosenName.value;
         nickname = chosenName.value;
-      })
-      
-      
+        onlineUser.innerText = chosenName.value;
+      });
       
       form.addEventListener('submit', (e) =>{
         e.preventDefault();
@@ -98,7 +110,7 @@
 
       const allMessages = (messages) => {
         console.log(messages);
-        const msgs = messages.map((el) => {
+        messages.forEach((el) => {
           const { message, nickname, timestamp } = el.messages;
 
           let time = timestamp.substring(13, 11);
@@ -108,17 +120,14 @@
             time = 'AM';
           }
       
-        const userMessage = `${timestamp} ${time} - ${nickname}: ${message}`;
-
-        createMessage(userMessage);
+          const userMessage = `${timestamp} ${time} - ${nickname}: ${message}`;
+          createMessage(userMessage);
         });
-      
-        
       }
 
       socket.on('message', (msg) => createMessage(msg));
 
-      socket.on('allMessages', (msg) => allMessages(msg))
+      socket.on('allMessages', (msg) => allMessages(msg));
 
     </script>
   </body>

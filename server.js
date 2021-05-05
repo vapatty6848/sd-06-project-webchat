@@ -13,8 +13,7 @@ app.use(cors());
 
 io.on('connection', async (socket) => {
   const messages = await getMsgs();
-  console.log(messages);
-  io.emit('allMessages', messages);
+  socket.emit('allMessages', messages);
 
   socket.on('message', (msg) => {
     const { nickname, chatMessage } = msg;
