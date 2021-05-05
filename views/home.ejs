@@ -50,13 +50,17 @@
   <body>
     <input id="chooseName" data-testid="nickname-box" placeholder="Insira seu nickname"/>
     <button id="saveName" data-testid="nickname-button">Salvar </button>
-    <h2 data-testid="online-user" id="nickname"></h2>
+    <!-- aqui -->
+    <!-- <h2 data-testid="online-user" id="nickname"></h2> -->
+
 
     <br />
     <hr />
     <br />
     <h2>ONLINE</h2>
-    <ul id="users-online"></ul>
+    <ul id="users-online">
+      
+    </ul>
     <br />
     <hr />
     <br />
@@ -81,22 +85,42 @@
 
       nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
       nick.innerHTML = nickname;
-      const onlineUser = document.createElement('li');
-      onlineUser.setAttribute('data-testid', 'online-user');
-      onlineUser.innerText = nickname;
-      usersUl.appendChild(onlineUser);
+      socket.emit('getName', nickname);
+      
+      const setOnlineUsers = (users) => {
+        usersUl.innerHTML = '';
+        // console.log(users);
+        if(users.length >= 1) {
+          console.log(1);
+
+          users.forEach((user) => {
+            const onlineUser = document.createElement('li');
+            onlineUser.setAttribute('data-testid', 'online-user');
+            onlineUser.innerText = user.nickname;
+            usersUl.appendChild(onlineUser);
+          });
+        } else {
+          console.log(0);
+          const onlineUser = document.createElement('li');
+          onlineUser.setAttribute('data-testid', 'online-user');
+          onlineUser.innerText = nickname;
+        }
+      };
+      
+      socket.on('onlineUsers', (users) => setOnlineUsers(users));
 
       saveName.addEventListener('click', (e) => {
-        nick.innerHTML = chosenName.value;
+        newName = chosenName.value;
         nickname = chosenName.value;
-        onlineUser.innerText = chosenName.value;
+        console.log(newName);
+        socket.emit('updateName', newName);
       });
       
       form.addEventListener('submit', (e) =>{
         e.preventDefault();
-
+        console.log(nickname)
         socket.emit('message', { chatMessage: inputMessage.value, nickname });
-
+        
         inputMessage.value = ''
         return false;
       });    
@@ -109,7 +133,6 @@
       }
 
       const allMessages = (messages) => {
-        console.log(messages);
         messages.forEach((el) => {
           const { message, nickname, timestamp } = el.messages;
 
@@ -126,7 +149,7 @@
       }
 
       socket.on('message', (msg) => createMessage(msg));
-
+     
       socket.on('allMessages', (msg) => allMessages(msg));
 
     </script>
