@@ -82,7 +82,7 @@
       nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
       nick.innerHTML = nickname;
       const onlineUser = document.createElement('li');
-      onlineUser.setAttribute('data-testid', 'message')
+      onlineUser.setAttribute('data-testid', 'online-user');
       onlineUser.innerText = nickname;
       usersUl.appendChild(onlineUser);
 
