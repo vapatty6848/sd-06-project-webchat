@@ -34,7 +34,6 @@ const nickUpdate = (nickName, socket) => {
 };
 
 const messageProcess = async (socket, message) => {
-
   const { nickname, chatMessage } = message;
   io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
   await Messages.createMessage(nickname, chatMessage, dateTime);
