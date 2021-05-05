@@ -61,11 +61,23 @@ const messagesController = require('./controller/messagesController');
 
 app.use('/', messagesController);
 
+// Requisito 4
+const disconnectSocket = async (socket) => {
+  socket.on('disconnect', async () => {
+    console.log(`${socket.id} is gone!`);
+    const userIndex = usersArray.findIndex((user) => user.id === socket.id);
+    usersArray.splice(userIndex, 1);
+    usersModel.deleteUser(socket.id);
+    io.emit('users', usersArray);
+  });
+};
+
 io.on('connection', (socket) => {
     console.log(`socketId: ${socket.id} conected!`);
     messageSocket(socket);
     userSocket(socket);
     updateUserNicknameSocket(socket);
+    disconnectSocket(socket);
 });
 
 httpServer.listen(PORT, () => console.log(`for whom the bells tolls ${PORT}`));

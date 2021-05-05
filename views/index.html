@@ -109,6 +109,10 @@
             width: 700px;
             align-content: center;
         }
+
+        .nickname {
+            padding: 3px;
+        }
     </style>
     <title>Web chat</title>
     <script src="/socket.io/socket.io.js"></script>
@@ -162,15 +166,16 @@
         socket.on('connect', () => {
             const initialNickname = `nickName-${Math.random().toString().substr(2, 7)}`;
             const nickname = initialNickname;
-            newUser = { nickname }
+            newUser = { nickname, id:socket.id }
             createLiNickname(newUser);
             getNewColor();
             socket.emit('user', nickname);
         });
         // Requisito-2
         const createLiNickname = (user) => {
-            const liUser = document.createElement('liUser');
+            const liUser = document.createElement('li');
             liUser.innerText = user.nickname;
+            liUser.setAttribute('class', 'nickname');
             liUser.setAttribute('data-testid', 'online-user')
             const ulNicknames = document.querySelector('#ulNicknames');
             ulNicknames.appendChild(liUser);
@@ -218,6 +223,29 @@
                 ulMessages.appendChild(liMessage);
             });
         };
+
+        // Requisito-4
+        socket.on('users', (usersArray) => {
+            console.log('newUser :',newUser)
+            usersArray.map((user) => {
+                if (user.id === newUser.id) {                    
+                    return user.nickname === newUser.nickname
+                }
+                return user;
+            });
+            console.log('usersArray: ', usersArray);
+            ulUsers(usersArray);
+        })
+
+        const ulUsers = (usersArray) => {
+            const ulNicknames = document.querySelector('#ulNicknames');
+            ulNicknames.innerHTML = '';
+            createLiNickname(newUser);
+            usersArray.forEach((user) => {
+                if (user.id !== newUser.id) createLiNickname(user);
+            });
+        };
+
     </script>
 </body>
 

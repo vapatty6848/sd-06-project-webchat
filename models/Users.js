@@ -3,7 +3,8 @@ const connection = require('./connection');
 // Requisito-1
 const create = async (id, nickname) => {
     const user = await connection()
-      .then((db) => db.collection('users').insertOne({ id, nickname }));
+      .then((db) => db.collection('users')
+      .insertOne({ id, nickname }));
     return (user.ops[0]);
   };
 
@@ -18,10 +19,17 @@ const create = async (id, nickname) => {
       ));
     return update.value;
   };
-
   // https://stackoverflow.com/questions/35626040/findoneandupdate-used-with-returnnewdocumenttrue-returns-the-original-document
+  
+  // Requisito 4
+  const deleteUser = async (id) => {
+    const deletedUser = await connection()
+      .then((db) => db.collection('users').findOneAndDelete({ id }));
+    return deletedUser;
+  };
 
   module.exports = {
     create,
     updateNickname,
+    deleteUser,
   };  
