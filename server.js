@@ -18,7 +18,6 @@ const onConnect = async (socket) => {
   const { id } = socket;
   const randomNick = `User-${id.substr(2, 11)}`;
   users.push({ id, nickName: randomNick });
-  console.log('users: ', users);
 
   io.emit('nickNameUpdateFront', users);
   const messages = await Messages.getAllMessages();
@@ -33,7 +32,7 @@ const nickUpdate = (nickName, socket) => {
   io.emit('nickNameUpdateFront', users); 
 };
 
-const messageProcess = async (socket, message) => {
+const messageProcess = async (message) => {
   const { nickname, chatMessage } = message;
   io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
   await Messages.createMessage(nickname, chatMessage, dateTime);
@@ -45,10 +44,10 @@ const onDisconnect = (socket) => {
   users.splice(userIndex, 1);
   io.emit('nickNameUpdateFront', users);
 };
-io.on('connection', async (socket) => {
-  await onConnect(socket);
+io.on('connection', (socket) => {
+  onConnect(socket);
   socket.on('nickNameUpdate', (nickName) => nickUpdate(nickName, socket));
-  socket.on('message', (message) => messageProcess(socket, message));
+  socket.on('message', (message) => messageProcess(message));
   socket.on('disconnect', () => onDisconnect(socket));
 });
 
