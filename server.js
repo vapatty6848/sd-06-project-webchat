@@ -44,10 +44,10 @@ const onDisconnect = (socket) => {
   users.splice(userIndex, 1);
   io.emit('nickNameUpdateFront', users);
 };
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   onConnect(socket);
   socket.on('nickNameUpdate', (nickName) => nickUpdate(nickName, socket));
-  socket.on('message', (message) => messageProcess(message));
+  await socket.on('message', (message) => messageProcess(message));
   socket.on('disconnect', () => onDisconnect(socket));
 });
 
