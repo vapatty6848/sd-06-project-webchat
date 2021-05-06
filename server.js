@@ -32,10 +32,12 @@ const nickUpdate = async (nickName, socket) => {
   io.emit('nickNameUpdateFront', users); 
 };
 
-const messageProcess = (message) => {
+const messageProcess = async (message) => {
   const { nickname, chatMessage } = message;
-  io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
-  Messages.createMessage(nickname, chatMessage, dateTime);
+  // io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
+  await Messages.createMessage(nickname, chatMessage, dateTime);
+  const messages = await Messages.getAllMessages();
+  io.emit('message', messages); 
 };
 
 const onDisconnect = (socket) => {
@@ -51,8 +53,10 @@ io.on('connection', async (socket) => {
 
   io.emit('nickNameUpdateFront', users);
   const messages = await Messages.getAllMessages();
-  await messages.forEach((message) => socket.emit('message',
-   `${message.date} - ${message.nickname}: ${message.message}`)); 
+
+  socket.emit('message', messages); 
+  // await messages.forEach((message) => socket.emit('message',
+  //  `${message.date} - ${message.nickname}: ${message.message}`)); 
 
   // onConnect(socket);
   socket.on('nickNameUpdate', (nickName) => nickUpdate(nickName, socket));
