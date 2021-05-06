@@ -2,6 +2,7 @@ const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app);
+const dateFormat = require("dateformat");
 
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
@@ -20,10 +21,17 @@ app.get('/', (req, res) => {
   res.render('home');
 });
 
+const now = new Date();
+const fullData = dateFormat(now, 'dd/mm/yyyy HH:mm:ss TT');
+console.log(fullData);
+
 io.on('connection', (socket) => {
   console.log('Novo usuário conectado');
 
-  socket.emit();
+  socket.on('message', (message) => 
+    io.emit('message', `${fullData} - ${message.nickname} ${message.chatMessage}`));
+
+  socket.emit('message', { message: { chatMessage, nickname } });
 });
 
 httpServer.listen(3000, () => {
