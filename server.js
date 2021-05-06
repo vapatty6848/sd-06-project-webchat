@@ -12,8 +12,12 @@ const dateTime = new Date().toLocaleString().replace(/\//g, '-');
 
 app.set('view engine', 'ejs');
 
-app.get('/', (_req, res) => res.render('home'));
+app.set('views', './views');
 
+app.get('/', async (_req, res) => {  
+  const messages = await Messages.getAllMessages();
+  res.status(200).render('home', { messages });
+});
 // const onConnect = async (socket) => {
 //   const { id } = socket;
 //   const randomNick = `User-${id.substr(2, 11)}`;
@@ -51,11 +55,10 @@ io.on('connection', async (socket) => {
   users.push({ id, nickName: randomNick });
 
   io.emit('nickNameUpdateFront', users);
-  const messages = await Messages.getAllMessages();
 
   // socket.emit('message', messages); 
-  messages.forEach((message) => socket.emit('message',
-   `${message.date} - ${message.nickname}: ${message.message}`)); 
+  // messages.forEach((message) => socket.emit('message',
+  //  `${message.date} - ${message.nickname}: ${message.message}`)); 
 
   // onConnect(socket);
   socket.on('nickNameUpdate', (nickName) => nickUpdate(nickName, socket));
