@@ -11,18 +11,22 @@
   <h1>El chat del Magic</h1>
   <ul id="msg-screen"></ul>
   <form>
-    <input type="text" id="input-msg"/>
-    <button type="button" id="send-msg">Enviar</button>
+    <input type="text" id="input-msg" data-testid="message-box"/>
+    <button type="button" id="send-msg" data-testid="send-button">Enviar</button>
   </form>
   <script>
     const socket = io();
-
+    socket.on('randomName', ({ userName }) => localStorage.setItem('nickname', userName));
+    console.log('name in localStorage: ', localStorage.getItem('nickname'));
     const msgInput = document.querySelector('#input-msg');
 
     document.querySelector('#send-msg').addEventListener('click', (e) => {
       e.preventDefault();
-      const message = msgInput.value;
-      socket.emit('message', { nickname: 'teste', chatMessage: message });
+      const chatMessage = msgInput.value;
+      const nickname = localStorage.getItem('nickname');
+      console.log('sending with nickname: ', nickname);
+      console.log('sending with message: ', chatMessage);
+      socket.emit('message', { nickname, chatMessage });
       msgInput.value = '';
     });
 

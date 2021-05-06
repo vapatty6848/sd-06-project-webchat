@@ -1,6 +1,7 @@
 const app = require('express')();
 const http = require('http').createServer(app);
 const cors = require('cors');
+const randomize = require('randomatic');
 const { format } = require('date-fns');
 const io = require('socket.io')(http, {
   cors: {
@@ -8,6 +9,7 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   },
 });
+const Messages = require('./models/messages');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 
@@ -16,11 +18,14 @@ app.set('views', './views');
 app.use(cors());
 
 io.on('connection', (socket) => {
+  socket.emit('historyMessages', { history: Messages.getAll() });
+  socket.emit('randomName', { userName: randomize('Aa0', 16) });
   socket.on('message', (message) => {
     const { chatMessage, nickname } = message;
     const formattedDate = format(new Date(), 'dd-MM-yyyy KK:mm:ss aa');
     const formattedMessage = `${formattedDate} - ${nickname}: ${chatMessage}`;
     io.emit('serverMessage', formattedMessage);
+    Messages.create({ message: chatMessage, nickname, timestamp: formattedDate });
   });
 });
 
