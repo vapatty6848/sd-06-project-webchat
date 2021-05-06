@@ -32,10 +32,10 @@ const nickUpdate = async (nickName, socket) => {
   io.emit('nickNameUpdateFront', users); 
 };
 
-const messageProcess = async (message) => {
+const messageProcess = (message) => {
   const { nickname, chatMessage } = message;
   io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
-  await Messages.createMessage(nickname, chatMessage, dateTime);
+  Messages.createMessage(nickname, chatMessage, dateTime);
 };
 
 const onDisconnect = (socket) => {
