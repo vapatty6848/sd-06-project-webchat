@@ -50,14 +50,11 @@
   <body>
     <input id="chooseName" data-testid="nickname-box" placeholder="Insira seu nickname"/>
     <button id="saveName" data-testid="nickname-button">Salvar </button>
-    <!-- aqui -->
-    <!-- <h2 data-testid="online-user" id="nickname"></h2> -->
-
 
     <br />
     <hr />
     <br />
-    <h2>ONLINE</h2>
+    <h2>ONLINE USERS</h2>
     <ul id="users-online">
       
     </ul>
@@ -77,21 +74,23 @@
       const inputMessage = document.querySelector('#mensagemInput')
       const chosenName = document.querySelector('#chooseName');
       const saveName = document.querySelector('#saveName');
-      const nick = document.querySelector('#nickname');
+      // const nick = document.querySelector('#nickname');
       const messagesUl = document.querySelector('#mensagens');
       const usersUl = document.querySelector('#users-online');
 
       let nickname;
 
       nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-      nick.innerHTML = nickname;
-      socket.emit('getName', nickname);
-      
+      // nick.innerHTML = nickname;
+      socket.on('connect', () => {
+        socket.emit('getName', nickname);
+      });
+
       const setOnlineUsers = (users) => {
         usersUl.innerHTML = '';
-        // console.log(users);
-        if(users.length >= 1) {
-          console.log(1);
+        console.log(users);
+        // if(users.length >= 1) {
+          // console.log(1);
 
           users.forEach((user) => {
             const onlineUser = document.createElement('li');
@@ -99,12 +98,12 @@
             onlineUser.innerText = user.nickname;
             usersUl.appendChild(onlineUser);
           });
-        } else {
-          console.log(0);
-          const onlineUser = document.createElement('li');
-          onlineUser.setAttribute('data-testid', 'online-user');
-          onlineUser.innerText = nickname;
-        }
+        // } else {
+          // console.log(0);
+          // const onlineUser = document.createElement('li');
+          // onlineUser.setAttribute('data-testid', 'online-user');
+          // onlineUser.innerText = nickname;
+        // }
       };
       
       socket.on('onlineUsers', (users) => setOnlineUsers(users));

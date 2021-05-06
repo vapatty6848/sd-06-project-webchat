@@ -36,6 +36,7 @@ io.on('connection', async (socket) => {
   socket.emit('allMessages', messages);
 
   socket.on('getName', (nickname) => {
+    console.log(nickname);
     onlineUsers.push({ id: socket.id, nickname });
     io.emit('onlineUsers', onlineUsers);
   });

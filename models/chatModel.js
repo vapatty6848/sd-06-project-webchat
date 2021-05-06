@@ -8,7 +8,7 @@ const saveMsgs = async (messages) => {
 const getMsgs = async () => {
   const msg = await connection()
   .then((db) => db.collection('messages').find({}).toArray());
-  console.log(msg);
+  // console.log(msg);
   return msg;
 };
 
