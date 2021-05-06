@@ -25,19 +25,18 @@ app.get('/', (_req, res) => res.render('home'));
 //    `${message.date} - ${message.nickname}: ${message.message}`)); 
 // };
 
-const nickUpdate = async (nickName, socket) => {
-  const currentUser = users.find((usr) => usr.id === socket.id);
-  const userIndex = users.indexOf(await currentUser);
+const nickUpdate = (nickName, socket) => {
+  const userIndex = users.findIndex((usr) => usr.id === socket.id);
   users.splice(userIndex, 1, { id: socket.id, nickName });
   io.emit('nickNameUpdateFront', users); 
 };
 
-const messageProcess = async (message) => {
+const messageProcess = (message) => {
   const { nickname, chatMessage } = message;
-  // io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
-  await Messages.createMessage(nickname, chatMessage, dateTime);
-  const messages = await Messages.getAllMessages();
-  io.emit('message', messages); 
+  io.emit('message', `${dateTime} - ${nickname}: ${chatMessage}`);
+  Messages.createMessage(nickname, chatMessage, dateTime);
+  // const messages = await Messages.getAllMessages();
+  // io.emit('message', messages); 
 };
 
 const onDisconnect = (socket) => {
@@ -54,13 +53,13 @@ io.on('connection', async (socket) => {
   io.emit('nickNameUpdateFront', users);
   const messages = await Messages.getAllMessages();
 
-  socket.emit('message', messages); 
-  // await messages.forEach((message) => socket.emit('message',
-  //  `${message.date} - ${message.nickname}: ${message.message}`)); 
+  // socket.emit('message', messages); 
+  messages.forEach((message) => socket.emit('message',
+   `${message.date} - ${message.nickname}: ${message.message}`)); 
 
   // onConnect(socket);
   socket.on('nickNameUpdate', (nickName) => nickUpdate(nickName, socket));
-  socket.on('message', (message) => messageProcess(message));
+  socket.on('message', async (message) => messageProcess(message));
   socket.on('disconnect', () => onDisconnect(socket));
 });
 
