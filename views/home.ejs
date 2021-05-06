@@ -51,7 +51,7 @@
         document.querySelector('#nickName').value = '';
       });
 
-      socket.on('nickNameUpdateFront', (users) => {
+      socket.on('nickNameUpdateFront', async (users) => {
         const ulUsers = document.querySelector('#onlineUsers');
         while (ulUsers.firstChild) {
           ulUsers.removeChild(ulUsers.firstChild);
@@ -65,7 +65,7 @@
             users.unshift(currentUser);
           }
         }
-        users.forEach((element) => {
+        await users.forEach((element) => {
           const newNickName = document.createElement('li');
           newNickName.setAttribute('data-testid', 'online-user');
           newNickName.innerHTML = element.nickName;
