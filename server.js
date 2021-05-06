@@ -42,7 +42,7 @@ const disconectFunction = (id) => {
 const connectFunction = (id) => {
   const obj = { id, nickName: id.toString().substr(0, 16) };
   onChat.push(obj);
-  console.log(onChat);
+  console.log('****Onchat****', onChat);
   return onChat;
 };
 
@@ -71,7 +71,7 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => {
-    io.emit('alterUsers', disconectFunction(socket.id));
+    io.emit('logoutUser', disconectFunction(socket.id));
   });
 });
 

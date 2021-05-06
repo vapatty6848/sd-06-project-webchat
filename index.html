@@ -75,14 +75,28 @@
       ulListMessages.appendChild(newAppend);
     }
 
+    const filterUserOnPage = (arr) => {
+      const localUser = JSON.parse(sessionStorage.getItem('user'));
+      const filteredArr = arr.filter(({ id }) => id !== localUser.id);
+      const newArr = [localUser, ...filteredArr]
+      return newArr;
+    }
+
     const createNickNames = (onChat) => {
       const ulListNickName = document.querySelector('#ul-nickName');
       ulListNickName.innerHTML = '';
+      let othersOnChat = onChat;
+
       if(firstLoop === false) {
         sessionStorage.setItem('user', `${JSON.stringify(onChat[onChat.length - 1])}`);
         firstLoop = true;
       }
-      onChat.map(({id, nickName}) => {
+      if (onChat.length > 1) {
+        othersOnChat = filterUserOnPage(onChat);
+      }
+      console.log(othersOnChat)
+
+      othersOnChat.map(({id, nickName}) => {
         const newLiNickName = document.createElement('li');
         newLiNickName.innerText = nickName;
         newLiNickName.setAttribute('data-testid', 'online-user');
@@ -90,6 +104,14 @@
         ulListNickName.appendChild(newLiNickName);
       })
     }
+
+    // const alterNickNameFunction = (arr) => {
+    //   const localUser = JSON.parse(sessionStorage.getItem('user'));
+    //   const {id, nickName} = localUser;
+    //   const newname = arr.find((obj) => obj.id === id);
+    //   console.log('******',newname);
+    //   createNickNames(arr);
+    // }
 
     buttonMensage.addEventListener('click', () => {
       let user = JSON.parse(sessionStorage.getItem('user'));
@@ -108,7 +130,7 @@
       const user = JSON.parse(sessionStorage.getItem('user'));
       const { id } = JSON.parse(sessionStorage.getItem('user'));
       const newUser = { nickname: inputNickName.value, id };
-      sessionStorage.setItem('user', `${JSON.stringify(newUser)}`);
+      sessionStorage.setItem('user', `${JSON.stringify({ nickName: inputNickName.value, id })}`);
       socket.emit('alterNickName', newUser);
       inputNickName.value = '';
     })
@@ -116,6 +138,7 @@
     socket.on('message', (msg) => createMessage(msg));
     socket.on('conexao', (onChat) => createNickNames(onChat));
     socket.on('alterNickName', (onChat) => createNickNames(onChat));
+    socket.on('logoutUser', (onChat) => createNickNames(onChat));
     
   </script>
 </body>
