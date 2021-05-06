@@ -75,7 +75,7 @@
       ulListMessages.appendChild(newAppend);
     }
 
-    const filterUserOnPage = (arr) => {
+    const orderArray = (arr) => {
       const localUser = JSON.parse(sessionStorage.getItem('user'));
       const filteredArr = arr.filter(({ id }) => id !== localUser.id);
       const newArr = [localUser, ...filteredArr]
@@ -92,7 +92,7 @@
         firstLoop = true;
       }
       if (onChat.length > 1) {
-        othersOnChat = filterUserOnPage(onChat);
+        othersOnChat = orderArray(onChat);
       }
       console.log(othersOnChat)
 
@@ -105,21 +105,13 @@
       })
     }
 
-    // const alterNickNameFunction = (arr) => {
-    //   const localUser = JSON.parse(sessionStorage.getItem('user'));
-    //   const {id, nickName} = localUser;
-    //   const newname = arr.find((obj) => obj.id === id);
-    //   console.log('******',newname);
-    //   createNickNames(arr);
-    // }
-
     buttonMensage.addEventListener('click', () => {
       let user = JSON.parse(sessionStorage.getItem('user'));
-      let { nickname } = user;
+      let { nickName } = user;
       // 1
       console.log(' Front 1', user);
       let newMsg = inputMessage.value;
-      let info = { chatMessage: newMsg, nickname };
+      let info = { chatMessage: newMsg, nickname: nickName };
       // 2
       console.log('Front 2', user, info);
       socket.emit('message', info);
