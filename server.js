@@ -30,7 +30,6 @@ io.on('connection', (socket) => {
 
   socket.on('message', ({ nickname, chatMessage }) => 
     io.emit('message', `${fullData} - ${nickname} ${chatMessage}`));
-  
 });
 
 httpServer.listen(3000, () => {
