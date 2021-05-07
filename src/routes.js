@@ -4,6 +4,6 @@ const { chatController } = require('./controllers');
 
 const routerMessage = Router();
 
-routerMessage.get('/chat', chatController.renderMessages);
+routerMessage.get('/', chatController.renderMessages);
 
 module.exports = routerMessage;
