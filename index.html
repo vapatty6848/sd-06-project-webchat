@@ -35,7 +35,7 @@
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
 </head>
-<body>
+<body onload="onLoadFunction()">
   <h1>Iniciando WebChat</h1>
   <div id="input-nickName">
     <input id="nickNameInput" autoComplete="off" placeholder="Insira seu NickName" data-testid="nickname-box"/>
@@ -67,12 +67,31 @@
 
     let firstLoop = false;
 
+    const apiUrl = 'http://localhost:3000';
+
+    const fetchFunction = async (endPoint) => {
+      const response = await fetch(`${apiUrl}${endPoint}`);
+      const data = await response.json();
+      sessionStorage.setItem('messages', `${JSON.stringify(data)}`);
+    };
+
+    
     const createMessage = (msg) => {
+      const { message, nickname, timestamp } = JSON.parse(msg);
       const ulListMessages = document.querySelector('#ul-mensagens');
       const newAppend = document.createElement('li');
       newAppend.setAttribute('data-testid', 'message');
-      newAppend.innerText = msg;
+      newAppend.innerText = `${timestamp} - ${nickname}: ${message}`;
       ulListMessages.appendChild(newAppend);
+    }
+    
+    const onLoadFunction = async() => {
+      await fetchFunction('/messages');
+      const dbMessages = JSON.parse(sessionStorage.getItem('messages'));
+      console.log(dbMessages);
+      if (dbMessages.length > 0) {
+        dbMessages.map((obj) => createMessage(JSON.stringify(obj)));
+      }
     }
 
     const orderArray = (arr) => {
@@ -85,18 +104,18 @@
     const createNickNames = (onChat) => {
       const ulListNickName = document.querySelector('#ul-nickName');
       ulListNickName.innerHTML = '';
-      let othersOnChat = onChat;
+      let orderOnChat = onChat;
 
       if(firstLoop === false) {
         sessionStorage.setItem('user', `${JSON.stringify(onChat[onChat.length - 1])}`);
         firstLoop = true;
       }
       if (onChat.length > 1) {
-        othersOnChat = orderArray(onChat);
+        orderOnChat = orderArray(onChat);
       }
-      console.log(othersOnChat)
+      // console.log(orderOnChat)
 
-      othersOnChat.map(({id, nickName}) => {
+      orderOnChat.map(({id, nickName}) => {
         const newLiNickName = document.createElement('li');
         newLiNickName.innerText = nickName;
         newLiNickName.setAttribute('data-testid', 'online-user');
@@ -109,11 +128,11 @@
       let user = JSON.parse(sessionStorage.getItem('user'));
       let { nickName } = user;
       // 1
-      console.log(' Front 1', user);
+      // console.log(' Front 1', user);
       let newMsg = inputMessage.value;
       let info = { chatMessage: newMsg, nickname: nickName };
       // 2
-      console.log('Front 2', user, info);
+      // console.log('Front 2', user, info);
       socket.emit('message', info);
       inputMessage.value = '';
     })

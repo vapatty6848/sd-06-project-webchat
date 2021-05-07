@@ -9,6 +9,9 @@ const io = require('socket.io')(http, {
   },
 });
 
+// connection
+const connection = require('./models/connection');
+
 const addLeftZero = (number) => {
   const param = number.toString();
   if (param.length < 2) { return `0${number}`; }
@@ -25,13 +28,22 @@ const formatHours = (now) => {
 
 let onChat = [];
 
+const dbMessage = async (obj) => {
+  await connection().then((db) => db.collection('messages').insertOne(obj));
+};
+
 const messageFunction = (info) => {
   const { nickname, chatMessage } = info;
   console.log('*****Server*******', info);
   const now = new Date();
-  const tmp = `${addLeftZero(now.getDate())}-${addLeftZero(now.getMonth())}-${now.getFullYear()}`;
-  const msg = `${tmp} ${formatHours(now)} - ${nickname}: ${chatMessage}`;
-  return msg;
+  const dt = `${addLeftZero(now.getDate())}-${addLeftZero(now.getMonth())}-${now.getFullYear()}`;
+  const obj = {
+    message: chatMessage,
+    nickname,
+    timestamp: `${dt} ${formatHours(now)}`,
+  };
+  dbMessage(obj);
+  return JSON.stringify(obj);
 };
 
 const disconectFunction = (id) => {
@@ -58,6 +70,12 @@ const alterNickNameFunction = (newUser) => {
 
 app.use(cors());
 
+app.get('/messages', async (req, res) => {
+  const messages = await connection()
+    .then((db) => db.collection('messages').find().toArray());
+  return res.json(messages);
+});
+
 io.on('connection', (socket) => {
   io.emit('conexao', connectFunction(socket.id));
 
@@ -74,9 +92,6 @@ io.on('connection', (socket) => {
     io.emit('logoutUser', disconectFunction(socket.id));
   });
 });
-
-  // socket.broadcast.emit('newConnection', { message: 'Nova conexão' });
-  // socket.broadcast.emit('serverMessage', { message: 'Algo' });
 
 app.get('/', (_req, res) => {
   res.sendFile(`${__dirname}/index.html`);
