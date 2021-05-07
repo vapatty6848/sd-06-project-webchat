@@ -117,7 +117,7 @@
       });
       
       socket.on('updateUsers', (users) => renderOnlineUsers(users));
-      socket.on('chat-message', (message) => createMessage(message));
+      socket.on('message', (message) => createMessage(message));
     </script>
   </body>
 </html>

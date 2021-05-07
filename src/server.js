@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
   socket.on('message', async ({ chatMessage, nickname }) => {
     const message = formatMessage(dateFormated, chatMessage, nickname);
     await chatController.createMessages(chatMessage, nickname, dateFormated);
-    io.emit('chat-message', message);
+    io.emit('message', message);
   });
 
   socket.on('disconnect', () => {
