@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+  <html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h2 id="user-nickname"></h2>
+    <form action="">
+      <input
+        type="text"
+        placeholder="Insira seu nickname"
+        id="input-nickname"
+        data-testid="nickname-box"
+      >
+      <button
+        id="btn-nickname"
+        data-testid="nickname-button"
+      >
+        Salvar
+      </button>
+    </form>
+
+    <div>
+      <h2>Usuários online</h2>
+      <ul id="online-users-list"></ul>
+    </div>
+
+    <div>
+      <h2>Chat</h2>
+      <ul id="messages-list">
+        <% messages.forEach((message) => { %>
+          <li data-testid="message">
+            <%= `${message.timestamp} - ${message.nickname}: ${message.message}` %>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <form action="">
+      <input
+        type="text"
+        placeholder="Digite sua mensagem"
+        id="input-message"
+        data-testid="message-box"
+      >
+      <button
+        id="btn-message"
+        data-testid="send-button"
+      >
+        Enviar
+      </button>
+    </form>
+    <script>
+      const socket = io();
+      const userNickname = document.querySelector('#user-nickname');
+      const btnMessage = document.querySelector('#btn-message');
+      const btnSaveNickname = document.querySelector('#btn-nickname');
+      const onlineUsersList = document.querySelector('#online-users-list');
+      const inputMessage = document.querySelector('#input-message');
+      const inputNickname = document.querySelector('#input-nickname');
+
+      const generateRandomNickname = () => {
+        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let str = '';
+        for (let i = 0; i < 10; i++) {
+          str += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return `Guest_${str}`;
+      };
+
+      btnMessage.addEventListener('click', (e) => {
+        e.preventDefault();
+        const message = inputMessage.value;
+        socket.emit('message', { chatMessage: message, nickname: userNickname.innerHTML });
+        inputMessage.value = '';
+      });
+
+      btnSaveNickname.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nickname = inputNickname.value;
+        userNickname.innerHTML = nickname;
+        inputNickname.value = '';
+        socket.emit('update-nickname', nickname);
+      });
+
+      const createMessage = (message) => {
+        const messageList = document.querySelector('#messages-list');
+        const messageElement = document.createElement('li');
+        messageElement.innerText = message;
+        messageElement.setAttribute('data-testid', 'message');
+        messageList.appendChild(messageElement);
+      };
+
+      const renderOnlineUsers = (users) => {
+				const newUser = users.find((user) => user.socketId === socket.id);
+				const userIndex = users.findIndex((user) => user === newUser);
+				users.splice(userIndex, 1);
+				users.unshift(newUser);
+				onlineUsersList.innerText = '';
+        users.forEach((user) => {
+          const userElement = document.createElement('li');
+          userElement.innerText = user.nickname;
+          userElement.setAttribute('data-testid', 'online-user');
+          onlineUsersList.appendChild(userElement);
+        });
+      };
+
+      
+      socket.on('connect', () => {
+        const nickname = generateRandomNickname();
+        socket.emit('new-user-connected', nickname);
+        userNickname.innerHTML = nickname;
+      });
+      
+      socket.on('updateUsers', (users) => renderOnlineUsers(users));
+      socket.on('chat-message', (message) => createMessage(message));
+    </script>
+  </body>
+</html>
