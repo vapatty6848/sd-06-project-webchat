@@ -21,8 +21,6 @@ const options = {
 };
 const io = new Server(server, options);
 
-const PORT = process.env.PORT || 3000;
-
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -58,4 +56,4 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+module.exports = server;
