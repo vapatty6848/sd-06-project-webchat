@@ -10,6 +10,9 @@ const io = require('socket.io')(http, {
   },
 });
 
+const WebChatController = require('./src/controllers/WebChatController');
+const { saveMessage } = require('./src/models/Messages');
+
 app.use(express.json());
 
 app.use(cors());
@@ -18,19 +21,20 @@ app.set('view engine', 'ejs');
 
 app.set('views', './views');
 
-app.use('/', () => console.log('funciona'));
+app.use('/', WebChatController);
 
 let users = [];
 
-const setNewUser = (socket, newUser) => {
+const setNewOnlineUser = (socket, newUser) => {
   socket.emit('setOnlineUsers', [{ id: socket.id, nickname: newUser }, ...users]);
   users.push({ id: socket.id, nickname: newUser });
   socket.broadcast.emit('userConnected', { nickname: newUser, users });
 };
 
 const setMessage = async (chatMessage, nickname) => {
-  const times = new Date().toLocaleString().replace(/\//g, '-');
-  const message = `${times} - ${nickname}: ${chatMessage}`;
+  const timestamp = new Date().toLocaleString().replace(/\//g, '-');
+  await saveMessage(chatMessage, nickname, timestamp);
+  const message = `${timestamp} - ${nickname}: ${chatMessage}`;
   io.emit('message', message);
 };
 
@@ -51,14 +55,12 @@ const logOff = (socket) => {
 };
 
 io.on('connection', (socket) => {
-  socket.on('newUser', (newUser) => setNewUser(socket, newUser));
+  socket.on('newUser', (newUser) => setNewOnlineUser(socket, newUser));
   socket.on('message', ({ chatMessage, nickname }) => setMessage(chatMessage, nickname));
   socket.on('updateUserNick', (nickname) => setNickname(socket, nickname));
   socket.on('disconnect', () => logOff(socket));
 });
 
-const PORT = 3000;
-
-http.listen(PORT, () => {
-  console.log(`Servidor ouvindo na porta ${PORT}`);
+http.listen(3000, () => {
+  console.log('Servidor ouvindo na porta 3000');
 });
