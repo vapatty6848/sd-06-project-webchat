@@ -14,6 +14,7 @@ const io = require('socket.io')(http, {
 });
 
 const messagesDB = require('./models/messagesModel');
+const usersDB = require('./models/usersModel');
 
 app.use(cors());
 app.set('view engine', 'ejs');
@@ -52,7 +53,8 @@ io.on('connection', (socket) => {
 
 app.get('/', async (_req, res) => {
   const messages = await messagesDB.getAllMessages();
-  return res.render('home', { messages });
+  const users = await usersDB.getAllUsers();
+  return res.render('home', { messages, users });
 });
 
 http.listen(PORT, () => console.log('App listening on PORT %s', PORT));
