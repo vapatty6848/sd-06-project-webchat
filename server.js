@@ -22,14 +22,26 @@ app.get('/', (req, res) => {
 });
 
 const now = new Date();
-const fullData = String(dateFormat(now, 'dd-mm-yyyy HH:mm:ss TT'));
+const fullData = String(dateFormat(now, 'dd-mm-yyyy HH:MM:ss TT'));
 console.log(fullData);
 
+/* const users = []; */
 io.on('connection', (socket) => {
   console.log('Novo usuário conectado');
 
-  socket.on('message', ({ nickname, chatMessage }) => 
-    io.emit('message', `${fullData} - ${nickname} ${chatMessage}`));
+  socket.on('message', ({ nickname, chatMessage }) => {
+    console.log(nickname);
+    io.emit('message', `${fullData} - ${nickname}: ${chatMessage}`)
+  });
+
+  /* socket.emit('newUser', (user) => {
+    const nickname = String(socket.id).slice(0, 16);
+    users.push(nickname);
+  }); */
+
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} se desconectou!`);
+  });
 });
 
 httpServer.listen(3000, () => {
