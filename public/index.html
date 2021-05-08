@@ -90,7 +90,7 @@
     let nickname = generateRandomNickname(16);
     const socket = io();
     socket.emit('setNickname', nickname);
-    
+
      // GET NICKNAME INPUT VALUE AND SEND IT
     const inputNickname = document.querySelector('#nicknameInput');
     const buttonNickname = document.querySelector('#nickname-button');
@@ -100,7 +100,7 @@
       nickname = inputNickname.value;
 
       const messageObj = { oldNickname, nickname };
-  
+
       socket.emit('nicknameChange', messageObj);
       inputNickname.value = ''
       return false;
@@ -111,17 +111,17 @@
     const inputMessage = document.querySelector('#mensagemInput')
     form.addEventListener('submit', (e) =>{
       e.preventDefault();
-  
+
       const messageObj = {
         chatMessage: inputMessage.value,
         nickname
       };
-  
+
       socket.emit('message', messageObj);
       inputMessage.value = ''
       return false;
     })
-  
+
     // CREATE AN MESSAGE ON THE MESSAGE LIST
     const createMessage = (message, type = '') => {
       const messagesUl = document.querySelector('#mensagens');
@@ -139,12 +139,19 @@
       li.setAttribute('data-testid', type === 'welcome' ? 'online-user' : 'message');
       messagesUl.appendChild(li);
     }
-  
+
     // LISTEN EVENT ola AND CREATE A MESSAGE IF EVENT IS ACHIEVED
     socket.on('welcome', (message) => createMessage(message, 'welcome'));
-  
+
     // LISTEN EVENT mes AND CREATE A MESSAGE IF EVENT IS ACHIEVED
     // IT IS NOT RECEIVED BY THE SENDER
     socket.on('message', (message) => createMessage(message));
+
+    socket.on('recover', (messages) => {
+      messages.forEach(message => {
+        createMessage(message)
+      });
+    });
+
   </script>
 </html>
