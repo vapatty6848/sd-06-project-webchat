@@ -1,7 +1,7 @@
 const connection = require('./connection');
 
 const getAll = async () => {
-    connection().then((db) => db.collection('messages').find().toArray());
+    return await connection().then((db) => db.collection('messages').find().toArray());
 };
 
 const create = async ({ message }) => connection()

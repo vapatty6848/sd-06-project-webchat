@@ -46,7 +46,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
-    <ul id="mensagens"></ul>
+    <ul id="mensagens">
+      <% messages.forEach((message) => { %>
+        <li><%= message.message %></li>
+      <% }) %>
+    </ul>
     <form action="">
       <input id="mensagemInput" autocomplete="off" /><button>Send</button>
     </form>
@@ -66,7 +70,7 @@
         li.innerText = message;
         messagesUl.appendChild(li);
       }
-			socket.on('messageData', ( mensagem ) => createMessage(mensagem));
+			socket.on('message', ( mensagem ) => createMessage(mensagem));
     </script>
   </body>
 </html>
