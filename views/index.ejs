@@ -48,11 +48,12 @@
   <body>
     <ul id="mensagens">
       <% messages.forEach((message) => { %>
-        <li><%= message.message %></li>
+        <li data-testid="message"><%= message.timestamp %> - <%= message.nickname %>: <%= message.message %></li>
       <% }) %>
     </ul>
     <form action="">
-      <input id="mensagemInput" autocomplete="off" /><button>Send</button>
+      <input id="mensagemInput" data-testid="message-box" autocomplete="off" />
+      <button data-testid="send-button">Send</button>
     </form>
 		<script>
 			const socket = io();

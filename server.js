@@ -23,7 +23,7 @@ app.use(express.json());
 const sendToMongo = (message) => {
   fetch('http://localhost:3000/', {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify(message),
     headers: { 'Content-type': 'application/json' },
     });
 };
@@ -32,7 +32,11 @@ io.on('connection', (socket) => {
   console.log('Conectado');
   socket.on('message', (message) => {
     console.log('Mensagem enviada');
-    sendToMongo(`${formatDate()} - ${message.nickname}: ${message.chatMessage}`);
+    sendToMongo({ 
+      message: `${message.chatMessage}`,
+      nickname: `${message.nickname}`,
+      timestamp: `${formatDate()}`,
+    });
     io.emit('message', `${formatDate()} - ${message.nickname}: ${message.chatMessage}`);
   });
   socket.on('disconnect', () => {
