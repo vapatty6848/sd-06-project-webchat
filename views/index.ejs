@@ -52,13 +52,13 @@
       <% }) %>
     </ul>
     <form action="">
-      <input id="mensagemInput" data-testid="message-box" autocomplete="off" />
+      <input id="message-box" data-testid="message-box" autocomplete="off" />
       <button data-testid="send-button">Send</button>
     </form>
 		<script>
 			const socket = io();
 			const form = document.querySelector('form')
-			const inputMessage = document.querySelector('#mensagemInput')
+			const inputMessage = document.querySelector('#message-box')
 			form.addEventListener('submit', (e) =>{
 					e.preventDefault();
 					socket.emit('message', { chatMessage: inputMessage.value, nickname: 'Joel' });
