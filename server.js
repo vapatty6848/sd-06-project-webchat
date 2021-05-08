@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
 
   socket.on('message', ({ nickname, chatMessage }) => {
     console.log(nickname);
-    io.emit('message', `${fullData} - ${nickname}: ${chatMessage}`)
+    io.emit('message', `${fullData} - ${nickname}: ${chatMessage}`);
   });
 
   /* socket.emit('newUser', (user) => {
