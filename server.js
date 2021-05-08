@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const httpServer = require('http').createServer(app);
 const dateFormat = require('dateformat');
+const messageModel = require('./models/messageModel');
 
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
@@ -21,6 +22,10 @@ app.get('/', (req, res) => {
   res.render('home');
 });
 
+app.get('/', (req, res) => {
+  res.status(200).render('home.ejs', messageModel.getAllMessages);
+});
+
 const now = new Date();
 const fullData = String(dateFormat(now, 'dd-mm-yyyy HH:MM:ss TT'));
 console.log(fullData);
@@ -29,15 +34,15 @@ console.log(fullData);
 io.on('connection', (socket) => {
   console.log('Novo usuário conectado');
 
-  socket.on('message', ({ nickname, chatMessage }) => {
+  socket.on('message', async ({ nickname, chatMessage }) => {
     console.log(nickname);
     io.emit('message', `${fullData} - ${nickname}: ${chatMessage}`);
+    messageModel.createHistory(nickname, chatMessage, fullData);
   });
 
-  /* socket.emit('newUser', (user) => {
-    const nickname = String(socket.id).slice(0, 16);
-    users.push(nickname);
-  }); */
+  socket.on('newUser', (nickname) => {
+    socket.emit('nickname', nickname);
+  });
 
   socket.on('disconnect', () => {
     console.log(`${socket.id} se desconectou!`);

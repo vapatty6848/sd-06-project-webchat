@@ -11,6 +11,8 @@
   <h1>Web Chato Messages</h1>
   <p id="myUser" data-testid="online-user"></p>
 
+  <p id="history"></p>
+
   <input id="changeNickname" type="text" data-testid="nickname-box">
   <button id="btnName" data-testid="nickname-button">Change nickname</button>
 
@@ -20,32 +22,40 @@
 </body>
 <script>
   const socket = io();
+  let nickname;
 
-  window.addEventListener('load', () => {
-    const nickname = String(socket.id).slice(0, 16);
-    document.querySelector('#myUser').innerHTML = nickname;
-    return true;
+  socket.on('connect', () => {
+    nickname = String(socket.id).slice(0, 16);
+    socket.emit('newUser', nickname);
   });
+
+  const renderNick = (nick) => {
+    document.querySelector('#myUser').innerHTML = nick;
+    return;
+  }
+
+  socket.on('nickname', (nick) => renderNick(nick));
+
 
   document.querySelector('#btnSend').addEventListener('click', (e) => {
     const nickname = document.querySelector('#myUser').innerHTML;
     const message = document.querySelector('#inputMessage').value;
     document.querySelector('#inputMessage').value = '';
     socket.emit('message', { nickname: nickname, chatMessage: message });
-  })
+  });
 
   document.querySelector('#btnName').addEventListener('click', (e) => {
     const newNickname = document.querySelector('#changeNickname').value;
     document.querySelector('#myUser').innerHTML = newNickname;
     document.querySelector('#changeNickname').value = '';
-  })
+  });
 
   socket.on('message', (message) => {
     const messageLi = document.createElement('li');
     messageLi.innerHTML = message;
     messageLi.setAttribute('data-testid', 'message');
     document.querySelector('#messagesList').appendChild(messageLi);
-  })
+  });
  
 </script>
 </html>
