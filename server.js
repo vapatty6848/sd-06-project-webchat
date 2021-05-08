@@ -1,4 +1,6 @@
-const app = require('express')();
+const express = require('express');
+
+const app = express();
 
 const http = require('http').createServer(app);
 
@@ -15,10 +17,6 @@ const { formatDate } = require('./functions');
 
 app.use(cors());
 
-app.get('/', (_req, res) => {
-  res.sendFile(`${__dirname}/index.html`);
-});
-
 io.on('connection', (socket) => {
   console.log('Conectado');
   socket.on('message', (message) => {
@@ -29,6 +27,15 @@ io.on('connection', (socket) => {
     console.log('Desconectado');
   });
 });
+const webChatController = require('./controllers/webChatController');
+
+app.set('view engine', 'ejs');
+
+app.set('views', './views');
+
+app.use(express.static(`${__dirname}/views/`));
+
+app.use('/', webChatController);
 
 http.listen(3000, () => {
   console.log('Servidor ouvindo na porta 3000');
