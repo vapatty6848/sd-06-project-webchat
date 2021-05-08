@@ -175,6 +175,9 @@
 
     <div class="div-chatMessages">
       <ul id="chatMessages">
+        <% messages.forEach(({ timestamp, nickname, message }) => { %>
+          <li data-testid="message"><%= timestamp %> - <%= nickname %>: <%= message %></li>
+        <% }) %>
       </ul>
     </div>
 
@@ -211,6 +214,7 @@
           users.setAttribute('data-testid', 'online-user');
           users.setAttribute('id', user.id);
           users.innerHTML = user.nickname;
+          console.log('users', users)
           document.querySelector('#listUsers').appendChild(users);
         });
       });
@@ -218,12 +222,19 @@
       document.querySelector('#bttnNickname').addEventListener('click', (e) =>{
         const inputNickname = document.querySelector('#nickname').value;
         sessionStorage.setItem('nick', inputNickname);
-        const id = document.querySelector(`#${socket.id}`)
+        const id = document.querySelector(`#${socket.id}`);
+        console.log('socket', socket.id)
         id.innerHTML = inputNickname;
-        socket.emit('nickname', { id: socket.id, nickname: inputNickname });
+        socket.emit('changeNickname', { id: socket.id, nickname: inputNickname });
       });
 
-      socket.on('nickname', (userList) => {
+      socket.on('changeNickname', (usersList) => {
+        const user = usersList.find((user) => user.id === socket.id);
+        const id = document.querySelector(`#${user.id}`);
+        console.log('user', user)
+        console.log('id', id)
+        console.log('usert', socket.id)
+        id.innerHTML = user.nickname;
       });
 
       document.querySelector('#bttnMessage').addEventListener('click', (e) => {
@@ -241,6 +252,10 @@
         document.querySelector('#chatMessages').appendChild(listMessage);
       });
     
+      socket.on('disconnect', () => {
+        
+      });
+
     </script>
 
   </body>
