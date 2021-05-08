@@ -20,12 +20,11 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(express.static(`${__dirname}/public/`));
 
-const usersList = [];
+let usersList = [];
 
-const findUser = (listNickname, id, nickname) => {
-  const detectUser = listNickname.findIndex((user) => user.id === id);
-  listNickname.splice(detectUser, 1, { id, nickname });
-    return listNickname;
+const findUser = (id, nickname) => {
+  const detectUser = usersList.findIndex((user) => user.id === id);
+  usersList.splice(detectUser, 1, { id, nickname });
 };
 
 const dateAndTime = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
@@ -37,9 +36,8 @@ io.on('connection', (socket) => {
     io.emit('connectedUsers', (usersList));
   });
   socket.on('changeNickname', ({ id, nickname }) => {
-    const userList = findUser(usersList, id, nickname);
-    console.log(userList);
-    io.emit('nickname', (userList));
+    findUser(id, nickname);
+    io.emit('connectedUsers', (usersList));
   });
   socket.on('message', async ({ chatMessage, nickname }) => {
     const newMessage = `${dateAndTime} - ${nickname}: ${chatMessage}`;
@@ -47,13 +45,13 @@ io.on('connection', (socket) => {
     await messagesDB.createMessage({ message: chatMessage, nickname, timestamp: dateAndTime });
   });
   socket.on('disconnect', () => {
-    console.log(`usuário desconectado ${socket.id}`);
+    usersList = usersList.filter(({ id }) => id !== socket.id);
+    io.emit('connectedUsers', (usersList));
   });
 });
 
 app.get('/', async (_req, res) => {
   const messages = await messagesDB.getAllMessages();
-
   return res.render('home', { messages });
 });
 

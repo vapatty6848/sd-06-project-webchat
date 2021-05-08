@@ -209,6 +209,7 @@
       });
 
       socket.on('connectedUsers', (usersList) => {
+        document.querySelector('#listUsers').innerHTML="";
         usersList.forEach((user) => {
           const users = document.createElement('li');
           users.setAttribute('data-testid', 'online-user');
@@ -223,7 +224,6 @@
         const inputNickname = document.querySelector('#nickname').value;
         sessionStorage.setItem('nick', inputNickname);
         const id = document.querySelector(`#${socket.id}`);
-        console.log('socket', socket.id)
         id.innerHTML = inputNickname;
         socket.emit('changeNickname', { id: socket.id, nickname: inputNickname });
       });
@@ -236,7 +236,7 @@
         console.log('usert', socket.id)
         id.innerHTML = user.nickname;
       });
-
+      
       document.querySelector('#bttnMessage').addEventListener('click', (e) => {
         const chatMessage = document.querySelector('#message').value;
         console.log(chatMessage);
@@ -252,9 +252,7 @@
         document.querySelector('#chatMessages').appendChild(listMessage);
       });
     
-      socket.on('disconnect', () => {
-        
-      });
+
 
     </script>
 
