@@ -27,24 +27,53 @@ const prepareMessageAndSave = async (messageObj) => {
     return message;
 };
 
+let onlineUsers = [];
+
+const removeNicknameFromOnlineUsers = (nickname) => {
+  const index = onlineUsers.indexOf(nickname);
+  if (index >= 0) {
+    onlineUsers = [...onlineUsers.slice(0, index), ...onlineUsers.slice(index + 1)];
+  }
+  return onlineUsers;
+};
+
+const changeNicknameOnlineUsers = (oldNickname, newNickname) => {
+  const index = onlineUsers.indexOf(oldNickname);
+  if (index >= 0) {
+    onlineUsers = [...onlineUsers.slice(0, index), newNickname,
+      ...onlineUsers.slice(index + 1)];
+  }
+  return onlineUsers;
+};
+
+const addNicknameOnlineUsers = (nickname) => {
+  onlineUsers.push(nickname);
+  return onlineUsers;
+};
+
 const chat = (http) => {
   const io = socketIo(http, config);
 
   return io.on('connection', (socket) => {
+    let username = '';
     socket.on('setNickname', async (nickname) => {
-      socket.emit('welcome', nickname);
+      username = nickname;
+      io.emit('onlineUsers', addNicknameOnlineUsers(nickname));
       socket.emit('recover', await getMessagesFromDb());
     });
-    
-    // socket.broadcast.emit('newUser', { message: 'New user on chat!' });
-    socket.on('disconnect', () => console.log('Disconnected'));
+
+    socket.on('disconnect', () =>
+      io.emit('onlineUsers', removeNicknameFromOnlineUsers(username)));
 
     socket.on('message', async (messageObj) => {      
       io.emit('message', await prepareMessageAndSave(messageObj));
     });
 
-    socket.on('nicknameChange', () => console.log('Nickname'));
+    socket.on('nicknameChange', (nickname) => {
+      io.emit('onlineUsers', changeNicknameOnlineUsers(username, nickname));
+      username = nickname;
+    });
   });
 };
 
-module.exports = chat;
+module.exports = chat; 
