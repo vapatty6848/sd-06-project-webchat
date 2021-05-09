@@ -11,10 +11,16 @@
   <h1>Web Chato Messages</h1>
   <p id="myUser" data-testid="online-user"></p>
 
-  <p id="history"></p>
-
   <input id="changeNickname" type="text" data-testid="nickname-box">
   <button id="btnName" data-testid="nickname-button">Change nickname</button>
+  <br />
+  <!-- <ul id="history">
+    <% historyMessages.forEach((messages) => {%>
+      <li>
+        <%=`${messages.timestamp} - ${messages.nickname}: ${messages.message} %>
+      </li>
+    <% }) %>
+  </ul> -->
 
   <input id="inputMessage" type="text" data-testid="message-box" />
   <button id="btnSend" data-testid="send-button">SEND</button>

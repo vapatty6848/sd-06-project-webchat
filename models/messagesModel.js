@@ -9,7 +9,6 @@ const createHistory = async (nickname, message, timestamp) => {
 const getAllMessages = async () => {
   const getMessages = await connection()
     .then((db) => db.collection('messages').find().toArray());
-    console.log(getMessages);
   return getMessages;
 };
 

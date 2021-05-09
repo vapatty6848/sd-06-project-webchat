@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 const httpServer = require('http').createServer(app);
 const dateFormat = require('dateformat');
-const messageModel = require('./models/messageModel');
 
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
@@ -12,6 +11,8 @@ const io = require('socket.io')(httpServer, {
     methods: ['GET', 'POST'],
   },
 });
+
+const messagesModel = require('./models/messagesModel');
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
@@ -22,8 +23,9 @@ app.get('/', (req, res) => {
   res.render('home');
 });
 
-app.get('/', (req, res) => {
-  res.status(200).render('home.ejs', messageModel.getAllMessages);
+app.get('/', async (req, res) => {
+  const historyMessages = await messagesModel.getAllMessages();
+  res.render('home.ejs', historyMessages);
 });
 
 const now = new Date();
@@ -37,7 +39,7 @@ io.on('connection', (socket) => {
   socket.on('message', async ({ nickname, chatMessage }) => {
     console.log(nickname);
     io.emit('message', `${fullData} - ${nickname}: ${chatMessage}`);
-    messageModel.createHistory(nickname, chatMessage, fullData);
+    messagesModel.createHistory(nickname, chatMessage, fullData);
   });
 
   socket.on('newUser', (nickname) => {
