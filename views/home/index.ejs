@@ -9,23 +9,106 @@
 </head>
 <body>
   <h1>Hello There</h1>
+  <p>A client just connected to this chat!</p>
+  <p
+    id="clientName"
+    data-testid="online-user"
+  ></p>
   <form action="">
-    <input id="mensagemInput" type='text' /><button type="submit">Send</button>
+    <input
+      id="mensagemInput"
+      type='text'
+      data-testid="message-box"
+    />
+    <button
+      type="button"
+      id="sendMessage"
+      data-testid="send-button"
+    >
+      Send
+    </button>
   </form>
+  <input
+    type="text"
+    id="nickInput"
+    data-testid="nickname-box"
+  />
+  <button
+    type="button"
+    id="changeNick"
+    data-testid="nickname-button"
+  >
+    Change Nick
+  </button>
+  <ul id="messagesList">
+    <% savedMessages.map(({ message, nickname, timestamp }) => { %>
+        <li data-testid="message"><%= `${timestamp} - ${nickname}: ${message}` %></li>
+    <%  }) %>
+  </ul>
+  <p>Lista de clientes conectados: </p>
+  <ul id="userList">
+    <% savedUsers.map(({ nickName }) => { %>
+      <li data-testid="message"><%= `${nickname}` %></li>
+    <%  }) %>
+  </ul>
   <script>
     const socket = io();
-    const form = document.querySelector('form')
-    const inputMessage = document.querySelector('#mensagemInput')
-    form.addEventListener('submit', (e) =>{
+    console.log(socket);
+    const changeNickButton = document.querySelector('#changeNick');
+    const sendMessage = document.querySelector('#sendMessage');
+    const inputMessage = document.querySelector('#mensagemInput');
+    const inputNick = document.querySelector('#nickInput');
+    const clientName = document.querySelector('#clientName');
+    
+    
+    
+    changeNickButton.addEventListener('click', (e) => {
       e.preventDefault();
+      console.log('aqui')
+      nickName = inputNick.value;
+      socket.emit('changeNick', nickName);
+      inputNick.value = '';
+      return 0;
+    });
+
+    sendMessage.addEventListener('click', (e) => {
+      e.preventDefault();
+      let nickName=socket.id.slice(0, 16);
       obj = {
         chatMessage: inputMessage.value,
-        nickname: socket.id,
-      }
+        nickname: nickName,
+      };
       socket.emit('message', obj);
-      inputMessage.value = ''
-      return false;
-    })
+      inputMessage.value = '';
+      return 0;
+    });
+
+    const createMessage = (message) => {
+      const ul = document.querySelector('#messagesList');
+      const li = document.createElement('li');
+      li.innerText = message;
+      li.setAttribute('data-testid', 'message');
+      ul.appendChild(li);
+    };
+
+    const createUser = (userList) => {
+      const ul = document.querySelector('#userList');
+      const newList = [...ul.children];
+      const newListAgain = newList.map((item) => item.innerText);
+      userList.forEach((item) => {
+        if (!newListAgain.includes(item)) {
+          const li = document.createElement('li');
+          li.innerText = item;
+          ul.appendChild(li);
+        }
+      })
+    };
+
+
+    socket.on('message', (message) => createMessage(message));
+    socket.on('name', (name) => clientName.innerText=name.slice(0, 16));
+    socket.emit('list');
+    socket.on('list', (userList) => createUser(userList));
   </script>
 </body>
 </html>
