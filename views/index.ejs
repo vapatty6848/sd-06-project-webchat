@@ -46,29 +46,62 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
   </head>
   <body>
+    <ul id="users">
+    </ul>
+    <input data-testid="nickname-box" id="nickname-box" autocomplete="off" />
+    <button data-testid="nickname-button" id="nickname-button">Send</button>
     <ul id="mensagens">
       <% messages.forEach((message) => { %>
-        <li data-testid="message"><%= message.timestamp %> - <%= message.nickname %>: <%= message.message %></li>
+        <li id="testando" data-testid="message"><%= message.timestamp %> - <%= message.nickname %>: <%= message.message %></li>
       <% }) %>
     </ul>
     <form action="">
-      <input id="message-box" data-testid="message-box" autocomplete="off" />
+      <input data-testid="message-box" id="message-box" autocomplete="off" />
       <button data-testid="send-button">Send</button>
     </form>
 		<script>
 			const socket = io();
 			const form = document.querySelector('form')
 			const inputMessage = document.querySelector('#message-box')
+      const generateNick = (tamanho) => {
+        var letras = 'abcdefghiklmnopqrstuvwxyz';
+        var aleatorio = '';
+        for (var i = 0; i < tamanho; i++) {
+        var rnum = Math.floor(Math.random() * letras.length);
+        aleatorio += letras.substring(rnum, rnum + 1);
+        }
+        return aleatorio;
+      }
+      const usersUl = document.querySelector('#users');
+      const usersLi = document.createElement('li');
+      usersLi.setAttribute('data-testid', 'online-user');
+      usersLi.id = 'usuario';
+      let nickname = generateNick(16);
+      usersLi.innerText = nickname;
+      usersUl.appendChild(usersLi);
+
+      const nickButton = document.querySelector('#nickname-button');
+      const nickBox = document.querySelector('#nickname-box');
+
+      nickButton.addEventListener('click', (e) => {
+        nickname = nickBox.value;
+        nickBox.value = '';
+        const user = document.querySelector('#usuario');
+        user.innerText = nickname;
+      })
+
 			form.addEventListener('submit', (e) =>{
 					e.preventDefault();
-					socket.emit('message', { chatMessage: inputMessage.value, nickname: 'Joel' });
+					socket.emit('message', { chatMessage: inputMessage.value, nickname });
 					inputMessage.value = ''
 					return false;
 			})
+
 			const createMessage = (message) => {
         const messagesUl = document.querySelector('#mensagens');
         const li = document.createElement('li');
         li.innerText = message;
+        li.setAttribute('data-testid', 'message');
         messagesUl.appendChild(li);
       }
 			socket.on('message', ( mensagem ) => createMessage(mensagem));
