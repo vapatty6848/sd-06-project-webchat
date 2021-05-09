@@ -27,11 +27,23 @@ const sendToMongo = (message) => {
     headers: { 'Content-type': 'application/json' },
     });
 };
+let nicknames = [];
+
+const changeUser = (nickname, nick) => {
+  const position = nicknames.findIndex((e) => e === nick);
+  nicknames[position] = nickname;
+  io.emit('user', nicknames);
+};
+
+const newUser = (nickname, socket) => {
+  nicknames.push(nickname);
+  io.emit('user', nicknames);
+  socket.emit('user', nicknames.reverse());
+};
 
 io.on('connection', (socket) => {
-  console.log('Conectado');
+  let nick;
   socket.on('message', (message) => {
-    console.log('Mensagem enviada');
     sendToMongo({ 
       message: `${message.chatMessage}`,
       nickname: `${message.nickname}`,
@@ -40,8 +52,11 @@ io.on('connection', (socket) => {
     io.emit('message', `${formatDate()} - ${message.nickname}: ${message.chatMessage}`);
   });
   socket.on('disconnect', () => {
-    console.log('Desconectado');
+    nicknames = nicknames.filter((e) => e !== nick);
+    io.emit('user', nicknames);
   });
+  socket.on('user', (nickname) => { newUser(nickname, socket); nick = nickname; });
+  socket.on('changeUser', (nickname) => { changeUser(nickname, nick); nick = nickname; });
 });
 const webChatController = require('./controllers/webChatController');
 

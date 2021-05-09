@@ -72,26 +72,34 @@
         }
         return aleatorio;
       }
-      const usersUl = document.querySelector('#users');
-      const usersLi = document.createElement('li');
-      usersLi.setAttribute('data-testid', 'online-user');
-      usersLi.id = 'usuario';
+      const listUser = (nicks) => {
+        const usersUl = document.querySelector('#users');
+        usersUl.innerText = "";
+        nicks.forEach(nick => {
+          const usersLi = document.createElement('li');
+          usersLi.setAttribute('data-testid', 'online-user');
+          usersLi.innerText = nick;
+          usersUl.appendChild(usersLi);
+        });
+      }
+
       let nickname = generateNick(16);
-      usersLi.innerText = nickname;
-      usersUl.appendChild(usersLi);
+
+      socket.emit('user', nickname);
+      socket.on('user', ( nicks ) => listUser(nicks));
 
       const nickButton = document.querySelector('#nickname-button');
       const nickBox = document.querySelector('#nickname-box');
 
       nickButton.addEventListener('click', (e) => {
+        socket.emit('changeUser', nickBox.value);
         nickname = nickBox.value;
         nickBox.value = '';
-        const user = document.querySelector('#usuario');
-        user.innerText = nickname;
       })
 
 			form.addEventListener('submit', (e) =>{
 					e.preventDefault();
+          const user = document.querySelector('#usuario');
 					socket.emit('message', { chatMessage: inputMessage.value, nickname });
 					inputMessage.value = ''
 					return false;
