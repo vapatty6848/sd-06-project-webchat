@@ -89,15 +89,18 @@
         socket.emit('getName', nickname);
       });
 
-      const setOnlineUsers = (users) => {
+      const setOnlineUsers = (users) => {     
         usersUl.innerHTML = '';
-        console.log(users);
-          users.forEach((user) => {
-            const onlineUser = document.createElement('li');
-            onlineUser.setAttribute('data-testid', 'online-user');
-            onlineUser.innerText = user.nickname;
-            usersUl.appendChild(onlineUser);
-          });
+        const owner = users.find((user) => user.id === socket.id);
+        const getIndex = users.indexOf(owner);
+        users.splice(getIndex, 1);
+        users.splice(0, 0, owner);
+        users.forEach((user) => {
+          const onlineUser = document.createElement('li');
+          onlineUser.setAttribute('data-testid', 'online-user');
+          onlineUser.innerText = user.nickname;
+          usersUl.appendChild(onlineUser);
+        });
       };
       
       socket.on('onlineUsers', (users) => setOnlineUsers(users));

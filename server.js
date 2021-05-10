@@ -36,6 +36,7 @@ let onlineUsers = [];
 
 io.on('connection', async (socket) => {
   socket.on('getName', (nickname) => {
+    console.log(onlineUsers);
     onlineUsers.push({ id: socket.id, nickname });
     io.emit('onlineUsers', onlineUsers);
   });
@@ -50,6 +51,7 @@ io.on('connection', async (socket) => {
   socket.on('disconnect', () => {
     const usersLeft = onlineUsers.filter((user) => user.id !== socket.id);
     onlineUsers = usersLeft;
+    console.log(onlineUsers);
     io.emit('onlineUsers', usersLeft);
   });
   
