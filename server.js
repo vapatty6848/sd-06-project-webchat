@@ -21,14 +21,19 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(express.static(`${__dirname}/public/`));
 
-let usersList = [];
+const usersList = [];
 
 const findUser = (id, nickname) => {
   const detectUser = usersList.findIndex((user) => user.id === id);
   usersList.splice(detectUser, 1, { id, nickname });
 };
 
-const dateAndTime = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
+const removeUser = (id) => {
+  const detectUser = usersList.findIndex((user) => user.id === id);
+  usersList.splice(detectUser, 1);
+};
+
+const dateAndTime = () => dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
 
 io.on('connection', (socket) => {
   socket.on('connectedUsers', ({ id, nickname }) => {
@@ -41,14 +46,14 @@ io.on('connection', (socket) => {
     io.emit('connectedUsers', (usersList));
   });
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    const newMessage = `${dateAndTime} - ${nickname}: ${chatMessage}`;
+  socket.on('message', ({ chatMessage, nickname }) => {
+    const newMessage = `${dateAndTime()} - ${nickname}: ${chatMessage}`;
     io.emit('message', newMessage);
-    await messagesDB.createMessage({ message: chatMessage, nickname, timestamp: dateAndTime });
+    messagesDB.createMessage({ message: chatMessage, nickname, timestamp: dateAndTime });
   });
 
   socket.on('disconnect', () => {
-    usersList = usersList.filter(({ id }) => id !== socket.id);
+    removeUser(socket.id);
     io.emit('connectedUsers', (usersList));
   });
 });
