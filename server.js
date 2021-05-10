@@ -31,20 +31,22 @@ const findUser = (id, nickname) => {
 const dateAndTime = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
 
 io.on('connection', (socket) => {
-  console.log(`usuário conectado ${socket.id}`);
   socket.on('connectedUsers', ({ id, nickname }) => {
     usersList.push({ id, nickname });
     io.emit('connectedUsers', (usersList));
   });
+
   socket.on('changeNickname', ({ id, nickname }) => {
     findUser(id, nickname);
     io.emit('connectedUsers', (usersList));
   });
+
   socket.on('message', async ({ chatMessage, nickname }) => {
     const newMessage = `${dateAndTime} - ${nickname}: ${chatMessage}`;
     io.emit('message', newMessage);
     await messagesDB.createMessage({ message: chatMessage, nickname, timestamp: dateAndTime });
   });
+
   socket.on('disconnect', () => {
     usersList = usersList.filter(({ id }) => id !== socket.id);
     io.emit('connectedUsers', (usersList));

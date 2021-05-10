@@ -10,99 +10,137 @@
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <title>Projeto WebChat</title>
     <style>
-      /* body {
+      /* .body {
         background-color: rgb(61, 26, 26);
         font-family: 'Poppins', sans-serif;
       }
 
       .title {
-        color: #ffff;
+        color: white;
         font-size: 25pt;
         text-align: center;
       }
 
       .div-changeNickname-listUsers {
         align-items: center;
-        align-content: center;
-        border-bottom: 2px solid #ffff;
+        border-bottom: 2px solid white;
         display: flex;
-        flex-flow: column wrap;
+        flex-flow: row wrap;
         justify-content: center;
         margin: auto;
       }
 
-      #nickname {
-        border: 2px solid #ffff;
+      .div-changeNickname {
+        align-items: center;
+        display: flex;
+        flex-flow: column wrap;
+        justify-content: center;
+        margin: auto;
+        width: 50%;
+      }
+
+      .nickname {
+        border: 2px solid black;
         border-radius: 10px 0px;
         font-family: 'Poppins', sans-serif;
         font-size: 12pt;
         height: 25px;
+        margin: 5px auto;
         text-align: center;
         width: 250px;
       }
 
-      #nickname:focus {
-        border: 3px solid #ffff;
+      .nickname:focus {
+        border: 5px solid black;
         outline: none !important;
       }
 
-      #bttnNickname {
+      .bttnNickname {
         background-color: black;
         border: none;
         border-radius: 10px 0px;
-        color: #ffff;
+        color: white;
         font-family: 'Poppins', sans-serif;
-        font-size: 14pt;
+        font-size: 12pt;
         font-weight: 900;
         height: 35px;
-        width: 150px;
+        margin: 5px auto;
+        width: 250px;
       }
 
-      #bttnNickname:hover {
+      .bttnNickname:hover {
         background-color: #383838;
         cursor: pointer;
       }
 
-      #listUsers {
-        color: #ffff;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14pt;
-        font-weight: 900;
+      .div-listUsers {
+        align-items: center;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: center;
+        margin: auto;
+        width: 50%;
       }
 
-      .div-chatMessages {
+      .listUsers {
         align-items: center;
-        align-content: flex-start;
         display: flex;
-        flex-flow: column wrap;
-        justify-content: flex-start;
+        flex-flow: row wrap;
+        height: 100px;
+        justify-content: center;
+        list-style-type: none;
         margin: auto;
       }
 
-      .p-message {
-        color: #ffff;
-        font-family: 'Poppins', sans-serif;
-        font-size: 18pt;
-        font-weight: 900;
-        text-align: center;
-      }
-
-      #chatMessages {
-
+      .listUsers li {
+        background-color: white;
         border-radius: 10px 0px;
-        color: #0000;
+        color: black;
         font-family: 'Poppins', sans-serif;
         font-size: 12pt;
         font-weight: 900;
         list-style-type: none;
-        margin: 5px 0px;
-        width: 100%;
+        margin: 5px;
+        padding: 5px 10px;
+      }
+
+      .div-chatMessages {
+        align-items: center;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: center;
+        margin: auto;
+        margin-bottom: 100px;
+      }
+
+      .p-message {
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16pt;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .chatMessages {
+        list-style-type: none;
+      }
+
+      .chatMessages li {
+        background-color: white;
+        border-radius: 10px 0px;
+        color: black;
+        font-family: 'Poppins', sans-serif;
+        font-size: 12pt;
+        font-weight: 900;
+        list-style-type: none;
+        margin: 5px;
+        padding: 5px 10px;
       }
 
       .div-message {
         align-items: center;
-        align-content: center;
-        border-top: 2px solid #ffff;
+        background-color: rgb(61, 26, 26);
+        border-top: 2px solid white;
         bottom: 0px;
         display: flex;
         flex-flow: row nowrap;
@@ -112,26 +150,26 @@
         width: 100%;
       }
 
-      #message {
-        border: 2px solid #ffff;
+      .message {
+        border: 2px solid white;
         border-radius: 10px 0px;
         font-family: 'Poppins', sans-serif;
         font-size: 12pt;
         height: 25px;
-        margin: 10px 0px;
+        margin: 10px 5px;
         width: 70%;
       }
 
-      #message:focus {
-        border: 3px solid #ffff;
+      .message:focus {
+        border: 3px solid black;
         outline: none !important;
       }
 
-      #bttnMessage {
+      .bttnMessage {
         background-color: black;
         border: none;
         border-radius: 10px 0px;
-        color: #ffff;
+        color: white;
         font-family: 'Poppins', sans-serif;
         font-size: 14pt;
         font-weight: 900;
@@ -139,33 +177,38 @@
         width: 150px;
       }
 
-      #bttnMessage:hover {
+      .bttnMessage:hover {
         background-color: #383838;
         cursor: pointer;
       } */
 
     </style>
   </head>
-  <body>
+  <body class="body">
     <h1 class="title">WebChat Trybe</h1>
 
     <div class="div-changeNickname-listUsers">
-      <div>
+      <div class="div-changeNickname">
         <input
           type="text"
           id="nickname"
+          class="nickname"
           data-testid="nickname-box"
           placeholder="Digite o novo nickname"
         />
         <button
           id="bttnNickname"
+          class="bttnNickname"
           data-testid="nickname-button"
         >
           Salvar
         </button>
       </div>
-      <div>
-        <ul id="listUsers">
+      <div class="div-listUsers">
+        <ul
+          id="listUsers"
+          class="listUsers"
+        >
           Usuários Online
         </ul>
       </div>
@@ -174,7 +217,10 @@
     <p class="p-message">Mensagens</p>
 
     <div class="div-chatMessages">
-      <ul id="chatMessages">
+      <ul 
+        id="chatMessages"
+        class="chatMessages"
+      >
         <% messages.forEach(({ timestamp, nickname, message }) => { %>
           <li data-testid="message"><%= timestamp %> - <%= nickname %>: <%= message %></li>
         <% }) %>
@@ -185,11 +231,13 @@
       <input
         type="text"
         id="message"
+        class="message"
         data-testid="message-box"
         placeholder="Digite uma mensagem"
       />
       <button
         id="bttnMessage"
+        class="bttnMessage"
         data-testid="send-button"
       >
         Enviar
@@ -205,33 +253,26 @@
 
       socket.on('connect', () => {
         socket.emit('connectedUsers', ({ id: socket.id, nickname: generateNickname }));
-
       });
 
       socket.on('connectedUsers', (usersList) => {
-        document.querySelector('#listUsers').innerHTML=""
-        usersList.forEach((user) => {
+        document.querySelector('#listUsers').innerHTML="";
+        const userFirst = usersList.find((user) => user.id === socket.id);
+        const otherUsers = usersList.filter((user) => user.id !== socket.id);
+        otherUsers.unshift(userFirst);
+        otherUsers.forEach((user) => {
           const users = document.createElement('li');
           users.setAttribute('data-testid', 'online-user');
           users.setAttribute('id', user.id);
           users.innerHTML = user.nickname;
-          console.log('users', users)
           document.querySelector('#listUsers').appendChild(users);
         });
       });
-
-      // socket.on('disconnect', (usersList) => {
-      //   usersList.filter((user) => {
-      //     ({ id }) => id !== user.id
-      //   });
-      //     console.log('users', users)
-      // });
 
       document.querySelector('#bttnNickname').addEventListener('click', (e) =>{
         const inputNickname = document.querySelector('#nickname').value;
         sessionStorage.setItem('nick', inputNickname);
         const id = document.querySelector(`#${socket.id}`);
-        console.log('socket', socket.id)
         id.innerHTML = inputNickname;
         socket.emit('changeNickname', { id: socket.id, nickname: inputNickname });
       });
@@ -239,16 +280,11 @@
       socket.on('changeNickname', (usersList) => {
         const user = usersList.find((user) => user.id === socket.id);
         const id = document.querySelector(`#${user.id}`);
-        console.log('user', user)
-        console.log('id', id)
-        console.log('usert', socket.id)
         id.innerHTML = user.nickname;
       });
 
-      
       document.querySelector('#bttnMessage').addEventListener('click', (e) => {
         const chatMessage = document.querySelector('#message').value;
-        console.log(chatMessage);
         // Obtém os dados da sessionStorage sessionStorage.getItem('chave') - https://developer.mozilla.org/pt-BR/docs/Web/API/Window/sessionStorage
         const nickname = sessionStorage.getItem('nick');
         socket.emit('message',{ chatMessage, nickname });
@@ -260,8 +296,6 @@
         listMessage.setAttribute('data-testid', 'message');
         document.querySelector('#chatMessages').appendChild(listMessage);
       });
-    
-
 
     </script>
 
