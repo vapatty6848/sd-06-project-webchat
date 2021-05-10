@@ -1,6 +1,7 @@
 const connection = require('./connection');
 
 const saveMsgs = async (messages) => {
+  console.log(messages);
   await connection()
     .then((db) => db.collection('messages').insertOne({ messages }));
 };
@@ -8,7 +9,6 @@ const saveMsgs = async (messages) => {
 const getMsgs = async () => {
   const msg = await connection()
   .then((db) => db.collection('messages').find({}).toArray());
-  // console.log(msg);
   return msg;
 };
 
