@@ -10,8 +10,8 @@ const io = require('socket.io')(http, {
   },
 });
 
-const WebChatController = require('./src/controllers/WebChatController');
-const { saveMessage } = require('./src/models/Messages');
+const WebChatController = require('./controllers/WebChatController');
+const { saveMessage } = require('./models/Messages');
 
 app.use(express.json());
 
