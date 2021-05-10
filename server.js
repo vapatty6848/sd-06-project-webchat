@@ -12,8 +12,8 @@ const io = require('socket.io')(httpServer, {
     },
 });
 
-const Users = require('./models/users');
-const Messages = require('./models/messages');
+const Users = require('./models/Users');
+const Messages = require('./models/Messages');
 
 app.get('/', async (_req, res) => {
     const users = await Users.getAll();
