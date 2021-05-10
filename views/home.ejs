@@ -1,4 +1,105 @@
 <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Chat</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Chat</h1>
+  <label>Como quer ser chamado:
+    <input data-testid="nickname-box" type="text" id="nickname">
+  </label>
+  <button data-testid="nickname-button" id="nickname-btn">Salvar</button>
+  <br>
+  <h2 id='eu'></h2>
+  <h3>Usuários online:</h3>
+  <ul id="users">
+    <li><%=nickname %> </li>
+  </ul>
+    <br>
+    <h3>Mensagens</h3>
+    <ul id="all-messages"></ul>
+    <br>
+    <input type="text" data-testid="message-box" id="message" placeholder="Digite uma nova mensagem aqui">
+  <button data-testid="send-button" id="send-btn">Enviar</button>
+  <script>
+    const nickname = `${Math.random().toString().substr(2, 16)}`;
+    const socket = io('http://localhost:3000');
+    const nickInput = document.querySelector('#nickname');
+    const nickButton = document.querySelector('#nickname-btn');
+    const sendMsgBtn = document.querySelector('#send-btn');
+    const msgText = document.querySelector('#message');
+    window.onload = async () => {
+      socket.on('connect', () => {
+        socket.emit('initialNickname', ({
+          nickname,
+          socketID: socket.id
+        }));
+      });
+      sessionStorage.setItem('nickname', nickname);
+      const messages = await fetch('http://localhost:3000/chat', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then((res) => res.json());
+      const listMessages = document.querySelector("#all-messages");
+      messages.forEach((msg) => {
+        const liMessage = document.createElement('li');
+        liMessage.setAttribute('data-testid', 'message');
+        liMessage.innerText = `${msg.timestamp} ${msg.nickname} ${msg.message}`;
+        listMessages.appendChild(liMessage);
+      });
+    };
+    sendMsgBtn.addEventListener('click', () => {
+      const nickname = sessionStorage.getItem('nickname');
+      socket.emit('message', ({
+        chatMessage: msgText.value,
+        nickname,
+      }));
+      msgText.value = '';
+      return false;
+    });
+    socket.on('message', (message) => {
+      const messageLi = document.createElement('li');
+      messageLi.innerText = message;
+      messageLi.setAttribute('data-testid', 'message')
+      document.querySelector('#all-messages').appendChild(messageLi)
+    })
+    nickButton.addEventListener('click', async () => {
+      sessionStorage.setItem('nickname', nickInput.value);
+      const nicknameStorage = sessionStorage.getItem('nickname');
+      await socket.emit('updateNick', ({
+        nickname: nicknameStorage,
+        socketIdFront: socket.id
+      }));
+      nickInput.value = '';
+      return false;
+    });
+    socket.on('teste', (nicknames) => {
+      const bla = nicknames.find((user) => user.socketID === socket.id)
+      const userNow = document.querySelector("#eu");
+      userNow.setAttribute('data-testid', 'online-user')
+      userNow.innerText = bla.nickname;
+      const listUsers = document.querySelector("#users");
+      listUsers.innerHTML = '';
+      const index = nicknames.findIndex((user) => user.socketID === socket.id);
+      console.log(index, 'indeeex')
+      nicknames.splice(index, 1);
+      nicknames.forEach((user) => {
+        const userLI = document.createElement('li');
+        userLI.setAttribute('data-testid', 'online-user')
+        userLI.innerText = user.nickname;
+        listUsers.appendChild(userLI);
+      });
+    })
+  </script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
 <html>
   <head>
     <title>Socket.IO - trybe</title>
@@ -153,4 +254,4 @@
 
     </script>
   </body>
-</html>
+</html> -->
