@@ -1,7 +1,9 @@
 const moment = require('moment');
 const express = require('express');
+
 const app = express();
 const httpServer = require('http').createServer(app);
+
 const port = process.env.PORT || 3000;
 const cors = require('cors');
 const io = require('socket.io')(httpServer, {
@@ -11,6 +13,7 @@ const io = require('socket.io')(httpServer, {
   },
 });
 const { saveMsg, getAll } = require('./models/Messages');
+
 app.use(cors());
 function userDate() {
   const timeFormated = moment().format('DD-MM-yyyy h:mm:ss A');
