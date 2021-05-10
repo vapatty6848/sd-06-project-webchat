@@ -259,6 +259,7 @@
         document.querySelector('#listUsers').innerHTML="";
         const userFirst = usersList.find((user) => user.id === socket.id);
         const otherUsers = usersList.filter((user) => user.id !== socket.id);
+        // https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift
         otherUsers.unshift(userFirst);
         otherUsers.forEach((user) => {
           const users = document.createElement('li');
@@ -272,7 +273,8 @@
       document.querySelector('#bttnNickname').addEventListener('click', (e) =>{
         const inputNickname = document.querySelector('#nickname').value;
         sessionStorage.setItem('nick', inputNickname);
-        const id = document.querySelector(`#${socket.id}`);
+        const idSocket = `#${socket.id}`;
+        const id = document.querySelector(idSocket);
         id.innerHTML = inputNickname;
         socket.emit('changeNickname', { id: socket.id, nickname: inputNickname });
       });
