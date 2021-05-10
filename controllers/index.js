@@ -1,9 +1,9 @@
-const { Router } = require('express');
+// const { Router } = require('express');
 
-const messageController = new Router();
+// const messageController = new Router();
 
-messageController.post('/', (req, res) => {
+// messageController.post('/', (req, res) => {
 
-});
+// });
 
-module.exports = messageController;
+// module.exports = messageController;
