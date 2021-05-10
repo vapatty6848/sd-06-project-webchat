@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+  <div>
+    <div>
+      <div>
+        <div>
+          <input type="text" data-testid="nickname-box" id="nickname-box" placeholder="Informe seu nickname"/>
+        <button type="button" data-testid="nickname-button" id="nickname-button">
+          Salvar
+        </button>
+        <div>
+          <ul id="online-users">
+            <li>
+              <%= randonUser%>
+            </li>
+            <% users.forEach((user)=> {%>
+              <li>
+                <%= user.nickname %>
+              </li>
+              <% })%>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <ul id="message">
+          <% listAll.forEach((element)=> {%>
+            <li data-testid="message">
+              <%= `${element.times} ${element.nickname} ${element.chatMessage}` %>
+            </li>
+            <% }) %>
+      </div>
+      </ul>
+    </div>
+  </div>
+  <div>
+    <input type="text" data-testid="message-box" id="message-box" placeholder="Digite sua mensagem aqui"/>
+  <button ype="button" data-testid="send-button" id="send-button">
+    Enviar
+  </button>
+  </div>
+  <script>
+    const socket = io('http://localhost:3000');
+    let nickname = '<%= randonUser %>';
+    socket.emit('conectado', nickname)
+    socket.on('updateUsers', (users) => {
+      const listUsers = document.querySelector('#online-users');
+      listUsers.innerHTML = '';
+      const userfind = users.find((user) => user.socketId === socket.id)
+      const usersfilter = users.filter((user) => user.socketId !== socket.id);
+      [userfind, ...usersfilter].forEach((user) => {
+        const userLi = document.createElement('li');
+        userLi.setAttribute('data-testid', 'online-user');
+        userLi.innerHTML = user.nickname;
+        listUsers.appendChild(userLi);
+      });
+    });
+    document.querySelector('#nickname-button').addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box').value;
+      nickname = newNickname;
+      socket.emit('updateNickname', nickname);
+    });
+    socket.on('message', (message) => {
+      const msgLi = document.createElement('li');
+      msgLi.setAttribute('data-testid', 'message');
+      msgLi.innerHTML = message;
+      console.log(message, 'messge linha 102');
+      document.querySelector('#message').appendChild(msgLi);
+    })
+    document.querySelector('#send-button').addEventListener('click', () => {
+      const chatMessage = document.querySelector('#message-box').value;
+      socket.emit('message', { chatMessage, nickname });
+    });
+  </script>
+</body>
+
+</html>
