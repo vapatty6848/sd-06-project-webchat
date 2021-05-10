@@ -19,13 +19,10 @@ app.set('views', './views');
 
 app.use(cors());
 
-app.get('/', (req, res) => {
-  res.render('home');
-});
-
 app.get('/', async (req, res) => {
-  const historyMessages = await messagesModel.getAllMessages();
-  res.render('home.ejs', historyMessages);
+  const history = await messagesModel.getAllMessages();
+  console.log('Cade o history?', history);
+  res.render('home', { history });
 });
 
 const now = new Date();
