@@ -1,0 +1,101 @@
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Document</title>
+    <script src='http://localhost:3000/socket.io/socket.io.js'></script>
+  </head>
+  <body>
+    <h1>Chat do Guga</h1>
+    <h2>
+      Usuário conectado:
+        <spam data-testid="online-user">
+          <%= nickname %>
+        </spam>
+      </h2>
+    <div id="nickname-container">
+      <input
+        id="nickname"
+        data-testid="nickname-box"
+        type="text"
+        name="nickname"
+        placeholder="Digite seu nickname"
+      />
+      <button
+        id="save-nickname"
+        data-testid="nickname-button"
+        type="button"
+      >
+        Salvar
+      </button>
+    </div>
+    <div id="chat-container">
+      <input
+        id="msg"
+        data-testid="message-box"
+        type="text"
+        name="msg"
+        placeholder="Digite sua mensagem"
+      />
+      <button
+        id="send-btn"
+        data-testid="send-button"
+        type="button"
+      >
+        Enviar
+      </button>
+      <div>
+        <ul
+          id="messages"
+        >
+        </ul>
+      </div>
+    </div>
+    <button id='logout-btn'>Sair</button>
+
+    <!-- <script src='./client.js'></script> -->
+    <script>
+      let nickname = '<%= nickname %>';
+      console.log(nickname);
+
+      const socket = window.io('http://localhost:3000/');
+      socket.emit('userConnected', nickname);
+      socket.on('usersConnected', (data) => console.log(data));
+
+      const logoutButton = document.querySelector('#logout-btn');
+      const sendButton = document.querySelector('#send-btn');
+      const messageInput = document.querySelector('#msg');
+      const messageRender = document.querySelector('#messages');
+      const saveNickname = document.querySelector('#save-nickname');
+      const newNickname = document.querySelector('#nickname');
+
+      logoutButton.addEventListener('click', () => {
+        socket.disconnect();
+      });
+
+      saveNickname.addEventListener('click', () => {
+        nickname = newNickname.value;
+      })
+
+      sendButton.addEventListener('click', () => {
+        const chatMessage = messageInput.value;
+        // console.log('entrou', { nickname, chatMessage });
+        socket.emit('message', { nickname, chatMessage });
+      });
+      socket.on('message', (data) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = data;
+        // const dataType = document.createAttribute('data-testid');
+        messageRender.appendChild(li);
+        console.log(data);
+      });
+
+      window.onbeforeunload = () => {
+        socket.disconnect();
+        return false;
+      };
+    </script>
+  </body>
+</html>
