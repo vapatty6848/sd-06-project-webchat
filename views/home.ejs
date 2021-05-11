@@ -1,72 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Página com Socket.io</title>
-  <script src="/socket.io/socket.io.js"></script>
-</head>
-<body>
-  <h1>Página com Socket.io</h1>
-  <ul>users</ul>
-  <ul>mensagens
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>Página com Socket.io</h1>
+    <ul>
+      users
+    </ul>
+    <ul>
+      mensagens
+    </ul>
 
-  </ul>
+    <form>
+      <input type="text" name="nickname" placeholder="nickname" data-testid="nickname-box" />
+      <input
+        type="text"
+        data-testid="message-box"
+        name="message"
+        placeholder="message"
+        id="mensage-input"
+      />
+      <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
+      <button type="button" data-testid="nickname-button" id="nick-btn">Nick Name</button>
+    </form>
+  </body>
+  <script>
+    const socket = io();
 
-  <form>
-    <input
-      type="text"
-      name="nickname"
-      placeholder="nickname"
-      data-testid="nickname-box"
-    />
-    <input
-      type="text"
-      data-testid="message-box"
-      name="message"
-      placeholder="message"
-      id="mensage-input"
-    />
-    <button
-      type="button"
-      data-testid="send-button"
-      id="send-btn"
-    >
-      Enviar
-    </button>
-    <button
-      type="button"
-      data-testid="nickname-button"
-      id="nick-btn"
-    >
-      Nick Name
-    </button>
-  </form>
-</body>
-<script>
-  const socket = io();
+    let nickName = '',
 
-  let nickName = '',
+    const randomNick = () => {
+      const length = 16;
+      const random = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < length; i += 1) {
+        result += random.charAt(Math.floor(Math.random() * random.length));
+      }
+      return result;
+    };
 
-  const randomNick = () => {
-    const length = 16;
-    const random = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i += 1) {
-      result += random.charAt(Math.floor(Math.random() * random.length));
-    }
-    return result;
-  };
+    const nickBtn = document.querySelector('#nick-btn');
+    const sendBtn = document.querySelector('#send-btn');
 
-  const nickBtn = document.querySelector('#nick-btn');
-  const sendBtn = document.querySelector('#send-btn');
-
-  sendBtn.addEventListener('click', () => {
-    const inputMessage = document.querySelector('#mensage-input');
-    socket.emit('message', { chatMessage: inputMessage.value, nickname });
-    inputMessage.value = '';
-    return false;
-  });
-</script>
+    sendBtn.addEventListener('click', () => {
+      const inputMessage = document.querySelector('#mensage-input');
+      socket.emit('message', { chatMessage: inputMessage.value, nickname });
+      inputMessage.value = '';
+      return false;
+    });
+  </script>
 </html>
