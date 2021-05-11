@@ -24,7 +24,7 @@ app.get('/', (_req, res) => {
   res.render('home');
 });
 
-const allUsers = [];
+let allUsers = [];
 
 const addNewUser = ({ socket, nickname }) => {
   allUsers.push({ id: socket.id, nickname });
@@ -51,13 +51,23 @@ const getTime = () => {
 const handleChatMessage = async ({ nickname, chatMessage }) => {
   const timestamp = getTime();
   const result = `${timestamp} ${nickname} ${chatMessage}`;
-  await addMessages({ nickname, chatMessage, timestamp });
+  // await addMessages({ nickname, chatMessage, timestamp });
   io.emit('message', result);
 };
 
 io.on('connection', async (socket) => {
-  console.log('novo usuario conectado');
-  socket.on('newUser', ({ nickname }) => addNewUser({ socket, nickname }));
+  socket.on('newUser', ({ nickname }) => addNewUser({ nickname, socket }));
+
+  socket.on('message', async ({ nickname, chatMessage }) =>
+    handleChatMessage({ nickname, chatMessage }));
+
+    socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
+
+  socket.on('disconnect', () => {
+    const onlineUsers = allUsers.filter((user) => user.id !== socket.id);
+    allUsers = onlineUsers;
+    io.emit('updateOnlineUsers', allUsers);
+  });
 });
 
 httpServer.listen(PORT, () => {
