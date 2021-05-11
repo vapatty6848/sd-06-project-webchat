@@ -31,7 +31,18 @@ const addNewUser = ({ socket, nickname }) => {
   io.emit('updatOnlineUsers', allUsers);
 };
 
+const changeNickname = ({ newNickname, socket }) => {
+  allUsers.map((user) => {
+    if (user.id === socket.id) Object.assign(user, { id: user.id, nickname: newNickname });
+
+    return user;
+  });
+
+  io.emit('updateOnlineUsers', allUsers);
+};
+
 io.on('connection', async (socket) => {
+  console.log('novo usuario conectado');
   socket.on('newUser', ({ nickname }) => addNewUser({ socket, nickname }));
 });
 
