@@ -48,6 +48,13 @@ const getTime = () => {
   return timeFormated;
 };
 
+const handleChatMessage = async ({ nickname, chatMessage }) => {
+  const timestamp = getTime();
+  const result = `${timestamp} ${nickname} ${chatMessage}`;
+  await addMessages({ nickname, chatMessage, timestamp });
+  io.emit('message', result);
+};
+
 io.on('connection', async (socket) => {
   console.log('novo usuario conectado');
   socket.on('newUser', ({ nickname }) => addNewUser({ socket, nickname }));
