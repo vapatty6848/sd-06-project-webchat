@@ -284,7 +284,8 @@
 
       socket.on('changeNickname', (usersList) => {
         const user = usersList.find((user) => user.id === socket.id);
-        const id = document.querySelector(`#${user.id}`);
+        const idSocket = `#${socket.id}`;
+        const id = document.querySelector(idSocket);
         id.innerHTML = user.nickname;
       });
 
