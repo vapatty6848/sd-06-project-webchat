@@ -41,6 +41,13 @@ const changeNickname = ({ newNickname, socket }) => {
   io.emit('updateOnlineUsers', allUsers);
 };
 
+const getTime = () => {
+  const time = new Date();
+  const timeFormated = `${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${time
+    .getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+  return timeFormated;
+};
+
 io.on('connection', async (socket) => {
   console.log('novo usuario conectado');
   socket.on('newUser', ({ nickname }) => addNewUser({ socket, nickname }));
