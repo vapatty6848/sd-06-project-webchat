@@ -47,6 +47,8 @@
 <script>
   const socket = io();
 
+  let nickName = '',
+
   const randomNick = () => {
     const length = 16;
     const random = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -61,7 +63,10 @@
   const sendBtn = document.querySelector('#send-btn');
 
   sendBtn.addEventListener('click', () => {
-    const mensageInput = document.querySelecto('#mensage-input');
+    const inputMessage = document.querySelector('#mensage-input');
+    socket.emit('message', { chatMessage: inputMessage.value, nickname });
+    inputMessage.value = '';
+    return false;
   });
 </script>
 </html>
