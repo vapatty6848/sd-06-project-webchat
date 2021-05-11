@@ -9,11 +9,11 @@
   <body>
     <h1>Chat do Guga</h1>
     <h2>
-      Usuário conectado:
-        <spam data-testid="online-user">
-          <%= nickname %>
-        </spam>
-      </h2>
+      Usuários conectados:
+      <ul id="usuarios-connected">
+        <li id="online-user" data-testid="online-user"></li>
+      </ul>
+    </h2>
     <div id="nickname-container">
       <input
         id="nickname"
@@ -49,6 +49,9 @@
         <ul
           id="messages"
         >
+          <% allMessages.forEach((message) => { %>
+            <li data-testid="message"><%= `${message.timestamp} - ${message.nickname}: ${message.message}` %></li>
+          <% }) %>
         </ul>
       </div>
     </div>
@@ -56,45 +59,68 @@
 
     <!-- <script src='./client.js'></script> -->
     <script>
-      let nickname = '<%= nickname %>';
-      console.log(nickname);
-
       const socket = window.io('http://localhost:3000/');
-      socket.emit('userConnected', nickname);
-      socket.on('usersConnected', (data) => console.log(data));
-
+      let nickname = '<%= nickname %>';
+      const allMessages = '<%= allMessages %>';
+      const onlineUser = () => document.querySelector('#online-user');
       const logoutButton = document.querySelector('#logout-btn');
       const sendButton = document.querySelector('#send-btn');
       const messageInput = document.querySelector('#msg');
       const messageRender = document.querySelector('#messages');
       const saveNickname = document.querySelector('#save-nickname');
-      const newNickname = document.querySelector('#nickname');
+      // const newNickname = document.querySelector('#nickname');
+      const usuarios = document.querySelector('#usuarios-connected');
+      
+      const newNickname = () => document.querySelector('#nickname');
+      
+      const renderNickname = (name) => {
+        onlineUser().innerHTML = name;
+      }
+      renderNickname(nickname);
+
+      socket.emit('userConnected', nickname);
+      socket.on('usersConnected', (data) => {
+        const valores = Object.entries(data);
+        const names = valores.map((item) => item[1]);
+        const myNickname = names.filter((name) => name === nickname);
+        const nameWithoutUser = names.filter((name) => name !== nickname);
+        usuarios.innerHTML = '';
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'online-user');
+        li.innerHTML = myNickname;
+        usuarios.appendChild(li);
+
+        nameWithoutUser.forEach((name) => {
+          const li = document.createElement('li');
+          li.innerHTML = name;
+          li.setAttribute('data-testid', 'online-user');
+          usuarios.appendChild(li);
+        });
+      });
+      socket.on('message', (data) => {
+        const li = document.createElement('li');
+        li.setAttribute('data-testid', 'message');
+        li.innerHTML = data;
+        messageRender.appendChild(li);
+      });
 
       logoutButton.addEventListener('click', () => {
         socket.disconnect();
       });
 
       saveNickname.addEventListener('click', () => {
-        nickname = newNickname.value;
-      })
-
-      sendButton.addEventListener('click', () => {
-        const chatMessage = messageInput.value;
-        // console.log('entrou', { nickname, chatMessage });
-        socket.emit('message', { nickname, chatMessage });
+        nickname = newNickname().value;
+        socket.emit('userConnected', nickname);
       });
-      socket.on('message', (data) => {
-        const li = document.createElement('li');
-        li.setAttribute('data-testid', 'message');
-        li.innerHTML = data;
-        // const dataType = document.createAttribute('data-testid');
-        messageRender.appendChild(li);
-        console.log(data);
+
+      sendButton.addEventListener('click', async () => {
+        const chatMessage = messageInput.value;
+        socket.emit('message', { nickname, chatMessage });
       });
 
       window.onbeforeunload = () => {
         socket.disconnect();
-        return false;
+        // return false;
       };
     </script>
   </body>
