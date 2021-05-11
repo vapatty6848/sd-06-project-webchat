@@ -33,8 +33,6 @@ const removeUser = (id) => {
   usersList.splice(detectUser, 1);
 };
 
-const dateAndTime = () => dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
-
 io.on('connection', (socket) => {
   socket.on('connectedUsers', ({ id, nickname }) => {
     usersList.push({ id, nickname });
@@ -47,7 +45,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('message', ({ chatMessage, nickname }) => {
-    const newMessage = `${dateAndTime()} - ${nickname}: ${chatMessage}`;
+    const dateAndTime = dateFormat(new Date(), 'dd-mm-yyyy h:MM:ss TT');
+    const newMessage = `${dateAndTime} - ${nickname}: ${chatMessage}`;
     io.emit('message', newMessage);
     messagesDB.createMessage({ message: chatMessage, nickname, timestamp: dateAndTime });
   });
