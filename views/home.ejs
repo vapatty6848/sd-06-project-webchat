@@ -9,8 +9,9 @@
 </head>
 <body>
   <h1>Web Chato Messages</h1>
-  <p id="myUser" data-testid="online-user"></p>
-
+  <ul id="online"></ul>
+  <br />
+  <br />
   <input id="changeNickname" type="text" data-testid="nickname-box">
   <button id="btnName" data-testid="nickname-button">Change nickname</button>
   <br />
@@ -40,6 +41,19 @@
 
   socket.on('nickname', (nick) => renderNick(nick));
 
+  socket.on('onlineUsers', (onlineUsers) => {
+    document.querySelector('#online').innerHTML = '';
+    const findUser = onlineUsers.findIndex((user) => user.id === socket.id);
+    const retirado = onlineUsers.splice(findUser, 1);
+    onlineUsers.unshift(retirado[0]);
+    onlineUsers.forEach((user) => {
+      const newOnlineUser = document.createElement('li');
+      newOnlineUser.innerHTML = user.nickname;
+      newOnlineUser.setAttribute('data-testid', 'online-user');
+      newOnlineUser.setAttribute('id', user.id);
+      document.querySelector('#online').appendChild(newOnlineUser);
+    });
+  });
 
   document.querySelector('#btnSend').addEventListener('click', (e) => {
     const nickname = document.querySelector('#myUser').innerHTML;
@@ -50,7 +64,7 @@
 
   document.querySelector('#btnName').addEventListener('click', (e) => {
     const newNickname = document.querySelector('#changeNickname').value;
-    document.querySelector('#myUser').innerHTML = newNickname;
+    socket.emit('changingNickname', newNickname);
     document.querySelector('#changeNickname').value = '';
   });
 

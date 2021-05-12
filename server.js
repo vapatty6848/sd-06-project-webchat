@@ -21,30 +21,32 @@ app.use(cors());
 
 app.get('/', async (req, res) => {
   const history = await messagesModel.getAllMessages();
-  console.log('Cade o history?', history);
   res.render('home', { history });
 });
 
 const now = new Date();
 const fullData = String(dateFormat(now, 'dd-mm-yyyy HH:MM:ss TT'));
-console.log(fullData);
 
-/* const users = []; */
+const onlineUsers = [];
+
 io.on('connection', (socket) => {
-  console.log('Novo usuário conectado');
-
   socket.on('message', async ({ nickname, chatMessage }) => {
-    console.log(nickname);
     io.emit('message', `${fullData} - ${nickname}: ${chatMessage}`);
     messagesModel.createHistory(nickname, chatMessage, fullData);
   });
 
   socket.on('newUser', (nickname) => {
-    socket.emit('nickname', nickname);
+    onlineUsers.unshift({ id: socket.id, nickname });
+    io.emit('onlineUsers', onlineUsers);
+  });
+
+  socket.on('changingNickname', (nickname) => {
+    const findUser = onlineUsers.findIndex((user) => user.id === socket.id);
+    onlineUsers.splice(findUser, 1, { id: socket.id, nickname });
+    io.emit('onlineUsers', onlineUsers);
   });
 
   socket.on('disconnect', () => {
-    console.log(`${socket.id} se desconectou!`);
   });
 });
 
