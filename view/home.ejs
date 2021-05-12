@@ -1,17 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SokectIO - teste</title>
-  <script src="/socket.io/socket.io.js"></script>
-</head>
-<body>
-  <h1>Webchat</h1>
-
-  <script>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocketIO - teste</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment-with-locales.min.js"></script>
+  </head>
+  <body>
+    <h1>Bate Papo - WebChat</h1>
+    <h2>Insira o seu nickname aqui</h2>
+      <input
+        data-testid="nickname-box"
+        type="text"
+        id="txtNickname"
+        placeholder="Insira seu nome aqui"
+      >
+    <button id="sendNickname" data-testid="nickname-button">
+      Entrar
+    </button>
+    
+    <h2>Estão na sala neste momento:</h2>
+      <ul id="nickNameDisplay"></ul>
+    
+    <h2>Chat:</h2>
+      <ul id='chatDisplay'>
+        <% messages.forEach((message) => { %>
+          <li  data-testid="message"> <%=message %></li>
+        <% }); %> 
+      </ul>
+    
+      <input
+        data-testid="message-box"
+        type="text"
+        id="txtMessage"
+        placeholder="Digite uma nova mensagem aqui"
+      >
+    <button id="sendMessage" data-testid="send-button">
+      Send
+    </button>
+    
+    <script>
+    
     const socket = io();
-  </script>
-</body>
+    const randomNickName = () => {
+      const types = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let randomTypes = '';
+      for (let i = 0; i < 16; i += 1) {
+          randomTypes += types[Math.floor(Math.random() * types.length)];
+      }
+      return randomTypes;
+    };
+    let nickname; 
+    
+    socket.on('connect', () => {
+      nickname = randomNickName();
+      socket.emit('connectedUser', nickname);
+    });
+  
+    const sendMessageButton = document.querySelector('#sendMessage');
+    const txtMessage = document.querySelector('#txtMessage');
+    const chatDisplay = document.querySelector('#chatDisplay');
+    const sendNickNameButton = document.querySelector('#sendNickname');   
+    const txtNickname = document.querySelector('#txtNickname');
+    const nickNameDisplay =  document.querySelector('#nickNameDisplay');
+    const renderDisplay = (message) => {
+      const messageItem = document.createElement('li');
+      messageItem.innerHTML = message;
+      messageItem.setAttribute('data-testid','message');
+      chatDisplay.append(messageItem);
+    }
+
+    sendNickNameButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      nickname = txtNickname.value;
+      socket.emit('updatedUser', nickname);
+    });
+
+    sendMessageButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      const chatMessage = txtMessage.value;
+      socket.emit('message', {chatMessage, nickname});
+      txtMessage.value = '';
+      txtNickname.value = '';
+    });
+    
+    socket.on('message', (message) => {
+      renderDisplay(message);
+    });
+    
+    socket.on('nickname', (arrayUsers) => {
+      nickNameDisplay.innerHTML = '';
+      const actualUser = arrayUsers.find((user) => user.id === socket.id);
+      const allActualUsers = arrayUsers.indexOf(actualUser);
+      arrayUsers.splice(allActualUsers, 1);
+      arrayUsers.splice(0, 0, actualUser);
+      arrayUsers.forEach( user => {
+        const nickNameItem = document.createElement('li');
+        nickNameItem.innerText = user.nickname;
+        nickNameItem.setAttribute('data-testid', 'online-user');
+        nickNameDisplay.appendChild(nickNameItem); 
+      });
+    });
+
+    </script>
+  </body>
 </html>
