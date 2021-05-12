@@ -29,6 +29,11 @@ const fullData = String(dateFormat(now, 'dd-mm-yyyy HH:MM:ss TT'));
 
 const onlineUsers = [];
 
+const userDisconnect = (socket, users) => {
+  const userDiconnect = users.findIndex((user) => user.id === socket.id);
+  onlineUsers.splice(userDiconnect, 1);
+};
+
 io.on('connection', (socket) => {
   socket.on('message', async ({ nickname, chatMessage }) => {
     io.emit('message', `${fullData} - ${nickname}: ${chatMessage}`);
@@ -47,6 +52,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    userDisconnect(socket, onlineUsers);
+    io.emit('onlineUsers', onlineUsers);
   });
 });
 

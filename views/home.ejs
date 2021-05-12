@@ -46,6 +46,8 @@
     const findUser = onlineUsers.findIndex((user) => user.id === socket.id);
     const retirado = onlineUsers.splice(findUser, 1);
     onlineUsers.unshift(retirado[0]);
+    const meuUsuário = onlineUsers.filter((user) => user.id === socket.id)
+    sessionStorage.setItem('meuNick', meuUsuário[0].nickname);
     onlineUsers.forEach((user) => {
       const newOnlineUser = document.createElement('li');
       newOnlineUser.innerHTML = user.nickname;
@@ -56,10 +58,10 @@
   });
 
   document.querySelector('#btnSend').addEventListener('click', (e) => {
-    const nickname = document.querySelector('#myUser').innerHTML;
+    const nickname = sessionStorage.getItem('meuNick');
     const message = document.querySelector('#inputMessage').value;
-    document.querySelector('#inputMessage').value = '';
     socket.emit('message', { nickname: nickname, chatMessage: message });
+    document.querySelector('#inputMessage').value = '';
   });
 
   document.querySelector('#btnName').addEventListener('click', (e) => {
