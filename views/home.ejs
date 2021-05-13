@@ -9,7 +9,7 @@
   </head>
   <body>
     <h1>Página com Socket.io</h1>
-    <ul>
+    <ul id="users-list">
       users
     </ul>
     <ul>
@@ -33,6 +33,14 @@
     const socket = io();
 
     let nickName = '',
+
+    const addUser = (nickname) => {
+      const listUsers = document.querySelector('#users-list');
+      const li = document.querySelector('li');
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = nickname;
+      listUsers.appendChild(li);
+    }
 
     const randomNick = () => {
       const length = 16;
