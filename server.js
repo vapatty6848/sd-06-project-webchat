@@ -58,10 +58,10 @@ const getRandom = () => {
   return result;
 };
 
-const handleChatMessage = async ({ nickname, chatMessage }) => {
+const handleChatMessage = ({ nickname, chatMessage }) => {
   const timeMessage = timestamp();
 
-  await createMessage({ nickname, chatMessage, timeMessage });
+  createMessage({ nickname, chatMessage, timeMessage });
   const response = `${timeMessage} ${nickname} ${chatMessage}`;
   io.emit('message', response);
 };
