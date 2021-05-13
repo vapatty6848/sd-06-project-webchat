@@ -8,17 +8,55 @@
   <title>Document</title>
 </head>
 <body>
-  <h1>El chat del Magic</h1>
-  <ul id="msg-screen"></ul>
-  <form>
-    <input type="text" id="input-msg" data-testid="message-box"/>
-    <button type="button" id="send-msg" data-testid="send-button">Enviar</button>
-  </form>
+  <header style="text-align: center;">
+    <h1>El chat del Magic</h1>
+  </header>
+  <main>
+    <div style="display: flex;">
+      <div>
+        <h3 data-testid="online-user" id="username"></h3>
+        <form>
+          <input type="text" id="input-name" data-testid="nickname-box"/>
+          <button type="button" id="change-name" data-testid="nickname-button">Mudar de nome</button>
+        </form>
+        <ul id="users-screen"></ul>
+      </div>
+      <ul id="msg-screen"></ul>
+    </div>
+    <form style="position: fixed; bottom: 10px; margin: 30px; width: 90%;">
+      <input
+        type="text"
+        id="input-msg"
+        data-testid="message-box"
+        style="width: 80%;"
+      />
+      <button type="button" id="send-msg" data-testid="send-button">Enviar</button>
+    </form>
+  </main>
   <script>
     const socket = io();
-    socket.on('randomName', ({ userName }) => localStorage.setItem('nickname', userName));
-    console.log('name in localStorage: ', localStorage.getItem('nickname'));
     const msgInput = document.querySelector('#input-msg');
+    const nameInput = document.querySelector('#input-name');
+    const username = document.querySelector('#username');
+    const printMessage = ({ timestamp, message, nickname }) => {
+      const formattedMessage = `${timestamp} - ${nickname}: ${message}`;
+      const msgScreen = document.querySelector('#msg-screen');
+      const newMsg = document.createElement('li');
+      newMsg.innerText = formattedMessage;
+      newMsg.setAttribute('data-testid', 'message')
+      msgScreen.appendChild(newMsg);
+    };
+
+    const changeName = (newName) => {
+      localStorage.setItem('nickname', newName);
+      username.innerText = `${newName}`;
+    }
+
+    socket.on('randomName', ({ userName }) => changeName(userName));
+    console.log('name in localStorage: ', localStorage.getItem('nickname'));
+    socket.on('historyMessages', ({ history }) => {
+      history.forEach((message) => printMessage(message));
+    });
 
     document.querySelector('#send-msg').addEventListener('click', (e) => {
       e.preventDefault();
@@ -30,14 +68,13 @@
       msgInput.value = '';
     });
 
-    const printMessage = (message) => {
-      const msgScreen = document.querySelector('#msg-screen');
-      const newMsg = document.createElement('li');
-      newMsg.innerText = message;
-      msgScreen.appendChild(newMsg);
-    };
+    document.querySelector('#change-name').addEventListener('click', (e) => {
+      e.preventDefault();
+      const newUserName = nameInput.value;
+      changeName(newUserName);
+    });
 
-    socket.on('serverMessage', (message) => {
+    socket.on('message', (message) => {
       printMessage(message);
     } )
   </script>
