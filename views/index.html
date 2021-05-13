@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <div id="chat" action="">
+      <input id="input-message" autocomplete="off" /><button id="send-button">Send</button>
+      <input id="input-nickname" autocomplete="off" /><button>Ok</button>
+    </div>
+    <script>
+        const socket = io();
+
+        const send = document.getElementById('send-button');
+        const inputMessage = document.getElementById('input-message');
+        const inputNickname = document.getElementById('input-nickname');
+        
+        
+        send.addEventListener('click', () => {
+             if (inputMessage) {
+              console.log(inputMessage)
+              console.log(inputNickname)
+              socket.emit('message', { chatMessage: inputMessage.value, nickname: inputNickname.value });
+              inputMessage.value = '';
+            }
+        })
+        
+        const createMessage = (message) => {
+            const messageUl = document.getElementById('messages');
+            const li = document.createElement('li');
+            li.innerText = message
+            messageUl.appendChild(li);
+        }
+
+        socket.on('message', (message) => createMessage(message))
+
+      </script>
+  </body>
+</html>
