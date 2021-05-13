@@ -29,13 +29,26 @@ app.get('/', async (_req, res) => {
   res.render('index', { renderMessages });
 });
 
-let allUsers = [];
+const allUsers = [];
+
+const getRandom = () => {
+  const length = 16;
+  const characteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    result += characteres.charAt(Math.floor(Math.random() * characteres.length));
+  }
+  return result;
+};
 
 const addNewUser = (socket) => {
   const newUser = {
     id: socket.id,
+    nickname: getRandom(),
   };
   allUsers.push(newUser);
+
+  return [newUser];
 };
 
 const handleNickname = (newNickname, socket) => {
@@ -48,16 +61,6 @@ const timestamp = () => {
   return time;
 };
 
-const getRandom = () => {
-  const length = 16;
-  const characteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i += 1) {
-    result += characteres.charAt(Math.floor(Math.random() * characteres.length));
-  }
-  return result;
-};
-
 const handleChatMessage = ({ nickname, chatMessage }) => {
   const timeMessage = timestamp();
 
@@ -67,10 +70,10 @@ const handleChatMessage = ({ nickname, chatMessage }) => {
 };
 
 io.on('connection', (socket) => {
-  console.log(`User ${socket.id} connected.`);
-  addNewUser(socket);
-  console.log(allUsers);
-  io.emit('connected', getRandom());
+  const newUser = addNewUser(socket);
+  io.emit('connected', newUser);
+  const onlineUsers = allUsers.filter((user) => user.id !== newUser[0].id);
+  socket.emit('usersOnline', onlineUsers);
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     handleChatMessage({ nickname, chatMessage });
@@ -78,15 +81,14 @@ io.on('connection', (socket) => {
 
   socket.on('changeNickname', ({ newNickname }) => {
     handleNickname(newNickname, socket);
-    io.emit('changeNickname', allUsers);
+    const userChanged = allUsers.find((user) => user.id === socket.id);
+    io.emit('changeNickname', userChanged);
   });
 
   socket.on('disconnect', () => {
-    console.log(`User ${socket.id} has disconnected.`);
-    delete allUsers[socket.id];
-    const newAllUsers = allUsers.filter((user) => user.id !== socket.id);
-    allUsers = newAllUsers;
-    io.emit('updateOnlineUsers', allUsers);
+    const userDisconnected = allUsers.findIndex((user) => user.id === socket.id);
+    allUsers.splice(userDisconnected, 1);
+    io.emit('updateOnlineUsers', socket.id);
   });
 });
 

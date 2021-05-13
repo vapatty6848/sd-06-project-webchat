@@ -40,12 +40,15 @@
 
     const dataTestId = 'data-testid';
 
-    const addUser = (nickname) => {
-      const listUsers = document.querySelector('#allUsers');
-      const li = document.createElement('li');
-      li.setAttribute(dataTestId, 'online-user');
-      li.innerText = nickname;
-      listUsers.appendChild(li);
+    const addUser = (users) => {
+      users.forEach((user) => {
+        const listUsers = document.querySelector('#allUsers');
+        const li = document.createElement('li');
+        li.setAttribute(dataTestId, 'online-user');
+        li.setAttribute('id', user.id);
+        li.innerText = user.nickname;
+        listUsers.appendChild(li);
+      });
     }
 
     const createMessage = (response) => {
@@ -65,16 +68,18 @@
       return false;
     });
 
-    const changeNickname = (users) => {
+    const changeNickname = (userChanged) => {
       const allUsers = document.querySelector('#allUsers');
-      
-      allUsers.innerHTML = '';
-      users.forEach((user) => {
-        const li = document.createElement('li');
-        li.setAttribute(dataTestId, 'online-user');
-        li.innerText = user.nickname;
-        allUsers.appendChild(li);
-      });
+      const editedUser = document.getElementById(userChanged.id);
+
+      editedUser.innerHTML = userChanged.nickname;
+    }
+
+    const removeUser = (id) => {
+      const userDisconnected = document.getElementById(id);
+      const allUsers = document.querySelector('#allUsers');
+
+      allUsers.removeChild(userDisconnected);
     }
     
     const buttonNickname = document.querySelector('#nickname-save');
@@ -86,31 +91,19 @@
       newNickname.value = '';
     });
 
-    socket.on('connected', (nicknameGenerated, msgs) => {
-      nickname = nicknameGenerated;
-      addUser(nicknameGenerated);
-      console.log('as mensagens tao aqui', msgs);  
+    socket.on('connected', (newUser) => {
+      nickname = newUser[0].nickname;
+      addUser(newUser); 
+    });
+
+    socket.on('usersOnline', (onlineUsers) => {
+      addUser(onlineUsers);
     });
     
     socket.on('message', (message) => createMessage(message));
     
     socket.on('changeNickname', (user) => changeNickname(user));
 
-    socket.on('updateOnlineUsers', (allUsers) => {
-      const notOnline =  allUsers.filter((user) => user.id !== socket.id);
-      const firstUser = allUsers.filter((user) => user.id === socket.id);
-      const concatUsers = firstUser.concat(notOnline);
-      nickname = allUsers.find((user) => user.id === socket.id).nickname
-      
-      const onlineUsersList = document.querySelector('#allUsers');
-      while (onlineUsersList.firstChild) onlineUsersList.removeChild(onlineUsersList.lastChild);
-      concatUsers.forEach((user) => {
-        const renderUsers = document.createElement('li');
-    
-        renderUsers.setAttribute(dataTestId, 'online-user');
-        renderUsers.innerHTML = user.nickname;
-        document.querySelector('#allUsers').appendChild(renderUsers);
-      });
-    });
+    socket.on('updateOnlineUsers', (id) => removeUser(id));
   </script>
 </html>
