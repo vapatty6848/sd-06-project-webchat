@@ -38,8 +38,15 @@
     const msgInput = document.querySelector('#input-msg');
     const nameInput = document.querySelector('#input-name');
     const username = document.querySelector('#username');
-    const printMessage = ({ timestamp, message, nickname }) => {
-      const formattedMessage = `${timestamp} - ${nickname}: ${message}`;
+    const printMessage = (chatMessage) => {
+      const msgScreen = document.querySelector('#msg-screen');
+      const newMsg = document.createElement('li');
+      newMsg.innerText = chatMessage;
+      newMsg.setAttribute('data-testid', 'message')
+      msgScreen.appendChild(newMsg);
+    };
+    const printHistoryMessage = ({ timestamp, chatMessage, nickname }) => {
+      const formattedMessage = `${timestamp} - ${nickname}: ${chatMessage}`;
       const msgScreen = document.querySelector('#msg-screen');
       const newMsg = document.createElement('li');
       newMsg.innerText = formattedMessage;
@@ -53,17 +60,14 @@
     }
 
     socket.on('randomName', ({ userName }) => changeName(userName));
-    console.log('name in localStorage: ', localStorage.getItem('nickname'));
     socket.on('historyMessages', ({ history }) => {
-      history.forEach((message) => printMessage(message));
+      history.forEach((message) => printHistoryMessage(message));
     });
 
     document.querySelector('#send-msg').addEventListener('click', (e) => {
       e.preventDefault();
       const chatMessage = msgInput.value;
       const nickname = localStorage.getItem('nickname');
-      console.log('sending with nickname: ', nickname);
-      console.log('sending with message: ', chatMessage);
       socket.emit('message', { nickname, chatMessage });
       msgInput.value = '';
     });

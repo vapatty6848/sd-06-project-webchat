@@ -19,13 +19,13 @@ app.use(cors());
 
 io.on('connection', async (socket) => {
   const history = await Messages.getAll();
-  console.log('history messgaes from socket: ', history);
   socket.emit('historyMessages', { history });
   socket.emit('randomName', { userName: randomize('Aa0', 16) });
   socket.on('message', (message) => {
     const { chatMessage, nickname } = message;
     const formattedDate = format(new Date(), 'dd-MM-yyyy KK:mm:ss aa');
-    io.emit('message', { timestamp: formattedDate, message: chatMessage, nickname });
+    const formattedMessage = `${formattedDate} - ${nickname}: ${chatMessage}`;
+    io.emit('message', formattedMessage);
     Messages.create({ message: chatMessage, nickname, timestamp: formattedDate });
   });
 });
