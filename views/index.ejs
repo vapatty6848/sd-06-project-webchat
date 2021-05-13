@@ -50,7 +50,7 @@
 </head>
 
 <body>
-  <h1>WebChat</h1>
+  <h1>WebChatO</h1>
   <br>
   <h2>Digite seu Nickname</h2>
   <input type="text" id="nicknameInput" data-testid="nickname-box">
@@ -126,9 +126,13 @@
     renderMessages(message);
     });
 
-    socket.on('nickname', (users) => {
+    socket.on('nickname', (clients) => {
       listNickname.innerHTML = '';
-      users.forEach((user) => {
+      const now = clients.find((user) => user.id === socket.id);
+    const nowIndex = clients.indexOf(now);
+    clients.splice(nowIndex, 1);
+    clients.splice(0, 0, now);
+      clients.forEach((user) => {
         const userLi = document.createElement('li');
         userLi.setAttribute('data-testid', 'online-user');
         userLi.innerText = user.nickname;

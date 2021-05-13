@@ -56,9 +56,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Usuário ${socket.id} desconectado`);
-    const exit = clients.find((user) => user.id === socket.id);
-    const index = clients.indexOf(exit);
-    clients = clients.splice(index, 1); 
+    const online = clients.filter((user) => user.id !== socket.id);
+    clients = online;
+    io.emit('nickname', clients);
   });
 });
 
