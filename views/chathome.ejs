@@ -45,8 +45,8 @@
       newMsg.setAttribute('data-testid', 'message')
       msgScreen.appendChild(newMsg);
     };
-    const printHistoryMessage = ({ timestamp, chatMessage, nickname }) => {
-      const formattedMessage = `${timestamp} - ${nickname}: ${chatMessage}`;
+    const printHistoryMessage = ({ timestamp, message, nickname }) => {
+      const formattedMessage = `${timestamp} - ${nickname}: ${message}`;
       const msgScreen = document.querySelector('#msg-screen');
       const newMsg = document.createElement('li');
       newMsg.innerText = formattedMessage;
