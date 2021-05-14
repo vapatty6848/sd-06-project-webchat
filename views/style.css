@@ -1,5 +1,5 @@
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 	font-family: Verdana, Geneva, Tahoma, sans-serif;
 	margin: 0;
 	padding: 0;
@@ -14,7 +14,7 @@ h1 {
 }
 
 .container {
-	align-content: center;
+  align-content: center;
   display: flex;
   height: 100%;
   justify-content: center;
@@ -41,7 +41,7 @@ h1 {
 
 .list-messages {
   background-color: darkmagenta;
-  height: 100%; 
+  height: 100%;
 }
 
 .right-side {
@@ -75,7 +75,7 @@ input {
 }
 
 button {
-  background-color: DodgerBlue;
+  background-color: dodgerblue;
   color: white;
   padding: 6px 0;
 }
