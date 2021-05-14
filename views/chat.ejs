@@ -7,23 +7,50 @@
   <title>Milho verde</title>
 </head>
 <body>
-  <ul id="mensagens"></ul>
-  <form class="msgForm">
+  <!-- <form>
+    <input type="text" id="nameInput" /><button>Salvar</button>
+  </form> -->
+  <div style="background-color: blueviolet;">
+    <ul id="usuarios"></ul>
+  </div>
+  <div style="background-color: aqua;">
+    <ul id="mensagens"></ul>
+  </div>
+  <form action="" class="msgForm">
     <input class="msgInput" autocomplete="off" /><button>Send</button>
   </form>
 </body>
-<script src="/socket.io/socket.io.js"></script>
+<script src="socket.io/socket.io.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
 <script>
   const socket = io();
-  const form = document.querySelector('.msgForm');
+
+  const form = document.querySelector('form');
   const msgInput = document.querySelector('.msgInput');
   form.addEventListener('submit', (e) => {
-    console.log('entrou aqui no evento sem disparar submissão');
     e.preventDefault();
-    // socket.emit('mensagem', msgInput.value);
+    console.log('entrou aqui no evento sem disparar submissão', `e essa é a mensagem: ${msgInput.value}`, socket.id);
+    const message = { nickname: socket.id, chatMessage: msgInput.value }
+    socket.emit('message', message);
     msgInput.value = '';
     return false;
   });
-  </script>
+  const createMenssage = (message) => {
+    const messagesUl = document.querySelector('#mensagens');
+    const li = document.createElement('li');
+    li.innerText = message;
+    messagesUl.appendChild(li);
+  };
+  const createListUser = (user) => {
+    const userUl = document.querySelector('#usuarios');
+    const li = document.createElement('li');
+    li.innerText = user;
+    userUl.appendChild(li);
+  };
+  socket.on('message', (message) => {
+    createMenssage(message);
+    // createListUser(user);
+  });
+</script>
 
 </html>

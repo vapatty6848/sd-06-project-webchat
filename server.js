@@ -1,30 +1,33 @@
 require('dotenv').config();
+const moment = require('moment');
 const express = require('express');
+const path = require('path'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const http = require('http').createServer(app);
-const cors = require('cors');
+const io = require('socket.io')(http);
 
-const io = require('socket.io')(http, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
-});
-
-app.use(cors());
+app.use(express.static(path.join(__dirname, 'views ')));
 app.set('view engine', 'ejs');
 app.set('views', './views');
-// app.use(express.static(`${__dirname}/public/`));
 
 io.on('connection', async (socket) => {
-  console.log('conectado');
+  socket.join('room1');
+  console.log(`${socket.id} conectado`);
   socket.on('disconnect', () => {
     console.log('Desconectado');
   });
+ const date = moment().format('DD-MM-yyyy HH:mm:ss');
+ console.log(date);
+ 
+  socket.on('message', (message) => {
+    io.emit('message', `${date} ${message.nickname} Diz: ${message.chatMessage}`);
+  });
+
+  socket.emit('message', `${socket.nickname} acabou de entrar`);
 });
 
-app.get('/', (req, res) => res.render(`${__dirname}/views/chat.ejs`));
+app.get('/', (_req, res) => res.render('chat.ejs'));
 http.listen(PORT, () => console.log(`webchat port: ${PORT}!`));
