@@ -13,20 +13,26 @@ app.use(express.static(path.join(__dirname, 'views ')));
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+const users = [];
+
 io.on('connection', async (socket) => {
-  socket.join('room1');
   console.log(`${socket.id} conectado`);
   socket.on('disconnect', () => {
     console.log('Desconectado');
   });
- const date = moment().format('DD-MM-yyyy HH:mm:ss');
- console.log(date);
+  const date = moment().format('DD-MM-yyyy HH:mm:ss');
+  console.log(date);
  
   socket.on('message', (message) => {
     io.emit('message', `${date} ${message.nickname} Diz: ${message.chatMessage}`);
   });
-
-  socket.emit('message', `${socket.nickname} acabou de entrar`);
+  socket.on('user', () => {
+    const nickname = socket.id;
+    const user = { nickname, id: socket.id };
+    users.push(user);
+    io.emit('nickUser', users);
+  });
+  io.emit('user', `${socket.id} acabou de entrar`);
 });
 
 app.get('/', (_req, res) => res.render('chat.ejs'));

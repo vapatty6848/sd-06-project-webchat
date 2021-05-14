@@ -30,7 +30,7 @@
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     console.log('entrou aqui no evento sem disparar submissão', `e essa é a mensagem: ${msgInput.value}`, socket.id);
-    const message = { nickname: socket.id, chatMessage: msgInput.value }
+    const message = { nickname: socket.id.slice(0,16), chatMessage: msgInput.value }
     socket.emit('message', message);
     msgInput.value = '';
     return false;
@@ -41,15 +41,27 @@
     li.innerText = message;
     messagesUl.appendChild(li);
   };
-  const createListUser = (user) => {
+  const createListUser = (users) => {
+    console.log(users, socket.id);
     const userUl = document.querySelector('#usuarios');
-    const li = document.createElement('li');
-    li.innerText = user;
-    userUl.appendChild(li);
+    userUl.innerHTML = '';
+    const lastUser = users.find((user) => user.id === socket.id);
+    let newUsers = users.filter((user) => user.id !== socket.id);
+    newUsers = [lastUser, ...newUsers];
+    console.log('ultimos usuarios', lastUser, 'novos', newUsers);
+    newUsers.forEach(user => {
+      const li = document.createElement('li');
+      li.innerText = user.nickname;
+      userUl.appendChild(li);
+    });
   };
   socket.on('message', (message) => {
     createMenssage(message);
     // createListUser(user);
+  });
+  socket.emit('user');
+  socket.on('nickUser', (users) => {
+    createListUser(users)
   });
 </script>
 
