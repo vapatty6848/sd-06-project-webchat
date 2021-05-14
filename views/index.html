@@ -47,11 +47,13 @@
           const absurdo = 'abcdefghijklmnopqrstuvwxyz0123456789'
           const user = []
           for (i = 1; i < 17; i++) {
-            let numberRandom = Math.floor(Math.random() * 37)
+            let numberRandom = Math.floor(Math.random() * 36)
+            console.log(numberRandom)
             user.push(absurdo[numberRandom])
           }
           sessionStorage.setItem('user', user.join(''))
           rendernickName(user.join(''))
+          console.log(user.join(''))
         }
 
         function rendernickName(nickName) {
