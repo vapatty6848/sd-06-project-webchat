@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <style>
+        * {
+  box-sizing: border-box;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  background-color: #1abc9c;
+  color: white;
+  font-size: 4em;
+  padding: 30px;
+  text-align: center;
+}
+
+.container {
+  align-content: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+}
+
+.content {
+  background-color: pink;
+  border-radius: 4px;
+  display: flex;
+  height: 90%;
+  margin: 30px;
+  max-height: 600px;
+  max-width: 600px;
+  padding: 20px;
+  width: 100%;
+}
+
+.list-people {
+  background-color: aqua;
+  height: 400px;
+  padding: 4px;
+  width: 30%;
+}
+
+.list-messages {
+  background-color: darkmagenta;
+  height: 100%;
+}
+
+.right-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 70%;
+}
+
+.send-message {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+textarea {
+  resize: none;
+  width: 100%;
+}
+
+input {
+  width: 100%;
+}
+
+.ul-messages {
+  list-style-type: none;
+  margin: 3px;
+  padding: 3px;
+  width: 100%;
+}
+
+button {
+  background-color: dodgerblue;
+  color: white;
+  padding: 6px 0;
+}
+
+button:hover {
+  background-color: royalblue;
+}
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+  </head>
+  <body>
+    <header><h1>Webchat</h1></header>
+    <main>
+      <div class="container">
+        <div class="content">
+          <div class="list-people">
+            <input id="input-nickname" data-testid="nickname-box"/>
+            <button id="btn-nickname" data-testid="nickname-button">OK</button>
+            <ul id="ul-users"></ul>
+          </div>
+          <div class="right-side">
+            <div class="list-messages">
+              <ul id="messages" class="ul-messages">
+                <% formatedMessages.forEach((message) => { %>
+                  <li data-testid="message"><%= message %></li>
+                <% }) %>
+              </ul>
+            </div>
+            <div class="send-message">
+              <input
+                id="input-message"
+                
+                placeholder="Digite sua mensagem!"
+                data-testid="message-box"
+              />
+              <!-- </textarea> -->
+              <button id="send-button" data-testid="send-button">Send</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+    <script>
+        const socket = io();
+        window.onload = handleNickName;
+
+        const send = document.getElementById('send-button');
+        const inputMessage = document.getElementById('input-message');
+        const inputNickname = document.getElementById('input-nickname');
+        const saveNickName = document.getElementById('btn-nickname')
+
+        function generateNickName() {
+          const absurdo = 'abcdefghijklmnopqrstuvwxyz0123456789'
+          const user = []
+          for (i = 1; i < 17; i++) {
+            let numberRandom = Math.floor(Math.random() * 36)
+            console.log(numberRandom)
+            user.push(absurdo[numberRandom])
+          }
+          sessionStorage.setItem('user', user.join(''))
+          rendernickName(user.join(''))
+          console.log(user.join(''))
+        }
+
+        function rendernickName(nickName) {
+          const usersUl = document.getElementById('ul-users')
+          const userLi = document.createElement('li');
+          userLi.innerText = nickName
+          userLi.setAttribute('data-testid','online-user')
+          usersUl.appendChild(userLi)
+          // usersUl.removeChild(usersUl.childNodes[0])
+          // usersUl.appendChild(userLi)
+        }
+
+        function handleNickName() {
+          const userInStorage = sessionStorage.getItem('user')
+          if (!userInStorage) {
+            generateNickName()
+          }
+          rendernickName(userInStorage)
+
+          return false
+        }
+   
+        saveNickName.addEventListener('click', () => {
+          if (inputNickname.value) {
+            sessionStorage.setItem('user', inputNickname.value)
+            console.log(inputNickname.value)
+            rendernickName(inputNickname.value)
+          }
+        })
+
+        send.addEventListener('click', () => {
+             if (inputMessage) {
+              socket.emit('message', { chatMessage: inputMessage.value, nickname: inputNickname.value });
+              inputMessage.value = '';
+            }
+        })
+        
+        const createMessage = (message) => {
+            const messageUl = document.getElementById('messages');
+            const li = document.createElement('li');
+            li.innerText = message
+            li.setAttribute("data-testid","message")
+            messageUl.appendChild(li);
+        }
+
+        socket.on('message', (message) => createMessage(message))
+
+      </script>
+  </body>
+</html>

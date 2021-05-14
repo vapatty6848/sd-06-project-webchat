@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 
 const app = express();
 const server = require('http').createServer(app);
@@ -13,19 +12,14 @@ const io = require('socket.io')(server, {
 });
 
 const Model = require('./models/Messages');
+const messageController = require('./controllers/messagesController');
 
 const PORT = 3000;
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'views')));
-app.set(express.static(path.join(__dirname, 'views')));
-app.engine('html', require('ejs').renderFile);
-
-app.set('view engine', 'html');
-
-app.get('/', (_req, res) => {
-    res.status(200).sendFile('index.html');
-});
+app.set('view engine', 'ejs');
+app.set('views', './views');
+app.use('/', messageController);
 
   const enviaMensagem = async (chatMessage, nickname) => {
     const date = new Date().toLocaleString().replace(/\//g, '-');
