@@ -12,7 +12,7 @@
     <ul id="users-list">
       users
     </ul>
-    <ul>
+    <ul id="message-body">
       mensagens
     </ul>
 
@@ -25,8 +25,20 @@
         placeholder="message"
         id="mensage-input"
       />
-      <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
-      <button type="button" data-testid="nickname-button" id="nick-btn">Nick Name</button>
+      <button
+        type="button"
+        data-testid="send-button"
+        id="send-btn"
+      >
+        Enviar
+      </button>
+      <button
+        type="button"
+        data-testid="nickname-button"
+        id="nick-btn"
+      >
+        Nick Name
+      </button>
     </form>
   </body>
   <script>
@@ -61,5 +73,15 @@
       inputMessage.value = '';
       return false;
     });
+
+    const createMessage = (response) => {
+      const allMessages = document.querySelector('#message-body');
+      const li = document.createElement('li');
+      li.setAttribute('data-testid', 'message');
+      li.innerText = response;
+      allMessages.appendChild(li);
+    };
+
+    socket.on('message', createMessage(message));
   </script>
 </html>
