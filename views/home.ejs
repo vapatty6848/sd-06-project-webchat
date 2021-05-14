@@ -56,7 +56,6 @@
     const sendBtn = document.querySelector('#send-btn');
 
     sendBtn.addEventListener('click', () => {
-      console.log('clicou');
       const inputMessage = document.querySelector('#message-input');
       socket.emit('message', { chatMessage: inputMessage.value, nickname });
       inputMessage.value = '';
@@ -72,5 +71,10 @@
     };
 
     socket.on('message', (message) => createMessage(message));
+
+    socket.on('connect', () => {
+      nickname = randomNick();
+      socket.emit('newUser', { nickname });
+    });
   </script>
 </html>
