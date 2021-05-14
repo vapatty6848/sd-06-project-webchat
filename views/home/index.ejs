@@ -99,8 +99,8 @@
     }
 
     const listUpdate = (listOfNicknames) => {
-      listOfNicknames.forEach((nickname) => {
-        const li = document.querySelector(`#${nickname}`);
+      listOfNicknames.forEach(({ nickname }) => {
+        const li = document.getElementById(`${nickname}`);
         if (!li) addUser(nickname);
       })
     }

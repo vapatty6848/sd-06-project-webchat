@@ -27,7 +27,7 @@ const date = `${now.getDate()}-${(now.getMonth() + 1)}-${now.getFullYear()}`;
 const time = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
 const socketOnDisconnect = (socket) => {
-  socket.on('disconnect', async () => {
+  socket.on('disconnect', () => {
     users.forEach((user) => {
       if (user.id === socket.id) {
         io.emit('removeUser', user.nickname);
@@ -44,23 +44,23 @@ const socketOnMessage = (socket) => {
         user.nickname = nickname;
       }
     });
-    users.forEach(async (user) => {
+    users.forEach((user) => {
       if (user.id === socket.id) {
         io.emit('message', `${date} ${time} - ${user.nickname}: ${chatMessage}`);
-        await saveMessage(chatMessage, user.nickname, `${date} ${time}`);
+        saveMessage(chatMessage, user.nickname, `${date} ${time}`);
       }
     });
   });
 };
 
 io.on('connection', async (socket) => {
-  users.push({ id: socket.id, nickname: socket.id.slice(0, 16)});
+  users.push({ id: socket.id, nickname: socket.id.slice(0, 16) });
   io.emit('name', socket.id);
   users.forEach((user) => {
     if (user.id === socket.id) io.emit('addUser', user.nickname);
   });
-  const listOfNicknames = users.map((user) => user.nickname);
-  io.emit('listUpdate', listOfNicknames);
+  // const listOfNicknames = users.map((user) => user.nickname);
+  io.emit('listUpdate', users);
   socketOnDisconnect(socket);
   socketOnMessage(socket);
   socket.on('changeNick', (nickname) => {
@@ -76,7 +76,6 @@ io.on('connection', async (socket) => {
 
 app.get('/', async (req, res) => {
   const savedMessages = await getMessages();
-  // const savedUsers = await getUsers();
   res.render('home/index', { savedMessages });
 });
 
