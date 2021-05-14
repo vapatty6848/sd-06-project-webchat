@@ -18,33 +18,21 @@
 
     <form>
       <input type="text" name="nickname" placeholder="nickname" data-testid="nickname-box" />
+      <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
       <input
         type="text"
         data-testid="message-box"
         name="message"
         placeholder="message"
-        id="mensage-input"
+        id="message-input"
       />
-      <button
-        type="button"
-        data-testid="send-button"
-        id="send-btn"
-      >
-        Enviar
-      </button>
-      <button
-        type="button"
-        data-testid="nickname-button"
-        id="nick-btn"
-      >
-        Nick Name
-      </button>
+      <button type="button" data-testid="nickname-button" id="nick-btn">Nick Name</button>
     </form>
   </body>
   <script>
     const socket = io();
 
-    let nickName = '',
+    let nickName = '';
 
     const addUser = (nickname) => {
       const listUsers = document.querySelector('#users-list');
@@ -52,7 +40,7 @@
       li.setAttribute('data-testid', 'online-user');
       li.innerText = nickname;
       listUsers.appendChild(li);
-    }
+    };
 
     const randomNick = () => {
       const length = 16;
@@ -68,7 +56,8 @@
     const sendBtn = document.querySelector('#send-btn');
 
     sendBtn.addEventListener('click', () => {
-      const inputMessage = document.querySelector('#mensage-input');
+      console.log('clicou');
+      const inputMessage = document.querySelector('#message-input');
       socket.emit('message', { chatMessage: inputMessage.value, nickname });
       inputMessage.value = '';
       return false;
@@ -82,6 +71,6 @@
       allMessages.appendChild(li);
     };
 
-    socket.on('message', createMessage(message));
+    socket.on('message', (message) => createMessage(message));
   </script>
 </html>
