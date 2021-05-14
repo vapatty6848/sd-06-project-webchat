@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebChato Project</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+</head>
+<body>
+  <h1>Web Chato Messages</h1>
+  <ul id="online"></ul>
+  <br />
+  <br />
+  <input id="changeNickname" type="text" data-testid="nickname-box">
+  <button id="btnName" data-testid="nickname-button">Change nickname</button>
+  <br />
+  <ul id="history">
+    <% history.map((message) => { %>
+      <li data-testid="message"><%= `${message.timestamp} - ${message.nickname}: ${message.message}` %></li>
+   <% }) %>
+  </ul>
+
+  <input id="inputMessage" type="text" data-testid="message-box" />
+  <button id="btnSend" data-testid="send-button">SEND</button>
+  <ul id="messagesList"></ul>
+</body>
+<script>
+  const socket = io();
+  let nickname;
+  socket.on('connect', () => {
+    nickname = String(socket.id).slice(0, 16);
+    socket.emit('newUser', nickname);
+  });
+  const renderNick = (nick) => {
+    document.querySelector('#myUser').innerHTML = nick;
+    return;
+  }
+  socket.on('nickname', (nick) => renderNick(nick));
+  socket.on('onlineUsers', (onlineUsers) => {
+    document.querySelector('#online').innerHTML = '';
+    const findUser = onlineUsers.findIndex((user) => user.id === socket.id);
+    const retirado = onlineUsers.splice(findUser, 1);
+    onlineUsers.unshift(retirado[0]);
+    const meuUsuário = onlineUsers.filter((user) => user.id === socket.id)
+    sessionStorage.setItem('meuNick', meuUsuário[0].nickname);
+    onlineUsers.forEach((user) => {
+      const newOnlineUser = document.createElement('li');
+      newOnlineUser.innerHTML = user.nickname;
+      newOnlineUser.setAttribute('data-testid', 'online-user');
+      newOnlineUser.setAttribute('id', user.id);
+      document.querySelector('#online').appendChild(newOnlineUser);
+    });
+  });
+  document.querySelector('#btnSend').addEventListener('click', (e) => {
+    const nickname = sessionStorage.getItem('meuNick');
+    const message = document.querySelector('#inputMessage').value;
+    socket.emit('message', { nickname: nickname, chatMessage: message });
+    document.querySelector('#inputMessage').value = '';
+  });
+  document.querySelector('#btnName').addEventListener('click', (e) => {
+    const newNickname = document.querySelector('#changeNickname').value;
+    socket.emit('changingNickname', newNickname);
+    document.querySelector('#changeNickname').value = '';
+  });
+  socket.on('message', (message) => {
+    const messageLi = document.createElement('li');
+    messageLi.innerHTML = message;
+    messageLi.setAttribute('data-testid', 'message');
+    document.querySelector('#messagesList').appendChild(messageLi);
+  });
+ 
+</script>
+</html>
