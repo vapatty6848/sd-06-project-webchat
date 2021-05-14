@@ -12,7 +12,7 @@
   <p>A client just connected to this chat!</p>
   <p
     id="clientName"
-    data-testid="online-user"
+    data-testid="onlin-user"
   ></p>
   <form action="">
     <input
@@ -47,24 +47,18 @@
   </ul>
   <p>Lista de clientes conectados: </p>
   <ul id="userList">
-    <% savedUsers.map(({ nickName }) => { %>
-      <li data-testid="message"><%= `${nickname}` %></li>
-    <%  }) %>
   </ul>
   <script>
     const socket = io();
-    console.log(socket);
     const changeNickButton = document.querySelector('#changeNick');
     const sendMessage = document.querySelector('#sendMessage');
     const inputMessage = document.querySelector('#mensagemInput');
     const inputNick = document.querySelector('#nickInput');
     const clientName = document.querySelector('#clientName');
-    
-    
+    const ul = document.querySelector('#userList');
     
     changeNickButton.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('aqui')
       nickName = inputNick.value;
       socket.emit('changeNick', nickName);
       inputNick.value = '';
@@ -91,24 +85,31 @@
       ul.appendChild(li);
     };
 
-    const createUser = (userList) => {
-      const ul = document.querySelector('#userList');
-      const newList = [...ul.children];
-      const newListAgain = newList.map((item) => item.innerText);
-      userList.forEach((item) => {
-        if (!newListAgain.includes(item)) {
-          const li = document.createElement('li');
-          li.innerText = item;
-          ul.appendChild(li);
-        }
-      })
-    };
+    const removeUser = (nickname) => {
+      const li = document.getElementById(`${nickname}`);
+      if (li) li.parentNode.removeChild(li);
+    }
 
+    const addUser = (nickname) => {
+      const li = document.createElement('li');
+      li.innerText = nickname;
+      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute('id', `${nickname}`);
+      ul.appendChild(li);
+    }
+
+    const listUpdate = (listOfNicknames) => {
+      listOfNicknames.forEach((nickname) => {
+        const li = document.querySelector(`#${nickname}`);
+        if (!li) addUser(nickname);
+      })
+    }
 
     socket.on('message', (message) => createMessage(message));
     socket.on('name', (name) => clientName.innerText=name.slice(0, 16));
-    socket.emit('list');
-    socket.on('list', (userList) => createUser(userList));
+    socket.on('removeUser', (nickname) => removeUser(nickname));
+    socket.on('addUser', (nickname) => addUser(nickname));
+    socket.on('listUpdate', (listOfNicknames) => listUpdate(listOfNicknames));
   </script>
 </body>
 </html>
