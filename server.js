@@ -12,6 +12,8 @@ const io = require('socket.io')(server, {
   },
 });
 
+const Model = require('./models/Messages');
+
 const PORT = 3000;
 
 app.use(cors());
@@ -26,9 +28,10 @@ app.get('/', (_req, res) => {
 });
 
   const enviaMensagem = async (chatMessage, nickname) => {
-          const date = new Date().toLocaleString().replace(/\//g, '-');
-          const message = `${date} ${chatMessage}: ${nickname}`;
-          io.emit('message', message);
+    const date = new Date().toLocaleString().replace(/\//g, '-');
+    const message = `${date} ${chatMessage}: ${nickname}`;
+    await Model.saveMessage(chatMessage, nickname, date);
+    io.emit('message', message);
   };
 
   io.on('connection', (socket) => {
