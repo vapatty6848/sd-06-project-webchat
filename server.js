@@ -21,15 +21,20 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use('/', messageController);
 
-  const enviaMensagem = async (chatMessage, nickname) => {
+  const sendMessage = async (chatMessage, nickname) => {
     const date = new Date().toLocaleString().replace(/\//g, '-');
     const message = `${date} ${chatMessage}: ${nickname}`;
     await Model.saveMessage(chatMessage, nickname, date);
     io.emit('message', message);
   };
 
+  const userConnected = async (socket, nickname) => {
+    console.log(nickname);
+  };
+
   io.on('connection', (socket) => {
-    socket.on('message', ({ chatMessage, nickname }) => enviaMensagem(chatMessage, nickname));
+    socket.on('message', ({ chatMessage, nickname }) => sendMessage(chatMessage, nickname));
+    socket.on('user', (nickname) => console.log(nickname))
   });
 
 server.listen(PORT, () => {
