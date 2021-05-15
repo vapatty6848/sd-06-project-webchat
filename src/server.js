@@ -30,13 +30,18 @@ io.on('connection', (socket) => {
     users.push({ id: socket.id, nickname });
     io.emit('updateUsers', users);
   });
+  socket.on('newNickname', (nickname) => {
+    const userIndex = users.findIndex((user) => user.id.includes(socket.id));
+    users[userIndex].nickname = nickname;
+    io.emit('updateUsers', users);
+  });
   socket.on('message', async ({ nickname, chatMessage }) => {
     const messageSent = await messagesController.create({ nickname, chatMessage });
     io.emit('message', formatMessage(messageSent));
   });
-  socket.on('newNickname', (nickname) => {
+  socket.on('disconnect', () => {
     const userIndex = users.findIndex((user) => user.id === socket.id);
-    users[userIndex].nickname = nickname;
+    users.splice(userIndex, 1);
     io.emit('updateUsers', users);
   });
 });
