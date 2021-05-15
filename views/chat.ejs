@@ -7,9 +7,9 @@
   <title>Milho verde</title>
 </head>
 <body>
-  <!-- <form>
-    <input type="text" id="nameInput" /><button>Salvar</button>
-  </form> -->
+  <form action="" class="nickFrom">
+    <input data-testid="nickname-box" type="text" id="nameInput" /><button data-testid="nickname-button">Salvar</button>
+  </form>
   <div style="background-color: blueviolet;">
     <ul id="usuarios"></ul>
   </div>
@@ -17,30 +17,50 @@
     <ul id="mensagens"></ul>
   </div>
   <form action="" class="msgForm">
-    <input class="msgInput" autocomplete="off" /><button>Send</button>
+    <input data-testid="message-box" class="msgInput" autocomplete="off" /><button data-testid="send-button">Send</button>
   </form>
 </body>
 <script src="socket.io/socket.io.js"></script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script> -->
 <script>
   const socket = io();
-
-  const form = document.querySelector('form');
+  let newNick;
+  // form de nickname
+  // const formNick = document.querySelector('.nickForm');
+  const nick = document.querySelector('#nameInput');
+  
+  // form de mensagem
+  const form = document.querySelectorAll('form');
   const msgInput = document.querySelector('.msgInput');
-  form.addEventListener('submit', (e) => {
+  console.log(form);
+  form[0].addEventListener('submit', (e) => {
     e.preventDefault();
+    console.log('este é o nick.value', nick.value);
+    newNick = nick.value;
+    console.log('este é o newNick', newNick);
+    return false;
+  });
+  form[1].addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nickname = socket.id.slice(0,16);
     console.log('entrou aqui no evento sem disparar submissão', `e essa é a mensagem: ${msgInput.value}`, socket.id);
-    const message = { nickname: socket.id.slice(0,16), chatMessage: msgInput.value }
+    const message = { nickname: newNick || socket.id.slice(0,16), chatMessage: msgInput.value }
+    console.log(message.nickname);
     socket.emit('message', message);
     msgInput.value = '';
     return false;
   });
+  // fim form de mensagem
+
+  // função cria mensagem
   const createMenssage = (message) => {
     const messagesUl = document.querySelector('#mensagens');
     const li = document.createElement('li');
+    li.setAttribute('data-testid', 'message');
     li.innerText = message;
     messagesUl.appendChild(li);
   };
+  // função cria lista de usuario
   const createListUser = (users) => {
     console.log(users, socket.id);
     const userUl = document.querySelector('#usuarios');
@@ -51,10 +71,13 @@
     console.log('ultimos usuarios', lastUser, 'novos', newUsers);
     newUsers.forEach(user => {
       const li = document.createElement('li');
+      li.setAttribute('data-testid', 'online-user');
       li.innerText = user.nickname;
       userUl.appendChild(li);
     });
   };
+
+  // sockets
   socket.on('message', (message) => {
     createMenssage(message);
     // createListUser(user);

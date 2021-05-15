@@ -27,7 +27,7 @@ io.on('connection', async (socket) => {
     io.emit('message', `${date} ${message.nickname} Diz: ${message.chatMessage}`);
   });
   socket.on('user', () => {
-    const nickname = socket.id;
+    const nickname = socket.id.slice(0, 16);
     const user = { nickname, id: socket.id };
     users.push(user);
     io.emit('nickUser', users);
