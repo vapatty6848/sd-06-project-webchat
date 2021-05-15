@@ -1,1 +1,1 @@
-// Faça seu código aqui
+require('./src/server');
