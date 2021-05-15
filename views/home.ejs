@@ -118,7 +118,6 @@ button:hover {
                 placeholder="Digite sua mensagem!"
                 data-testid="message-box"
               />
-              <!-- </textarea> -->
               <button id="send-button" data-testid="send-button">Send</button>
             </div>
           </div>
@@ -128,8 +127,11 @@ button:hover {
     </main>
     <script>
         const socket = io();
-        window.onload = handleNickName;
-
+        window.onload = function() {
+          // usersConnectedInTheChatRoom()
+          usersOnline()
+        }
+        
         const send = document.getElementById('send-button');
         const inputMessage = document.getElementById('input-message');
         const inputNickname = document.getElementById('input-nickname');
@@ -140,38 +142,41 @@ button:hover {
           const user = []
           for (i = 1; i < 17; i++) {
             let numberRandom = Math.floor(Math.random() * 36)
-            console.log(numberRandom)
+            
             user.push(absurdo[numberRandom])
           }
           sessionStorage.setItem('user', user.join(''))
-          rendernickName(user.join(''))
-          console.log(user.join(''))
+          
+          return user.join('')
         }
 
-        function rendernickName(nickName) {
-          const usersUl = document.getElementById('ul-users')
-          const userLi = document.createElement('li');
-          userLi.innerText = nickName
-          userLi.setAttribute('data-testid','online-user')
-          usersUl.appendChild(userLi)
-          // usersUl.removeChild(usersUl.childNodes[0])
-          // usersUl.appendChild(userLi)
+        function usersOnline() {
+          const user = (generateNickName())
+          socket.emit('user', user)
+          console.log(user)
         }
+
+        // function rendernickName(nickName) {
+        //   const usersUl = document.getElementById('ul-users')
+        //   const userLi = document.createElement('li');
+        //   userLi.innerText = nickName
+        //   userLi.setAttribute('data-testid','online-user')
+        //   usersUl.appendChild(userLi)
+        //   // usersUl.removeChild(usersUl.childNodes[0])
+        //   // usersUl.appendChild(userLi)
+        // }
 
         function handleNickName() {
           const userInStorage = sessionStorage.getItem('user')
+          const customNickName = sessionStorage.getItem('customNickName')
           if (!userInStorage) {
             generateNickName()
           }
-          rendernickName(userInStorage)
-
-          return false
         }
    
         saveNickName.addEventListener('click', () => {
           if (inputNickname.value) {
-            sessionStorage.setItem('user', inputNickname.value)
-            console.log(inputNickname.value)
+            sessionStorage.setItem('customNickName', inputNickname.value)
             rendernickName(inputNickname.value)
           }
         })
@@ -183,7 +188,7 @@ button:hover {
             }
         })
         
-        const createMessage = (message) => {
+        function createMessage(message) {
             const messageUl = document.getElementById('messages');
             const li = document.createElement('li');
             li.innerText = message
@@ -191,7 +196,25 @@ button:hover {
             messageUl.appendChild(li);
         }
 
+        function usersConnectedInTheChatRoom(usersArray) {
+          usersOnline = handleNickName()
+          console.log(usersOnline)
+          const usersUl = document.getElementById('ul-users')
+          // const userLi = document.createElement('li');
+         
+          // userLi.innerText = usersOnline
+          // userLi.setAttribute('data-testid','online-user')
+          // usersUl.appendChild(userLi)
+
+          usersArray.map((user, index) => {
+            const userLi = document.createElement('li');
+            userLi.innerText = user
+            usersUl.appendChild(userLi)
+          })
+        } 
+
         socket.on('message', (message) => createMessage(message))
+        socket.on('userConnected', (usersArray) => usersConnectedInTheChatRoom(usersArray))
 
       </script>
   </body>

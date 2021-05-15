@@ -28,13 +28,17 @@ app.use('/', messageController);
     io.emit('message', message);
   };
 
-  const userConnected = async (socket, nickname) => {
-    console.log(nickname);
+  const usersIntheChatRoom = [];
+
+  const userConnected = (nickname) => {
+    usersIntheChatRoom.push(nickname);
+    console.log(usersIntheChatRoom);
+    io.emit('userConnected', usersIntheChatRoom);
   };
 
   io.on('connection', (socket) => {
     socket.on('message', ({ chatMessage, nickname }) => sendMessage(chatMessage, nickname));
-    socket.on('user', (nickname) => console.log(nickname))
+    socket.on('user', (nickname) => userConnected(nickname));
   });
 
 server.listen(PORT, () => {
