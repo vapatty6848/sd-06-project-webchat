@@ -28,7 +28,6 @@ let allUsers = [];
 
 const addNewUser = ({ socket, nickname }) => {
   allUsers.push({ id: socket.id, nickname });
-  console.log(allUsers);
 
   // io.emit('updatOnlineUsers', allUsers);
   // enviar para front de todos
