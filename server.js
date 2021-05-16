@@ -28,17 +28,36 @@ app.use('/', messageController);
     io.emit('message', message);
   };
 
-  const usersIntheChatRoom = [];
+  let usersIntheChatRoom = [];
 
-  const userConnected = (nickname) => {
-    usersIntheChatRoom.push(nickname);
+  const handleNewUser = (socket, newUser) => {
+    usersIntheChatRoom.push({ id: socket.id, nickname: newUser });
+    io.emit('setOnlineUsers', usersIntheChatRoom);
+  };
+
+  const handleDisconnect = (socket) => {
+    const userOff = usersIntheChatRoom.find((user) => user.id === socket.id);
+    if (userOff) {
+      usersIntheChatRoom = usersIntheChatRoom.filter((user) => user !== userOff);
+      console.log(usersIntheChatRoom);
+      io.emit('userDisconnected', usersIntheChatRoom);
+    }
+  };
+
+  const updateNickname = (socket, nickname) => {
+    const userToUpdate = usersIntheChatRoom.find((user) => user.id === socket.id);
+    usersIntheChatRoom = usersIntheChatRoom.filter((user) => user !== userToUpdate);
+    socket.emit('updateUserNick', [{ id: socket.id, nickname }, ...usersIntheChatRoom]);
+    usersIntheChatRoom.push({ id: socket.id, nickname });
     console.log(usersIntheChatRoom);
-    io.emit('userConnected', usersIntheChatRoom);
+    socket.broadcast.emit('updateUserNickToOthers', usersIntheChatRoom);
   };
 
   io.on('connection', (socket) => {
     socket.on('message', ({ chatMessage, nickname }) => sendMessage(chatMessage, nickname));
-    socket.on('user', (nickname) => userConnected(nickname));
+    socket.on('disconnect', () => handleDisconnect(socket));
+    socket.on('newUser', (newUser) => handleNewUser(socket, newUser));
+    socket.on('updateNickname', (nickname) => updateNickname(socket, nickname));
   });
 
 server.listen(PORT, () => {

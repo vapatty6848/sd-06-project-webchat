@@ -127,11 +127,7 @@ button:hover {
     </main>
     <script>
         const socket = io();
-        window.onload = function() {
-          // usersConnectedInTheChatRoom()
-          usersOnline()
-        }
-        
+       
         const send = document.getElementById('send-button');
         const inputMessage = document.getElementById('input-message');
         const inputNickname = document.getElementById('input-nickname');
@@ -150,22 +146,6 @@ button:hover {
           return user.join('')
         }
 
-        function usersOnline() {
-          const user = (generateNickName())
-          socket.emit('user', user)
-          console.log(user)
-        }
-
-        // function rendernickName(nickName) {
-        //   const usersUl = document.getElementById('ul-users')
-        //   const userLi = document.createElement('li');
-        //   userLi.innerText = nickName
-        //   userLi.setAttribute('data-testid','online-user')
-        //   usersUl.appendChild(userLi)
-        //   // usersUl.removeChild(usersUl.childNodes[0])
-        //   // usersUl.appendChild(userLi)
-        // }
-
         function handleNickName() {
           const userInStorage = sessionStorage.getItem('user')
           const customNickName = sessionStorage.getItem('customNickName')
@@ -176,8 +156,9 @@ button:hover {
    
         saveNickName.addEventListener('click', () => {
           if (inputNickname.value) {
-            sessionStorage.setItem('customNickName', inputNickname.value)
-            rendernickName(inputNickname.value)
+            const newNickname = inputNickname.value
+            sessionStorage.setItem('nickname', newNickname)
+            socket.emit('updateNickname', newNickname)
           }
         })
 
@@ -196,26 +177,32 @@ button:hover {
             messageUl.appendChild(li);
         }
 
-        function usersConnectedInTheChatRoom(usersArray) {
-          usersOnline = handleNickName()
-          console.log(usersOnline)
-          const usersUl = document.getElementById('ul-users')
-          // const userLi = document.createElement('li');
-         
-          // userLi.innerText = usersOnline
-          // userLi.setAttribute('data-testid','online-user')
-          // usersUl.appendChild(userLi)
+        function setOnlineUsers(onlineUsers, socket) {
+          const usersList = document.getElementById('ul-users')
+          
+          while (usersList.firstChild) {
+            usersList.removeChild(usersList.firstChild);
+          }
 
-          usersArray.map((user, index) => {
-            const userLi = document.createElement('li');
-            userLi.innerText = user
-            usersUl.appendChild(userLi)
+          const me = onlineUsers.find((user) => user.id === socket.id)
+          let arrayUserToRender = []
+          arrayUserToRender.push(me)
+          const others = onlineUsers.filter((user) => user !== me).map((user) => arrayUserToRender.push(user))
+          
+          arrayUserToRender.forEach((user) => {
+            const userLI = document.createElement('li');
+            userLI.innerText = user.nickname;
+            userLI.setAttribute('data-testid', 'online-user')
+            usersList.appendChild(userLI);
           })
-        } 
+        }
 
-        socket.on('message', (message) => createMessage(message))
-        socket.on('userConnected', (usersArray) => usersConnectedInTheChatRoom(usersArray))
-
+        socket.on('connect', () => socket.emit('newUser', generateNickName()))
+        socket.on('message', (message) => createMessage(message))        
+        socket.on('setOnlineUsers', (onlineUsers) => setOnlineUsers(onlineUsers, socket)) 
+        socket.on('userDisconnected', (onlineUsers) => setOnlineUsers(onlineUsers, socket))
+        socket.on('updateUserNickToOthers', (onlineUsers) => setOnlineUsers(onlineUsers, socket));
+        socket.on('updateUserNick', (onlineUsers) => setOnlineUsers(onlineUsers, socket));
       </script>
   </body>
 </html>
