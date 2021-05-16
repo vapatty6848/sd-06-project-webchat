@@ -39,11 +39,13 @@
     const socket = io();
 
     socket.on('updateUsers', (user) => {
+      const usuariosOnline = document.querySelector('#users-list')
+      usuariosOnline.innerText = '';
       user.forEach((user) => {
         const userLi = document.createElement('li');
         userLi.innerText = user.nickname;
         userLi.setAttribute('data-testid', 'online-user');
-        document.querySelector('#users-list').appendChild(userLi);
+        usuariosOnline.appendChild(userLi);
       });
     });
 
