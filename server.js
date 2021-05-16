@@ -28,7 +28,10 @@ let allUsers = [];
 
 const addNewUser = ({ socket, nickname }) => {
   allUsers.push({ id: socket.id, nickname });
-  io.emit('updatOnlineUsers', allUsers);
+  console.log(allUsers);
+
+  // io.emit('updatOnlineUsers', allUsers);
+  // enviar para front de todos
 };
 
 const changeNickname = ({ newNickname, socket }) => {
@@ -38,7 +41,7 @@ const changeNickname = ({ newNickname, socket }) => {
     return user;
   });
 
-  io.emit('updateOnlineUsers', allUsers);
+  // io.emit('updateOnlineUsers', allUsers);
 };
 
 const getTime = () => {
@@ -58,15 +61,16 @@ const handleChatMessage = async ({ nickname, chatMessage }) => {
 io.on('connection', async (socket) => {
   socket.on('newUser', ({ nickname }) => addNewUser({ nickname, socket }));
 
+  io.emit('updateUsers', allUsers);
+  
   socket.on('message', async ({ nickname, chatMessage }) =>
     handleChatMessage({ nickname, chatMessage }));
 
-    socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
+  socket.on('changeNickname', (newNickname) => changeNickname({ newNickname, socket }));
 
   socket.on('disconnect', () => {
     const onlineUsers = allUsers.filter((user) => user.id !== socket.id);
     allUsers = onlineUsers;
-    io.emit('updateOnlineUsers', allUsers);
   });
 });
 

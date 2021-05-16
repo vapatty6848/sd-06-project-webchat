@@ -17,8 +17,6 @@
     </ul>
 
     <form>
-      <input type="text" name="nickname" placeholder="nickname" data-testid="nickname-box" />
-      <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
       <input
         type="text"
         data-testid="message-box"
@@ -26,21 +24,28 @@
         placeholder="message"
         id="message-input"
       />
+      <button type="button" data-testid="send-button" id="send-btn">Enviar</button>
+      <input
+        type="text"
+        name="nickname"
+        placeholder="nickname"
+        data-testid="nickname-box"
+        id="nickname"
+      />
       <button type="button" data-testid="nickname-button" id="nick-btn">Nick Name</button>
     </form>
   </body>
   <script>
     const socket = io();
 
-    let nickName = '';
-
-    const addUser = (nickname) => {
-      const listUsers = document.querySelector('#users-list');
-      const li = document.querySelector('li');
-      li.setAttribute('data-testid', 'online-user');
-      li.innerText = nickname;
-      listUsers.appendChild(li);
-    };
+    socket.on('updateUsers', (user) => {
+      user.forEach((user) => {
+        const userLi = document.createElement('li');
+        userLi.innerText = user.nickname;
+        userLi.setAttribute('data-testid', 'online-user');
+        document.querySelector('#users-list').appendChild(userLi);
+      });
+    });
 
     const randomNick = () => {
       const length = 16;
@@ -52,11 +57,11 @@
       return result;
     };
 
-    const nickBtn = document.querySelector('#nick-btn');
     const sendBtn = document.querySelector('#send-btn');
 
     sendBtn.addEventListener('click', () => {
       const inputMessage = document.querySelector('#message-input');
+      console.log(inputMessage.value);
       socket.emit('message', { chatMessage: inputMessage.value, nickname });
       inputMessage.value = '';
       return false;
@@ -75,6 +80,18 @@
     socket.on('connect', () => {
       nickname = randomNick();
       socket.emit('newUser', { nickname });
+    });
+
+    let nickName = '';
+
+    const nickBtn = document.querySelector('#nick-btn');
+
+    nickBtn.addEventListener('click', () => {
+      console.log('mudei de nick');
+      const newNick = document.querySelector('#nickname');
+      socket.emit('changeNickname', newNick.value);
+      nickname = newNick.value;
+      newNick.value = '';
     });
   </script>
 </html>
