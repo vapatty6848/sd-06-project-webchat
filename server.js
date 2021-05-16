@@ -28,9 +28,8 @@ let allUsers = [];
 
 const addNewUser = ({ socket, nickname }) => {
   allUsers.push({ id: socket.id, nickname });
-
-  // io.emit('updatOnlineUsers', allUsers);
-  // enviar para front de todos
+  io.emit('updateUsers', allUsers);
+  console.log(allUsers);
 };
 
 const changeNickname = ({ newNickname, socket }) => {
@@ -40,7 +39,7 @@ const changeNickname = ({ newNickname, socket }) => {
     return user;
   });
 
-  // io.emit('updateOnlineUsers', allUsers);
+  io.emit('updateUsers', allUsers);
 };
 
 const getTime = () => {
