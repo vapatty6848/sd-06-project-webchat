@@ -26,7 +26,6 @@ let allUsers = [];
 
 const addNewUser = ({ socket, nickname }) => {
   allUsers.push({ id: socket.id, nickname });
-  console.log(allUsers);
   io.emit('updateUsers', allUsers);
 };
 

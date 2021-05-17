@@ -45,7 +45,6 @@
     const usuariosOnline = document.querySelector('#users-list')
 
     const renderUsers = (array) => {
-      usuariosOnline.innerText = '';
       array.forEach((user) => {
         const userLi = document.createElement('li');
         userLi.innerText = user.nickname;
@@ -55,7 +54,10 @@
     };
 
     socket.on('updateUsers', (users) => {
-      renderUsers(users);
+      usuariosOnline.innerText = '';
+      const orderUsers = users.filter((u) => u.id !== socket.id);
+      renderUsers(users.filter((u) => u.id === socket.id));
+      renderUsers(orderUsers);
     });
 
     const randomNick = () => {
