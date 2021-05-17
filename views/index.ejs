@@ -45,6 +45,7 @@
 
     document.querySelector('#sendMessage').addEventListener('click', (e) => {
       const chatMessage = document.querySelector('#message').value;
+      console.log('meu chatMessage')
       nickname = nicknameField.innerHTML;
       socket.emit('message', {chatMessage, nickname});
     })
@@ -63,7 +64,7 @@
       messageLI.setAttributeNode(dataTestId);
       messageLI.innerHTML = message;
       
-      document.querySelector('#messages').appendChild(messageLI);
+      document.querySelector('#allMessages').appendChild(messageLI);
     });
         
     socket.on('updateUsers', (users) => {
