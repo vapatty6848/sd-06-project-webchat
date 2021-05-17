@@ -56,6 +56,7 @@
     const inputNick = document.querySelector('#nickInput');
     const clientName = document.querySelector('#clientName');
     const ul = document.querySelector('#userList');
+    let nickName;
     
     changeNickButton.addEventListener('click', (e) => {
       e.preventDefault();
@@ -67,7 +68,6 @@
 
     sendMessage.addEventListener('click', (e) => {
       e.preventDefault();
-      let nickName=socket.id.slice(0, 16);
       obj = {
         chatMessage: inputMessage.value,
         nickname: nickName,
@@ -91,7 +91,6 @@
     }
 
     const addUser = ({id, nickname}) => {
-      console.log(id, nickname)
       const li = document.createElement('li');
       li.innerText = nickname;
       li.setAttribute('data-testid', 'online-user');
@@ -111,6 +110,10 @@
     socket.on('removeUser', (nickname) => removeUser(nickname));
     socket.on('addUser', (nickname) => addUser(nickname));
     socket.on('listUpdate', (listOfNicknames) => listUpdate(listOfNicknames));
+    socket.on('connect', () => {
+      nickName = socket.id.slice(0, 16);
+      socket.emit('userOnline', nickName);
+    });
   </script>
 </body>
 </html>
