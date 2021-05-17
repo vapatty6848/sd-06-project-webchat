@@ -46,10 +46,10 @@ const getTime = () => {
   return timeFormated;
 };
 
-const handleChatMessage = async ({ nickname, chatMessage }) => {
+const handleChatMessage = ({ nickname, chatMessage }) => {
   const timestamp = getTime();
   const result = `${timestamp} ${nickname} ${chatMessage}`;
-  await db.addMessage({ nickname, chatMessage, timestamp });
+  db.addMessage({ nickname, chatMessage, timestamp });
   io.emit('message', result);
 };
 
