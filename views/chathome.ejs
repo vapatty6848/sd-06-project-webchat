@@ -18,7 +18,7 @@
           <input type="text" id="input-name" data-testid="nickname-box"/>
           <button type="button" id="change-name" data-testid="nickname-button">Mudar de nome</button>
         </form>
-        <h3 data-testid="online-user" id="username"></h3>
+        <h3 id="username"></h3>
         <ul id="users-screen"></ul>
       </div>
       <ul id="msg-screen"></ul>
@@ -55,13 +55,10 @@
     };
     const printUsersList = (userName) => {
       const usersScreen = document.querySelector('#users-screen');
-      const nickname = localStorage.getItem('nickname');
-      if (userName !== nickname) {
-        const user = document.createElement('li');
-        user.innerText = userName;
-        user.setAttribute('data-testid', 'online-user')
-        usersScreen.appendChild(user);
-      }
+      const user = document.createElement('li');
+      user.innerText = userName;
+      user.setAttribute('data-testid', 'online-user')
+      usersScreen.appendChild(user);
     }
 
     const changeName = (newName) => {
@@ -75,7 +72,10 @@
     });
     socket.on('usersList', ({ connectedList }) => {
       const usersScreen = document.querySelector('#users-screen');
+      const nickname = localStorage.getItem('nickname');
       usersScreen.innerHTML = '';
+      const removedUser = connectedList.splice(connectedList.indexOf(nickname), 1);
+      connectedList.unshift(removedUser);
       connectedList.forEach((user) => printUsersList(user));
     });
 
