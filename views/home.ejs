@@ -40,10 +40,10 @@
   <script>
     const socket = io();
 
-    socket.on('updateUsers', (user) => {
+    socket.on('updateUsers', (users) => {
       const usuariosOnline = document.querySelector('#users-list')
       usuariosOnline.innerText = '';
-      user.forEach((user) => {
+      users.forEach((user) => {
         const userLi = document.createElement('li');
         userLi.innerText = user.nickname;
         userLi.setAttribute('data-testid', 'online-user');
