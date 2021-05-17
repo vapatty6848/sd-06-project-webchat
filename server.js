@@ -16,13 +16,11 @@ const io = require('socket.io')(httpServer, {
 
 app.use(cors());
 
+const db = require('./models/messages');
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(`${__dirname}/views/`));
-
-app.get('/', (_req, res) => {
-  res.render('home');
-});
 
 let allUsers = [];
 
@@ -51,7 +49,7 @@ const getTime = () => {
 const handleChatMessage = async ({ nickname, chatMessage }) => {
   const timestamp = getTime();
   const result = `${timestamp} ${nickname} ${chatMessage}`;
-  // await addMessages({ nickname, chatMessage, timestamp });
+  await db.addMessage({ nickname, chatMessage, timestamp });
   io.emit('message', result);
 };
 
@@ -69,6 +67,13 @@ io.on('connection', async (socket) => {
     const onlineUsers = allUsers.filter((user) => user.id !== socket.id);
     allUsers = onlineUsers;
   });
+});
+
+app.get('/', async (_req, res) => {
+  const msgs = await db.getAllMessages();
+  const renderMsgs = msgs.map((message) => 
+    `${message.timestamp} ${message.nickname} ${message.chatMessage}`);
+  return res.render('home', { renderMsgs });
 });
 
 httpServer.listen(PORT, () => {
