@@ -72,6 +72,7 @@
       usersList.innerHTML = '';
       users.forEach((user) => {
         const userLI = document.createElement('li');
+        userLI.setAttribute('data-testid', 'online-user');
         userLI.innerHTML = user.name;
         usersList.appendChild(userLI);
       })
