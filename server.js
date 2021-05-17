@@ -19,8 +19,9 @@ app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', './views/');
 
-app.get('/', (_req, res) => {
-  res.render('index');
+app.get('/', async (_req, res) => {
+  const allMessages = await messagesModel.getAll();
+  res.status(200).render('index', { allMessages });
 });
 
 let users = [];
@@ -41,13 +42,15 @@ const newUser = (nickname, socket) => {
   io.emit('logStatus', `Usuário ${nickname} conectou`);
 };
 
+const messages = ({ chatMessage, nickname }) => {
+  io.emit('message', `${timestamp} - ${nickname}: ${chatMessage}`);
+    messagesModel.create(chatMessage, nickname, timestamp);
+};
+
 io.on('connection', (socket) => {
   socket.on('newUser', (nickname) => newUser(nickname, socket));
 
-  socket.on('message', async ({ chatMessage, nickname }) => {
-    io.emit('message', `${timestamp} - ${nickname}: ${chatMessage}`);
-    await messagesModel.create(chatMessage, nickname, timestamp);
-  });
+  socket.on('message', async ({ chatMessage, nickname }) => messages({ chatMessage, nickname }));
 
   socket.on('logStatus', (logStatus) => {
     io.emit('logStatus', logStatus);

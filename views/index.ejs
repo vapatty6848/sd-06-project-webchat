@@ -7,6 +7,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <title>Project WebChat</title>
 </head>
+<body>
   <h1>Web Chat</h1>
 
   <h2 id='userNickname' data-testid="online-user"></h2>
@@ -17,7 +18,12 @@
   <button id='sendMessage' data-testid="send-button">Enviar</button>
 
   <h3>Mensagens</h3>
-  <ul id='messages'>
+  <ul id='allMessages'>
+    <% allMessages.forEach((message) => { %>
+      <p data-testid="message">
+        <%= `${message.timestamp} - ${message.nickname}: ${message.chatMessage}`%>
+      </p>
+    <% }) %>
   </ul>
 
   <h3>Usuários Online</h3>
