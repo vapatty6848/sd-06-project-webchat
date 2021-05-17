@@ -33,27 +33,24 @@ const socketOnDisconnect = (socket) => {
 };
 
 const socketOnMessage = ({ chatMessage, nickname, socket }) => {
-    users.forEach((user) => {
-      if (user.id === socket.id && user.nickname === socket.id.slice(0, 16)) {
-        user.nickname = nickname;
-      }
-    });
-    users.forEach(async (user) => {
-      if (user.id === socket.id) {
-        io.emit('message', `${date} ${time} - ${user.nickname}: ${chatMessage}`);
-        await saveMessage(chatMessage, user.nickname, `${date} ${time}`);
-      }
-    });
+  const index = users.findIndex((item) => item.id.includes(socket.id));
+  if (socket.id === users[index].id && users[index].nickname === nickname) {
+    users[index].nickname = nickname;
+  }
+  users.forEach(async (user) => {
+    if (user.id === socket.id) {
+      io.emit('message', `${date} ${time} - ${user.nickname}: ${chatMessage}`);
+      await saveMessage(chatMessage, user.nickname, `${date} ${time}`);
+    }
+  });
 };
 
 const socketOnNickname = ({ socket, nickname }) => {
-  users.forEach((user) => {
-    if (user.id === socket.id) {
-      io.emit('removeUser', socket.id);
-      user.nickname = nickname;
-      io.emit('addUser', user);
-    }
-  });
+  const index = users.findIndex((item) => item.id.includes(socket.id));
+  io.emit('removeUser', socket.id);
+  users[index].nickname = nickname;
+  console.log(users[index]);
+  io.emit('addUser', { id: socket.id, nickname });
 };
 
 io.on('connection', async (socket) => {
