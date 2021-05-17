@@ -20,36 +20,39 @@ app.set('view engine', 'ejs');
 
 app.use('/', express.static(__dirname));
 
-const users = [];
+let users = [];
 
 const now = new Date();
 const date = `${now.getDate()}-${(now.getMonth() + 1)}-${now.getFullYear()}`;
 const time = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
 const socketOnDisconnect = (socket) => {
-  socket.on('disconnect', () => {
-    users.forEach((user) => {
-      if (user.id === socket.id) {
-        io.emit('removeUser', user.nickname);
-      }
-    });
-    users.splice(users.indexOf(socket.id), 1);
-  });
+  io.emit('removeUser', socket.id);
+  users = users.filter((item) => item.id !== socket.id);
+  console.log(users);
 };
 
-const socketOnMessage = (socket) => {
-  socket.on('message', ({ chatMessage, nickname }) => {
+const socketOnMessage = ({ chatMessage, nickname, socket }) => {
     users.forEach((user) => {
       if (user.id === socket.id && user.nickname === socket.id.slice(0, 16)) {
         user.nickname = nickname;
       }
     });
-    users.forEach((user) => {
+    users.forEach(async (user) => {
       if (user.id === socket.id) {
         io.emit('message', `${date} ${time} - ${user.nickname}: ${chatMessage}`);
-        saveMessage(chatMessage, user.nickname, `${date} ${time}`);
+        await saveMessage(chatMessage, user.nickname, `${date} ${time}`);
       }
     });
+};
+
+const socketOnNickname = ({ socket, nickname }) => {
+  users.forEach((user) => {
+    if (user.id === socket.id) {
+      io.emit('removeUser', socket.id);
+      user.nickname = nickname;
+      io.emit('addUser', user);
+    }
   });
 };
 
@@ -57,21 +60,13 @@ io.on('connection', async (socket) => {
   users.push({ id: socket.id, nickname: socket.id.slice(0, 16) });
   io.emit('name', socket.id);
   users.forEach((user) => {
-    if (user.id === socket.id) io.emit('addUser', user.nickname);
+    if (user.id === socket.id) io.emit('addUser', user);
   });
-  // const listOfNicknames = users.map((user) => user.nickname);
   io.emit('listUpdate', users);
-  socketOnDisconnect(socket);
-  socketOnMessage(socket);
-  socket.on('changeNick', (nickname) => {
-    users.forEach((user) => {
-      if (user.id === socket.id) {
-        io.emit('removeUser', user.nickname);
-        io.emit('addUser', nickname);
-        user.nickname = nickname; 
-      }
-    });
-  });
+  socket.on('disconnect', () => socketOnDisconnect(socket));
+  socket.on('message', ({ chatMessage, nickname }) => 
+    socketOnMessage({ socket, chatMessage, nickname }));
+  socket.on('changeNick', (nickname) => socketOnNickname({ socket, nickname }));
 });
 
 app.get('/', async (req, res) => {

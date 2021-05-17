@@ -85,23 +85,24 @@
       ul.appendChild(li);
     };
 
-    const removeUser = (nickname) => {
-      const li = document.getElementById(`${nickname}`);
+    const removeUser = (id) => {
+      const li = document.getElementById(`${id}`);
       if (li) li.parentNode.removeChild(li);
     }
 
-    const addUser = (nickname) => {
+    const addUser = ({id, nickname}) => {
+      console.log(id, nickname)
       const li = document.createElement('li');
       li.innerText = nickname;
       li.setAttribute('data-testid', 'online-user');
-      li.setAttribute('id', `${nickname}`);
+      li.setAttribute('id', `${id}`);
       ul.appendChild(li);
     }
 
     const listUpdate = (listOfNicknames) => {
-      listOfNicknames.forEach(({ nickname }) => {
-        const li = document.getElementById(`${nickname}`);
-        if (!li) addUser(nickname);
+      listOfNicknames.forEach((item) => {
+        const li = document.getElementById(`${item.id}`);
+        if (!li) addUser(item);
       })
     }
 
