@@ -65,7 +65,9 @@ io.on('connection', async (socket) => {
 
   socket.on('disconnect', () => {
     const onlineUsers = allUsers.filter((user) => user.id !== socket.id);
+    
     allUsers = onlineUsers;
+    io.emit('updateUsers', allUsers);
   });
 });
 
