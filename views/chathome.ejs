@@ -53,6 +53,13 @@
       newMsg.setAttribute('data-testid', 'message')
       msgScreen.appendChild(newMsg);
     };
+    const printUsersList = (userName) => {
+      const usersScreen = document.querySelector('#users-screen');
+      const user = document.createElement('li');
+      user.innerText = userName;
+      user.setAttribute('data-testid', 'online-user')
+      usersScreen.appendChild(user);
+    }
 
     const changeName = (newName) => {
       localStorage.setItem('nickname', newName);
@@ -62,6 +69,11 @@
     socket.on('randomName', ({ userName }) => changeName(userName));
     socket.on('historyMessages', ({ history }) => {
       history.forEach((message) => printHistoryMessage(message));
+    });
+    socket.on('usersList', ({ connectedList }) => {
+      const usersScreen = document.querySelector('#users-screen');
+      usersScreen.innerHTML = '';
+      connectedList.forEach((user) => printUsersList(user));
     });
 
     document.querySelector('#send-msg').addEventListener('click', (e) => {
@@ -75,6 +87,8 @@
     document.querySelector('#change-name').addEventListener('click', (e) => {
       e.preventDefault();
       const newUserName = nameInput.value;
+      const nickname = localStorage.getItem('nickname');
+      socket.emit('nameChange', { oldName: nickname, newName: newUserName });
       changeName(newUserName);
     });
 
