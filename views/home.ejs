@@ -13,7 +13,9 @@
       users
     </ul>
     <ul id="message-body">
-      mensagens
+      <% renderMsgs.forEach((message) => { %>
+        <li data-testid="message"><%= message %></li>
+      <% }); %>
     </ul>
 
     <form>
