@@ -14,11 +14,11 @@
   <main>
     <div style="display: flex;">
       <div>
-        <h3 data-testid="online-user" id="username"></h3>
         <form>
           <input type="text" id="input-name" data-testid="nickname-box"/>
           <button type="button" id="change-name" data-testid="nickname-button">Mudar de nome</button>
         </form>
+        <h3 data-testid="online-user" id="username"></h3>
         <ul id="users-screen"></ul>
       </div>
       <ul id="msg-screen"></ul>
@@ -55,10 +55,13 @@
     };
     const printUsersList = (userName) => {
       const usersScreen = document.querySelector('#users-screen');
-      const user = document.createElement('li');
-      user.innerText = userName;
-      user.setAttribute('data-testid', 'online-user')
-      usersScreen.appendChild(user);
+      const nickname = localStorage.getItem('nickname');
+      if (userName !== nickname) {
+        const user = document.createElement('li');
+        user.innerText = userName;
+        user.setAttribute('data-testid', 'online-user')
+        usersScreen.appendChild(user);
+      }
     }
 
     const changeName = (newName) => {
