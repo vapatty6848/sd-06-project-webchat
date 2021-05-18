@@ -66,10 +66,18 @@
       
       document.querySelector('#allMessages').appendChild(messageLI);
     });
-        
+
     socket.on('updateUsers', (users) => {
       const usersList = document.querySelector('#users');
       usersList.innerHTML = '';
+
+      const currentUser = users.find((user) => user.socketId === socket.id);
+      if (currentUser) {
+        const userIndex = users.indexOf(currentUser);
+          users.splice(userIndex, 1);
+          users.unshift(currentUser);
+      }
+
       users.forEach((user) => {
         const userLI = document.createElement('li');
         userLI.setAttribute('data-testid', 'online-user');
