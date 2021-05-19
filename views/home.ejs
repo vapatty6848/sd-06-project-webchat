@@ -21,7 +21,7 @@
   <ul id='users'>
     <li><%=nickname%></li>
     <%users.forEach((user)=>{%>
-      <li data-testid="online=user"><%=user.nickname%></li>
+      <li data-testid="online-user"><%=user.nickname%></li>
     <%})%>
   </ul>
 
@@ -50,7 +50,7 @@
 
     socket.on('message', (message) => {
       const messageLi = document.createElement('li');
-      messageLi.setAttribute('data-tesid', 'message');
+      messageLi.setAttribute('data-testid', 'message');
       messageLi.innerHTML = message;
       messageUl.appendChild(messageLi);
 
@@ -65,7 +65,7 @@
       usersUl.innerHTML = '';
       users.forEach((user) => {
         const userLi = document.createElement('li');
-        userLi.setAttribute('data-tesid', 'online-user');
+        userLi.setAttribute('data-testid', 'online-user');
         userLi.innerHTML = user.nickname;
         usersUl.appendChild(userLi);
       });
