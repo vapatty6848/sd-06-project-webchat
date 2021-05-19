@@ -40,10 +40,20 @@
     const sendButoon = document.getElementById('sendButoon');
     const nicknameBox = document.getElementById('nicknameBox');
     const nicknameButton = document.getElementById('nicknameButton');
+    const messageUl = document.getElementById('messages');
+
 
     sendButoon.addEventListener('click', () => {
       const chatMessage = messageBox.value;
       socket.emit('message', {chatMessage, nickname})
+    });
+
+    socket.on('message', (message) => {
+      const messageLi = document.createElement('li');
+      messageLi.setAttribute('data-tesid', 'message');
+      messageLi.innerHTML = message;
+      messageUl.appendChild(messageLi);
+
     });
 
 
