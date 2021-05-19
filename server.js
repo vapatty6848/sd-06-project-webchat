@@ -4,6 +4,7 @@ const moment = require('moment');
 
 const app = express();
 const httpServer = require('http').createServer(app);
+
 app.use(cors());
 
 const io = require('socket.io')(httpServer, {
@@ -28,7 +29,7 @@ const randomNickname = () => {
 
 io.on('connection', (socket) => {
   socket.on('connected', (nickname) => {
-      users.push({nickname, sokectId: socket.id});
+    users.push({ nickname, sokectId: socket.id });
   });
 
   socket.on('message', ({ chatMessage, nickname }) => {
@@ -38,15 +39,15 @@ io.on('connection', (socket) => {
 
   // Canal reservado
   socket.on('disconnect', () => {
-    users = users.filter((user) =>  user.sokectId !== socket.id);
-  }); 
+    users = users.filter((user) => user.sokectId !== socket.id);
+  });
 });
 
 app.set('view engine', 'ejs'); // Cria uma view do lado do servidor, usando um ejs que é um view engine(motor de criação);
 app.set('views', './views');
 
 app.get('/', (_req, res) => {
-  res.render('home',{nickname: randomNickname(), users });
+  res.render('home', { nickname: randomNickname(), users });
 });
 
 httpServer.listen('3000');
