@@ -30,12 +30,13 @@ const randomNickname = () => {
 const connected = (socket) => {
   socket.on('connected', (nickname) => {
     users.push({ nickname, socketId: socket.id });
+    io.emit('updateUsers', users);
   });
 };
 
 io.on('connection', (socket) => {
   connected(socket);
-  
+
   socket.on('message', ({ chatMessage, nickname }) => {
     const editedMessage = `${messageDate()} - ${nickname}: ${chatMessage}`;
     io.emit('message', editedMessage);
