@@ -20,20 +20,18 @@
   <h2>Usuários</h2>
   <ul id='users'>
     <li><%=nickname%></li>
-    <%users.forEach((user) =>{%>
-    <li data-testid="online=user"><%=user.nickname%></li>
+    <%users.forEach((user)=>{%>
+      <li data-testid="online=user"><%=user.nickname%></li>
     <%})%>
   </ul>
 
   <h3>Mensagens</h3>
   <ul id='messages'></ul>
 
-  
-
   <script>
 
     const socket = io('http://localhost:3000');
-    const nickname = '<%=nickname%>';
+    let nickname = '<%=nickname%>';
     socket.emit('connected', nickname);
 
     const messageBox = document.getElementById('messageBox');
@@ -45,7 +43,7 @@
 
     sendButoon.addEventListener('click', () => {
       const chatMessage = messageBox.value;
-      socket.emit('message', {chatMessage, nickname})
+      socket.emit('message', { chatMessage, nickname })
     });
 
     socket.on('message', (message) => {
@@ -56,6 +54,10 @@
 
     });
 
+    nicknameButton.addEventListener('click', () => {
+      nickname = nicknameBox.value;
+      socket.emit('updateNickname', nickname)
+    });
 
 
   </script>
