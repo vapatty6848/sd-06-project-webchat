@@ -15,7 +15,7 @@ const io = require('socket.io')(httpServer, {
 });
 
 let users = [];
-const messageDate = moment().format('DD-MM-YYYY hh:mm:ss A');
+const messageDate = () => moment().format('DD-MM-YYYY hh:mm:ss A');
 
 const randomNickname = () => {
   const length = 16;
@@ -33,8 +33,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('message', ({ chatMessage, nickname }) => {
-    const editedMessage = `${messageDate} - ${nickname}: ${chatMessage}`;
-    console.log(editedMessage);
+    const editedMessage = `${messageDate()} - ${nickname}: ${chatMessage}`;
     io.emit('message', editedMessage);
   });
 
