@@ -27,19 +27,33 @@ const randomNickname = () => {
   return result;
 };
 
-io.on('connection', (socket) => {
+const connected = (socket) => {
   socket.on('connected', (nickname) => {
-    users.push({ nickname, sokectId: socket.id });
+    users.push({ nickname, socketId: socket.id });
   });
+};
 
+io.on('connection', (socket) => {
+  connected(socket);
+  
   socket.on('message', ({ chatMessage, nickname }) => {
     const editedMessage = `${messageDate()} - ${nickname}: ${chatMessage}`;
     io.emit('message', editedMessage);
   });
 
+  socket.on('updateNickname', (nickname) => {
+    users = users.map((user) => {
+      if (user.socketId === socket.id) {
+        return { ...user, nickname };
+      }
+      return user;
+    });
+    io.emit('updateUsers', users);
+  });
+
   // Canal reservado
   socket.on('disconnect', () => {
-    users = users.filter((user) => user.sokectId !== socket.id);
+    users = users.filter((user) => user.socketId !== socket.id);
   });
 });
 
