@@ -35,6 +35,19 @@
     const socket = io('http://localhost:3000');
     const nickname = '<%=nickname%>';
     socket.emit('connected', nickname);
+
+    const messageBox = document.getElementById('messageBox');
+    const sendButoon = document.getElementById('sendButoon');
+    const nicknameBox = document.getElementById('nicknameBox');
+    const nicknameButton = document.getElementById('nicknameButton');
+
+    sendButoon.addEventListener('click', () => {
+      const chatMessage = messageBox.value;
+      socket.emit('message', {chatMessage, nickname})
+    });
+
+
+
   </script>
 </body>
 

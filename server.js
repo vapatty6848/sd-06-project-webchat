@@ -34,6 +34,7 @@ io.on('connection', (socket) => {
 
   socket.on('message', ({ chatMessage, nickname }) => {
     const editedMessage = `${messageDate} - ${nickname}: ${chatMessage}`;
+    console.log(editedMessage);
     io.emit('message', editedMessage);
   });
 
