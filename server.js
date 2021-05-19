@@ -13,7 +13,7 @@ const io = require('socket.io')(httpServer, {
   },
 });
 
-const users = [];
+let users = [];
 const messageDate = moment().format('DD-MM-YYYY hh:mm:ss A');
 
 const randomNickname = () => {
@@ -29,15 +29,20 @@ const randomNickname = () => {
 io.on('connection', (socket) => {
   socket.on('connected', (nickname) => {
       users.push({nickname, sokectId: socket.id});
-  })
+  });
 
   socket.on('message', ({ chatMessage, nickname }) => {
     const editedMessage = `${messageDate} - ${nickname}: ${chatMessage}`;
     io.emit('message', editedMessage);
   });
+
+  // Canal reservado
+  socket.on('disconnect', () => {
+    users = users.filter((user) =>  user.sokectId !== socket.id);
+  }); 
 });
 
-app.set('view engine', 'ejs'); //Cria uma view do lado do servidor, usando um ejs que é um view engine(motor de criação);
+app.set('view engine', 'ejs'); // Cria uma view do lado do servidor, usando um ejs que é um view engine(motor de criação);
 app.set('views', './views');
 
 app.get('/', (_req, res) => {
