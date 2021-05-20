@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,14 +8,34 @@
   <title>Web-Chat</title>
   <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body>
+
+  <!-- USER LOGGED -->
   <div>
     <h1 id="current-user"></h1>
+    <input id="nick-input" data-testid="nickname-box" type="text">
+    <button id="send-nick"  data-testid="nickname-button">Send</button>
   </div>
+
+  <!-- LIST OF ONLINE USERS -->
   <div>
     <h2>Online users</h2>
     <ul id='online-users-ul'></ul>
   </div>
+
+  <!-- MESSAGE BOX -->
+  <div>
+    <input data-testid="message-box" id="message-box" type="text">
+    <button data-testid="send-button" id="send-message">Send</button>
+  </div>
+
+  <!-- CHAT BOX -->
+  <div>
+    <h2>Chat</h2>
+    <ul id="chat-box"></ul>
+  </div>
+
   <script>
     const socket = io();
     let nickname = '';
@@ -24,6 +45,23 @@
 
     const currentUser = document.getElementById('current-user');
     const onlineUsersUl = document.getElementById('online-users-ul');
+    const messageBox = document.getElementById('message-box');
+    const sendMessageBtn = document.getElementById('send-message');
+    const chatBoxUl = document.getElementById('chat-box');
+    const nickInput = document.getElementById('nick-input');
+    const sendNickBtn = document.getElementById('send-nick');
+
+    sendMessageBtn.addEventListener('click', () => {
+      const message = messageBox.value;
+      socket.emit('message', { chatMessage: message, nickname });
+    });
+
+    sendNickBtn.addEventListener('click', () => {
+      const newNickname = nickInput.value;
+      nickname = newNickname;
+      currentUser.innerHTML = nickname;
+      socket.emit('newNickname', nickname );
+    });
 
     socket.on('connect', () => {
       nickname = (socket.id).slice(ZERO, NICKNAME_SIZE);
@@ -41,6 +79,14 @@
       });
     });
 
+    socket.on('message', (message) => {
+      const li = document.createElement('li');
+      li.innerHTML = message;
+      li.setAttribute('data-testid', 'message');
+      chatBoxUl.appendChild(li);
+    });
+
   </script>
 </body>
+
 </html>
