@@ -3,6 +3,7 @@ const { set } = require('lodash');
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const http = require('http').createServer(app);
@@ -13,6 +14,7 @@ const utils = require('./utils');
 
 app.set('view engine', 'ejs');
 app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', async (_req, res) => {
   const allMessages = await messages.getAllMessages();
