@@ -47,6 +47,7 @@
     let nickname = '';
 
     const ZERO = 0;
+    const ONE = 1;
     const NICKNAME_SIZE = 16;
 
     const currentUser = document.getElementById('current-user');
@@ -66,7 +67,7 @@
       const newNickname = nickInput.value;
       nickname = newNickname;
       currentUser.innerHTML = nickname;
-      socket.emit('newNickname', nickname );
+      socket.emit('newNickname', nickname);
     });
 
     socket.on('connect', () => {
@@ -76,7 +77,11 @@
     });
 
     socket.on('updateUsers', (users) => {
-      onlineUsersUl.innerHTML = ''
+      const userLogged = users.find((user) => user.id === socket.id);
+      const userIndex = users.findIndex((user) => user === userLogged);
+      users.splice(userIndex, ONE, userLogged);
+
+      onlineUsersUl.innerHTML = '';
       users.forEach((user) => {
         const li = document.createElement('li');
         li.innerHTML = user.nickname;

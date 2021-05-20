@@ -21,6 +21,12 @@ app.get('/', async (_req, res) => {
 
 const USERS = [];
 
+const socketNewNickname = ({ socket, newNickname }) => {
+  const userIndex = USERS.findIndex((user) => user.id === socket.id);
+  set(USERS[userIndex], 'nickname', newNickname);
+  io.emit('updateUsers', USERS);
+};
+
 io.on('connection', (socket) => {
   socket.on('newUser', (nickname) => {
     USERS.push({ id: socket.id, nickname });
@@ -33,10 +39,11 @@ io.on('connection', (socket) => {
     await messages.createMessage(date, nickname, message);
   });
 
-  socket.on('newNickname', (newNickname) => {
+  socket.on('newNickname', (newNickname) => socketNewNickname({ socket, newNickname }));
+
+  socket.on('disconnect', () => {
     const userIndex = USERS.findIndex((user) => user.id === socket.id);
-    // USERS[userIndex].nickname = newNickname
-    set(USERS[userIndex], 'nickname', newNickname);
+    USERS.splice(userIndex, 1);
     io.emit('updateUsers', USERS);
   });
 });
