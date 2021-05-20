@@ -79,7 +79,8 @@
     socket.on('updateUsers', (users) => {
       const userLogged = users.find((user) => user.id === socket.id);
       const userIndex = users.findIndex((user) => user === userLogged);
-      users.splice(userIndex, ONE, userLogged);
+      users.splice(userIndex, ONE);
+      users.unshift(userLogged)
 
       onlineUsersUl.innerHTML = '';
       users.forEach((user) => {
