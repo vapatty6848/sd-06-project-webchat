@@ -4,4 +4,4 @@ const messages = require('./messages');
 module.exports = {
   connection,
   messages,
-}
+};
