@@ -14,16 +14,17 @@ const utils = require('./utils');
 app.set('view engine', 'ejs');
 app.use(cors());
 
-app.get('/', (_req, res) => {
-  res.render('home');
+app.get('/', async (_req, res) => {
+  const allMessages = await messages.getAllMessages();
+  res.render('home', { allMessages });
 });
 
-let USERS = [];
+const USERS = [];
 
 io.on('connection', (socket) => {
   socket.on('newUser', (nickname) => {
     USERS.push({ id: socket.id, nickname });
-    io.emit('updateUsers', USERS)
+    io.emit('updateUsers', USERS);
   });
 
   socket.on('message', async ({ chatMessage: message, nickname }) => {
@@ -43,5 +44,5 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 
 http.listen(PORT, () => {
-  console.log(`Lintening on port ${PORT}`)
+  console.log(`Lintening on port ${PORT}`);
 });

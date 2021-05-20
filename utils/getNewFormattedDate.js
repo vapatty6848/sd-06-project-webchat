@@ -5,4 +5,4 @@ const getNewFormattedDate = () => {
   return `${days} ${hours}`;
 };
 
-module.exports = getNewFormattedDate
+module.exports = getNewFormattedDate;

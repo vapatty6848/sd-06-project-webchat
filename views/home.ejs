@@ -33,7 +33,13 @@
   <!-- CHAT BOX -->
   <div>
     <h2>Chat</h2>
-    <ul id="chat-box"></ul>
+    <ul id="chat-box">
+      <% allMessages.forEach((message) => { %>
+        <li data-testid="message">
+            <%= `${message.timestamp} ${message.nickname} ${message.message}` %>
+        </li>
+      <% }) %>
+    </ul>
   </div>
 
   <script>
