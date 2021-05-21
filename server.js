@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const moment = require('moment');
+
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, { 
@@ -11,7 +12,7 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   },
 });
-const { addMessages } = require('./models/messageModel');
+// const { addMessages } = require('./models/messageModel');
 
 app.use(cors());
 app.use(express.urlencoded({
@@ -35,7 +36,7 @@ io.on('connection', async (socket) => {
 });
 
 app.get('/', async (_req, res) => {
-  res.render('../views')
+  res.render('../views');
 });
 
 const PORT = process.env.PORT || 3000;
