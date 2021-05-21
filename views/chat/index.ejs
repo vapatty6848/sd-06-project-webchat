@@ -37,27 +37,25 @@
   // form de mensagem
   const form = document.querySelectorAll('form');
   const msgInput = document.querySelector('.msgInput');
-  console.log(form);
   form[0].addEventListener('submit', (e) => {
     e.preventDefault();
     newNick = nick.value;
     nick.value = '';
-    console.log('este é o newNick', newNick);
     const listUsers = document.querySelectorAll('.online-user');
     listUsers.forEach((user) => {
-      if (socket.id.slice(0, 16) === user.innerText) {
+      console.log(user);
+      if (socket.id.slice(0, 16) === user.id) {
         user.innerText = newNick;
-        socket.id = newNick;
       }
     });
-    console.log(listUsers, socket.id, '<= novo id socket');
+    updatedUsers = { nickname: newNick, id: socket.id };
+    socket.emit('updatedUser', updatedUsers);
     return false;
   });
   form[1].addEventListener('submit', (e) => {
     e.preventDefault();
     const nickname = socket.id.slice(0,16);
     const message = { nickname: newNick || socket.id.slice(0,16), chatMessage: msgInput.value }
-    console.log(message.nickname);
     socket.emit('message', message);
     msgInput.value = '';
     return false;
@@ -78,12 +76,12 @@
     userUl.innerHTML = '';
     const lastUser = users.find((user) => user.id === socket.id);
     let newUsers = users.filter((user) => user.id !== socket.id);
-    newUsers = [lastUser, ...newUsers];
-    console.log('ultimos usuarios', lastUser, 'novos', newUsers);
+    newUsers = [lastUser, ...newUsers]
     newUsers.forEach(user => {
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
       li.setAttribute('class', 'online-user');
+      li.setAttribute('id', user.id)
       li.innerText = user.nickname;
       userUl.appendChild(li);
     });

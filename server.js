@@ -17,9 +17,23 @@ app.set('views', './views');
 
 let users = [];
 const date = moment().format('DD-MM-yyyy HH:mm:ss');
+ const socketNick = (nick, socket) => {
+  const nickname = nick;
+  console.log(nickname, 'nick aqui');
+  const user = { nickname, id: socket.id };
+  users.push(user);
+  console.log(users);
+  io.emit('nickUser', users);
+ };
+
+const socketUpdatedNick = (updatedUser, socket) => {
+  const indexUser = users.findIndex((user) => user.id === socket.id);
+  users.splice(indexUser, 1, updatedUser);
+  console.log(users);
+  io.emit('nickUser', users);
+};
 
 io.on('connection', async (socket) => {
-  console.log(`${socket.id} conectado`);
   socket.on('disconnect', () => {
     const newListUser = users.filter((user) => user.id !== socket.id);
     users = newListUser;
@@ -27,16 +41,21 @@ io.on('connection', async (socket) => {
   });
   socket.on('message', async (message) => {
     const formatedMessage = chatController.formatMsg(date, message.nickname, message.chatMessage);
-    await chatController.insertMessage(date, message.nickname, message.chatMessage);
+    chatController.insertMessage(date, message.nickname, message.chatMessage);
     io.emit('message', formatedMessage);
   });
+
+  // socket.on('user', (nick) => {
+  //   const user = { nickname: nick || socket.id.slice(0, 16), id: socket.id };
+  //   users.push(user);
+  //   io.emit('nickUser', users);
+  // });
+  socket.on('updatedUser', (updatedUser) => socketUpdatedNick(updatedUser, socket));
+
   socket.on('user', () => {
-    const nickname = socket.id.slice(0, 16);
-    const user = { nickname, id: socket.id };
-    users.push(user);
-    io.emit('nickUser', users);
+    socketNick(socket.id.slice(0, 16), socket);
   });
-  io.emit('user', `${socket.id} acabou de entrar`);
+  // io.emit('updatedUser', `${socket.id} acabou de entrar`);
 });
 
 app.get('/', chatController.getMessage);
