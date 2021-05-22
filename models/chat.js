@@ -1,8 +1,8 @@
 const connection = require('./connection');
 
-const createMessage = async (data) => connection()
+const createMessage = async ({ nickname, chatMessage, timeMessage }) => connection()
   .then(async (db) => {
-    const newMessage = await db.collection('messages').insertOne(data);
+    const newMessage = await db.collection('messages').insertOne({ nickname, chatMessage, timeMessage });
     return newMessage.ops[0];
   })
   .catch((err) => {

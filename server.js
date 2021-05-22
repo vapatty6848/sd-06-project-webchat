@@ -1,10 +1,12 @@
 require('dotenv').config();
 
 const express = require('express');
+
 const app = express();
 const cors = require('cors');
 
 const moment = require('moment');
+
 const http = require('http').createServer(app);
 const PORT = 3000;
 const io = require('socket.io')(http, {
@@ -27,25 +29,25 @@ app.get('/', async (_req, res) => {
   res.render('index', { displayMsg });
 });
 
-const allUsers = [];
+const usersList = [];
 
 function addNewUser(socket) {
   const newUser = {
     id: socket.id,
     nickname: `${Math.random().toString().substr(2, 16)}`,
   };
-  allUsers.push(newUser);
+  usersList.push(newUser);
 
   return [newUser];
 }
 
 function nicknameHandler(updatedNickname, socket) {
-  const index = allUsers.findIndex((user) => user.id === socket.id);
-  allUsers[index].nickname = updatedNickname;
+  const index = usersList.findIndex((user) => user.id === socket.id);
+  usersList[index].nickname = updatedNickname;
 }
 
 function timestamp() {
-  return moment().format('DD-MM-yyyy HH:mm:ss');;
+  return moment().format('DD-MM-yyyy HH:mm:ss');
 }
 
 const messageFormatter = ({ nickname, chatMessage }) => {
@@ -59,7 +61,7 @@ const messageFormatter = ({ nickname, chatMessage }) => {
 io.on('connection', (socket) => {
   const newUser = addNewUser(socket);
   io.emit('connected', newUser);
-  const onlineUsers = allUsers.filter((user) => user.id !== newUser[0].id);
+  const onlineUsers = usersList.filter((user) => user.id !== newUser[0].id);
   socket.emit('usersOnline', onlineUsers);
 
   socket.on('message', async ({ chatMessage, nickname }) => {
@@ -68,13 +70,13 @@ io.on('connection', (socket) => {
 
   socket.on('changeNickname', ({ updatedNickname }) => {
     nicknameHandler(updatedNickname, socket);
-    const userChanged = allUsers.find((user) => user.id === socket.id);
+    const userChanged = usersList.find((user) => user.id === socket.id);
     io.emit('changeNickname', userChanged);
   });
 
   socket.on('disconnect', () => {
-    const userDisconnected = allUsers.findIndex((user) => user.id === socket.id);
-    allUsers.splice(userDisconnected, 1);
+    const userDisconnected = usersList.findIndex((user) => user.id === socket.id);
+    usersList.splice(userDisconnected, 1);
     io.emit('updateOnlineUsers', socket.id);
   });
 });
