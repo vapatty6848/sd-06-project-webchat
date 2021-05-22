@@ -5,7 +5,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 
-const moment = require('moment')
+const moment = require('moment');
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   cors: {
@@ -40,17 +40,17 @@ function addNewUser(socket) {
   allUsers.push(newUser);
 
   return [newUser];
-};
+}
 
 function handleNickname(newNickname, socket) {
   const index = allUsers.findIndex((user) => user.id === socket.id);
   allUsers[index].nickname = newNickname;
-};
+}
 
 function timestamp() {
   const time = moment().format('DD-MM-YYYY hh:mm:ss A');
   return time;
-};
+}
 
 const handleChatMessage = ({ nickname, chatMessage }) => {
   const timeMessage = timestamp();
