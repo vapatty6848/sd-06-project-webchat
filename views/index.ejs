@@ -6,10 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebChat</title>
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io('http://localhost:3000');
-  </script>
-</head>
+  </head>
 <body>
   <h1>The Chatter</h1>
     <form class="chat">
@@ -25,7 +22,7 @@
       id="nickname-save"
       data-testid="nickname-button"
       >
-      Nickname Recorded
+      Nickname Recorder
     </button>
       <div id="messages"></div>
       <input
@@ -57,10 +54,10 @@
     const dataTestId = 'data-testid';
     const listUsers = document.querySelector('#allUsers');
     const allMessages = document.querySelector('#allMessages');
-    const button = document.querySelector('#send-button');
+    const sendBtn = document.querySelector('#send-button');
     const inputMessage = document.querySelector('#message-box');
     const nickBtn = document.querySelector('#nickname-save');
-
+    const newNickname = document.querySelector('#nickname-box');
 
     const addUser = (users) => {
       users.forEach((user) => {
@@ -79,14 +76,13 @@
       allMessages.appendChild(li);
     }
 
-    button.addEventListener('click', () => {
+    sendBtn.addEventListener('click', () => {
       socket.emit('message', { chatMessage: inputMessage.value, nickname });
       inputMessage.value = '';
       return false;
     });
 
     const updateNickname = (userChanged) => {
-      const allUsers = document.querySelector('#allUsers');
       const editedUser = document.getElementById(userChanged.id);
       editedUser.innerHTML = userChanged.nickname;
     }
@@ -97,7 +93,6 @@
     }
     
     nickBtn.addEventListener('click', () => {
-      const newNickname = document.querySelector('#nickname-box');
       socket.emit('updateNickname', { newNickname: newNickname.value });
       nickname = newNickname.value;
       newNickname.value = '';
@@ -127,6 +122,5 @@
       }).then((res) => res.json());
       
   </script>
-</body>
-
+  
 </html>

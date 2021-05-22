@@ -4,6 +4,7 @@ const express = require('express');
 
 const app = express();
 const cors = require('cors');
+const path = require('path');
 
 const moment = require('moment');
 
@@ -19,7 +20,7 @@ const io = require('socket.io')(http, {
 
 app.use(cors());
 app.set('view engine', 'ejs');
-app.set('views', './views');
+app.set('views', path.join(__dirname, 'views'));
 
 const { createMessage, getAllMessages } = require('./models/chat');
 
@@ -32,7 +33,7 @@ app.get('/', async (_req, res) => {
 
 const usersList = [];
 
-function addNewUser(socket) {
+const addNewUser = (socket) => {
   const newUser = {
     id: socket.id,
     nickname: `${Math.random().toString().substr(2, 16)}`,
@@ -42,13 +43,14 @@ function addNewUser(socket) {
   return [newUser];
 }
 
-function nicknameHandler(updatedNickname, socket) {
+const nicknameHandler = (updatedNickname, socket) => {
   const index = usersList.findIndex((user) => user.id === socket.id);
   usersList[index].nickname = updatedNickname;
 }
 
-function timestamp() {
-  return moment().format('DD-MM-yyyy HH:mm:ss');
+const timestamp = () => {
+  const time = moment().format('DD-MM-yyyy HH:mm:ss');
+  return time;
 }
 
 const messageFormatter = ({ nickname, chatMessage }) => {
