@@ -1,12 +1,12 @@
 require('dotenv').config();
 
 const express = require('express');
-
 const app = express();
 const cors = require('cors');
 
 const moment = require('moment');
 const http = require('http').createServer(app);
+const PORT = 3000;
 const io = require('socket.io')(http, {
   cors: {
     origin: 'http://localhost:3000',
@@ -15,19 +15,16 @@ const io = require('socket.io')(http, {
 });
 
 app.use(cors());
-
-const { createMessage, getAllMessages } = require('./models/chat');
-
-const PORT = 3000;
-
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+const { createMessage, getAllMessages } = require('./models/chat');
+
 app.get('/', async (_req, res) => {
   const allMessages = await getAllMessages();
-  const renderMessages = allMessages
+  const displayMsg = allMessages
     .map((message) => `${message.timeMessage} ${message.nickname} ${message.chatMessage}`);
-  res.render('index', { renderMessages });
+  res.render('index', { displayMsg });
 });
 
 const allUsers = [];
@@ -42,17 +39,16 @@ function addNewUser(socket) {
   return [newUser];
 }
 
-function handleNickname(newNickname, socket) {
+function nicknameHandler(updatedNickname, socket) {
   const index = allUsers.findIndex((user) => user.id === socket.id);
-  allUsers[index].nickname = newNickname;
+  allUsers[index].nickname = updatedNickname;
 }
 
 function timestamp() {
-  const time = moment().format('DD-MM-YYYY hh:mm:ss A');
-  return time;
+  return moment().format('DD-MM-yyyy HH:mm:ss');;
 }
 
-const handleChatMessage = ({ nickname, chatMessage }) => {
+const messageFormatter = ({ nickname, chatMessage }) => {
   const timeMessage = timestamp();
 
   createMessage({ nickname, chatMessage, timeMessage });
@@ -67,11 +63,11 @@ io.on('connection', (socket) => {
   socket.emit('usersOnline', onlineUsers);
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    handleChatMessage({ nickname, chatMessage });
+    messageFormatter({ nickname, chatMessage });
   });
 
-  socket.on('changeNickname', ({ newNickname }) => {
-    handleNickname(newNickname, socket);
+  socket.on('changeNickname', ({ updatedNickname }) => {
+    nicknameHandler(updatedNickname, socket);
     const userChanged = allUsers.find((user) => user.id === socket.id);
     io.emit('changeNickname', userChanged);
   });
