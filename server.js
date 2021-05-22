@@ -41,17 +41,17 @@ const addNewUser = (socket) => {
   usersList.push(newUser);
 
   return [newUser];
-}
+};
 
 const nicknameHandler = (updatedNickname, socket) => {
   const index = usersList.findIndex((user) => user.id === socket.id);
   usersList[index].nickname = updatedNickname;
-}
+};
 
 const timestamp = () => {
   const time = moment().format('DD-MM-yyyy HH:mm:ss');
   return time;
-}
+};
 
 const messageFormatter = ({ nickname, chatMessage }) => {
   const timeMessage = timestamp();
