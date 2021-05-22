@@ -5,15 +5,131 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebChat</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('http://localhost:3000');
+  </script>
 </head>
 <body>
-  <h1>Welcome to The WebChat Project!</h1>
+  <h1>The Chatter</h1>
+    <form class="chat">
+      <input
+      type="text"
+      name="nickname-box"
+      id="nickname-box"
+      data-testid="nickname-box"
+      placeholder="How should we call you?"
+    />
+      <button
+      type="button"
+      id="nickname-save"
+      data-testid="nickname-button"
+      >
+      Nickname Recorded
+    </button>
+      <div id="messages"></div>
+      <input
+      type="text"
+      id="message-box"
+      data-testid="message-box"
+      name="message-box"
+      placeholder="What do you want to say?"
+    />
+      <button
+      type="button"
+      id="send-button"
+      data-testid="send-button"
+      >
+      Launch Message
+    </button>
+
+    </form>
+    <ul id="allUsers"></ul>
+    <ul id="allMessages">
+      <% renderMessages.forEach((message) => { %>
+        <li data-testid="message"><%= message %></li>
+      <% }); %>
+    </ul>
+  </body>
+  <script>
+    const socket = io();
+    let nickname = '';
+
+    const dataTestId = 'data-testid';
+
+    const addUser = (users) => {
+      users.forEach((user) => {
+        const listUsers = document.querySelector('#allUsers');
+        const li = document.createElement('li');
+        li.setAttribute(dataTestId, 'online-user');
+        li.setAttribute('id', user.id);
+        li.innerText = user.nickname;
+        listUsers.appendChild(li);
+      });
+    }
+
+    const createMessage = (response) => {
+      const allMessages = document.querySelector('#allMessages');
+      const li = document.createElement('li');
+      li.setAttribute(dataTestId, 'message');
+      li.innerText = response;
+      allMessages.appendChild(li);
+    }
+
+    const button = document.querySelector('#send-button');
+    
+    button.addEventListener('click', () => {
+      const inputMessage = document.querySelector('#message-box');
+      socket.emit('message', { chatMessage: inputMessage.value, nickname });
+      inputMessage.value = '';
+      return false;
+    });
+
+    const updateNickname = (userChanged) => {
+      const allUsers = document.querySelector('#allUsers');
+      const editedUser = document.getElementById(userChanged.id);
+      editedUser.innerHTML = userChanged.nickname;
+    }
+
+    const deleteUser = (id) => {
+      const userDisconnected = document.getElementById(id);
+      const allUsers = document.querySelector('#allUsers');
+      allUsers.removeChild(userDisconnected);
+    }
+    
+    const nickBtn = document.querySelector('#nickname-save');
+    
+    nickBtn.addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box');
+      socket.emit('updateNickname', { newNickname: newNickname.value });
+      nickname = newNickname.value;
+      newNickname.value = '';
+    });
+
+    socket.on('connected', (newUser) => {
+      nickname = newUser[0].nickname;
+      addUser(newUser); 
+    });
+
+    socket.on('usersOnline', (onlineUsers) => {
+      addUser(onlineUsers);
+    });
+    
+    socket.on('message', (message) => createMessage(message));
+    
+    socket.on('updateNickname', (user) => updateNickname(user));
+
+    socket.on('updateOnlineUsers', (id) => deleteUser(id));
+
+    sessionStorage.setItem('nickname', nickname);
+      const messages = await fetch('http://localhost:3000/chat', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then((res) => res.json());
+      
+  </script>
 </body>
-
-<script src="/socket.io/socket.io.js"></script>
-
-<script>
-  const socket = io('http://localhost:3000');
-</script>
 
 </html>
