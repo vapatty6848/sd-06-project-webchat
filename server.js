@@ -19,16 +19,18 @@ const io = require('socket.io')(http, {
 });
 
 app.use(cors());
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 
 const { createMessage, getAllMessages } = require('./models/chat');
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 app.get('/', async (_req, res) => {
   const allMessages = await getAllMessages();
   const displayMsg = allMessages
     .map((message) => `${message.timeMessage} ${message.nickname} ${message.chatMessage}`);
   res.render('index', { displayMsg });
+  console.log(displayMsg);
 });
 
 const usersList = [];

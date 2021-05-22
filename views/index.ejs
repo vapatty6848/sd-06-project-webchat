@@ -52,15 +52,14 @@
     const socket = io();
     let nickname = '';
     const dataTestId = 'data-testid';
-    const listUsers = document.querySelector('#allUsers');
-    const allMessages = document.querySelector('#allMessages');
     const sendBtn = document.querySelector('#send-button');
-    const inputMessage = document.querySelector('#message-box');
+
     const nickBtn = document.querySelector('#nickname-save');
-    const newNickname = document.querySelector('#nickname-box');
+    
 
     const addUser = (users) => {
       users.forEach((user) => {
+        const listUsers = document.querySelector('#allUsers');
         const li = document.createElement('li');
         li.setAttribute(dataTestId, 'online-user');
         li.setAttribute('id', user.id);
@@ -70,6 +69,7 @@
     }
 
     const createMessage = (response) => {
+      const allMessages = document.querySelector('#allMessages');
       const li = document.createElement('li');
       li.setAttribute(dataTestId, 'message');
       li.innerText = response;
@@ -77,12 +77,14 @@
     }
 
     sendBtn.addEventListener('click', () => {
+      const inputMessage = document.querySelector('#message-box');
       socket.emit('message', { chatMessage: inputMessage.value, nickname });
       inputMessage.value = '';
       return false;
     });
 
     const updateNickname = (userChanged) => {
+      const listUsers = document.querySelector('#allUsers');
       const editedUser = document.getElementById(userChanged.id);
       editedUser.innerHTML = userChanged.nickname;
     }
@@ -93,6 +95,7 @@
     }
     
     nickBtn.addEventListener('click', () => {
+      const newNickname = document.querySelector('#nickname-box');
       socket.emit('updateNickname', { newNickname: newNickname.value });
       nickname = newNickname.value;
       newNickname.value = '';
@@ -113,14 +116,7 @@
 
     socket.on('updateOnlineUsers', (id) => deleteUser(id));
 
-    sessionStorage.setItem('nickname', nickname);
-      const messages = await fetch('http://localhost:3000/chat', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      }).then((res) => res.json());
       
   </script>
-  
+
 </html>
