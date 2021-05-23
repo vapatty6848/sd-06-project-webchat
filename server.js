@@ -30,7 +30,6 @@ app.get('/', async (_req, res) => {
   const displayMsg = allMessages
     .map((message) => `${message.timeMessage} ${message.nickname} ${message.chatMessage}`);
   res.render('index', { displayMsg });
-  console.log(displayMsg);
 });
 
 const usersList = [];
@@ -41,7 +40,6 @@ const addNewUser = (socket) => {
     nickname: `${Math.random().toString().substr(2, 16)}`,
   };
   usersList.push(newUser);
-  console.log(usersList);
 
   return [newUser];
 };
@@ -74,13 +72,13 @@ io.on('connection', (socket) => {
     messageFormatter({ nickname, chatMessage });
   });
 
-  socket.on('changeNickname', ({ updatedNickname }) => {
+  socket.on('modifyNickname', ({ updatedNickname }) => {
     nicknameHandler(updatedNickname, socket);
     const userChanged = usersList.find((user) => user.id === socket.id);
-    io.emit('changeNickname', userChanged);
+    io.emit('modifyNickname', userChanged);
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', () => { 
     const userDisconnected = usersList.findIndex((user) => user.id === socket.id);
     usersList.splice(userDisconnected, 1);
     io.emit('updateOnlineUsers', socket.id);

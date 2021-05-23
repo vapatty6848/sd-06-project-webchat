@@ -53,9 +53,7 @@
     let nickname = '';
     const dataTestId = 'data-testid';
     const sendBtn = document.querySelector('#send-button');
-
     const nickBtn = document.querySelector('#nickname-save');
-    
 
     const addUser = (users) => {
       users.forEach((user) => {
@@ -83,7 +81,7 @@
       return false;
     });
 
-    const updateNickname = (userChanged) => {
+    const modifyNickname = (userChanged) => {
       const listUsers = document.querySelector('#allUsers');
       const editedUser = document.getElementById(userChanged.id);
       editedUser.innerHTML = userChanged.nickname;
@@ -95,10 +93,10 @@
     }
     
     nickBtn.addEventListener('click', () => {
-      const newNickname = document.querySelector('#nickname-box');
-      socket.emit('updateNickname', { newNickname: newNickname.value });
-      nickname = newNickname.value;
-      newNickname.value = '';
+      const updatedNickname = document.querySelector('#nickname-box');
+      socket.emit('modifyNickname', { updatedNickname: updatedNickname.value });
+      nickname = updatedNickname.value;
+      updatedNickname.value = '';
     });
 
     socket.on('connected', (newUser) => {
