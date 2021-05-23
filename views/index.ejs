@@ -87,7 +87,8 @@
       editedUser.innerHTML = userChanged.nickname;
     }
 
-    const deleteUser = (id) => {
+    const removeUser = (id) => {
+      const listUsers = document.querySelector('#allUsers');
       const userDisconnected = document.getElementById(id);
       listUsers.removeChild(userDisconnected);
     }
@@ -112,7 +113,7 @@
     
     socket.on('updateNickname', (user) => updateNickname(user));
 
-    socket.on('updateOnlineUsers', (id) => deleteUser(id));
+    socket.on('updateOnlineUsers', (id) => removeUser(id));
 
       
   </script>
