@@ -12,7 +12,7 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   },
 });
-// const { addMessages } = require('./models/messageModel');
+const { addMessages, allMessages } = require('./models/messageModel');
 
 app.use(cors());
 app.use(express.urlencoded({
@@ -30,13 +30,15 @@ io.on('connection', async (socket) => {
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const messageFormat = moment().format('DD-MM-yyyy HH:mm:ss A');
-    const result = `${messageFormat} - ${nickname} : ${chatMessage}`;
+    addMessages({ chatMessage, nickname, messageFormat })
+    const result = `${messageFormat} - ${nickname}: ${chatMessage}`;
     io.emit('message', result);
   });
 });
 
 app.get('/', async (_req, res) => {
-  res.render('../views');
+  const messageList = await allMessages();
+  res.render('../views', { messageList });
 });
 
 const PORT = process.env.PORT || 3000;
