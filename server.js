@@ -1,6 +1,7 @@
 const cors = require('cors');
 const express = require('express');
 const moment = require('moment');
+const { saveMessage, getAllMessages } = require('./models/chatModel');
 
 const app = express();
 const httpServer = require('http').createServer(app);
@@ -40,6 +41,7 @@ io.on('connection', (socket) => {
   socket.on('message', ({ chatMessage, nickname }) => {
     const editedMessage = `${messageDate()} - ${nickname}: ${chatMessage}`;
     io.emit('message', editedMessage);
+    saveMessage(editedMessage);
   });
 
   socket.on('updateNickname', (nickname) => {
@@ -61,8 +63,9 @@ io.on('connection', (socket) => {
 app.set('view engine', 'ejs'); // Cria uma view do lado do servidor, usando um ejs que é um view engine(motor de criação);
 app.set('views', './views');
 
-app.get('/', (_req, res) => {
-  res.render('home', { nickname: randomNickname(), users });
+app.get('/', async (_req, res) => {
+  const allMessages = await getAllMessages();
+  res.render('home', { nickname: randomNickname(), users, allMessages });
 });
 
 httpServer.listen('3000');
