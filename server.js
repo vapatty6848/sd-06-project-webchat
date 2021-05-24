@@ -36,6 +36,13 @@ const connected = (socket) => {
   });
 };
 
+const disconnected = (socket) => {
+  socket.on('disconnect', () => {
+    users = users.filter((user) => user.socketId !== socket.id);
+    io.emit('updateUsers', users);
+  });
+};
+
 io.on('connection', (socket) => {
   connected(socket);
 
@@ -54,11 +61,8 @@ io.on('connection', (socket) => {
     });
     io.emit('updateUsers', users);
   });
-
-  // Canal reservado
-  socket.on('disconnect', () => {
-    users = users.filter((user) => user.socketId !== socket.id);
-  });
+  
+  disconnected(socket);
 });
 
 app.set('view engine', 'ejs'); // Cria uma view do lado do servidor, usando um ejs que é um view engine(motor de criação);
