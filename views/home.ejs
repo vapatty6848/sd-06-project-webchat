@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Chat</h1>
+  <input type="text" id="mensagem" >
+  <button id="sendMessage">Enviar</button>
+  <script>
+    const nickname = Math.random().toFixed(14).toString();
+    const socket = io();
+    document.querySelector("#sendMessage").addEventListener('click', (e) => {
+      const chatMessage = document.querySelector("#mensagem").value;
+      socket.emit('message', { chatMessage, nickname });
+    });
+  </script>
+</body>
+</html>
