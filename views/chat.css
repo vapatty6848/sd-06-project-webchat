@@ -1,9 +1,9 @@
 * {
-  margin: 10;
-  padding: 0;
   box-sizing: border-box;
-  
+  margin: 10;
+  padding: 0;  
 }
+
 body {
   background-color: rgba(0, 0, 0, 0.342);
   font-family: 'Roboto', sans-serif;
@@ -11,28 +11,28 @@ body {
 
 form {
   background: rgba(0, 0, 0, 0.616);
-  padding: 3px;
-  position: fixed;
   bottom: 0;
-  width: 80%;
   display: flex;
   justify-content: space-between;
+  padding: 3px;
+  position: fixed;
+  width: 80%;
 }
 
 form input {
   border: 0;
+  margin-right: 0.5%;
   padding: 10px;
   width: 80%;
-  margin-right: 0.5%;
 }
 
 form button {
-  width: 15%;
   background: rgb(241, 94, 94);
   border: none;
-  padding: 10px;
   cursor: pointer;
   font-weight: 900;
+  padding: 10px;
+  width: 15%;
 }
 
 #mensagens {
@@ -50,12 +50,12 @@ form button {
 }
 
 #user-wrapper {
-  padding: 10px;
-  font-weight: 700;
-  display: flex;
-  justify-content: space-around;
   background-color: rgba(0, 0, 0, 0.336);
+  display: flex;
+  font-weight: 700;
   margin-bottom: 30px;
+  padding: 10px;
+  justify-content: space-around;
 }
 
 #users {
