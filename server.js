@@ -1,7 +1,6 @@
 const cors = require('cors');
 const express = require('express');
 const moment = require('moment');
-const { saveMessage, getAllMessages } = require('./models/chatModel');
 
 const app = express();
 const httpServer = require('http').createServer(app);
@@ -14,6 +13,8 @@ const io = require('socket.io')(httpServer, {
     methods: ['GET', 'POST'],
   },
 });
+
+const { saveMessage, getAllMessages } = require('./models/chatModel');
 
 let users = [];
 const messageDate = () => moment().format('DD-MM-YYYY hh:mm:ss A');
