@@ -37,7 +37,7 @@ const usersList = [];
 const addNewUser = (socket) => {
   const newUser = {
     id: socket.id,
-    nickname: `${Math.random().toString().substr(2, 16)}`,
+    nickname: `${socket.id.substr(4)}`,
   };
   usersList.push(newUser);
   return [newUser];
