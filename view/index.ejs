@@ -58,7 +58,7 @@
 <body>
 
   <input type="text" id="nickname-box" data-testid="nickname-box" placeholder="Digite seu apelido...">
-  <button id='nicknameButton' data-testid="nickname-button">Salvar</button>
+  <button id='nickname-button' data-testid="nickname-button">Salvar</button>
 
   <input type="text" id="message-box" data-testid="message-box" placeholder="Digite sua mensagem...">
   <button id="send-button" data-testid="send-button">Enviar</button>
@@ -67,7 +67,18 @@
   <div>
     <ul id="users">
       <% users.forEach(({ nickname, socketId })=> { %>
-        <li class="online-user2" data-testid="online-user" id=<%=socketId %> ><%= nickname %>
+        <li class="online-user2" data-testid="online-user" id=<%=socketId %> >
+          <%= nickname %>
+        </li>
+        <% }) %>
+    </ul>
+  </div>
+  <div>
+    <h2>Mensagens</h2>
+    <ul id="message">
+      <% messages.forEach((msg)=> { %>
+        <li dataTestid="message">
+          <%= msg.date %> - <%= msg.nickname %>: <%= msg.chatMessage%>
         </li>
         <% }) %>
     </ul>
@@ -77,18 +88,50 @@
 <script>
   const socket = io('http://localhost:3000');
 
-  const button = document.querySelector('#send-button');
-  const message = document.querySelector('#message-box');
+  const nickButton = document.querySelector('#nickname-button');
+  const messageButton = document.querySelector('#send-button');
+  const message = document.querySelector('#message');
+  const messageBox = document.querySelector('#message-box')
   const nickname = document.querySelector('#nickname-box');
 
+  const randomNickName = () => {
+    const length = 16;
+    const characteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+
+    for (let i = 0; i < length; i += 1) {
+      result += characteres.charAt(Math.floor(Math.random() * characteres.length));
+    }
+    return result;
+  };
+
   const renderUser = () => {
+    if (nickname.value === '') nickname.value = randomNickName();
     socket.emit('connected', { nickname: nickname.value });
-    socket.emit('message', { nickname: nickname.value, chatMessage: message.value });
-    message.value = '';
+  }
+
+  nickButton.addEventListener('click', renderUser);
+
+  const renderMessage = () => {
+    if (nickname.value === '') nickname.value = randomNickName();
+    socket.emit('connected', { nickname: nickname.value });
+    console.log(nickname);
+    socket.emit('message', { nickname: nickname.value, chatMessage: messageBox.value });
+    messageBox.value = '';
     return false;
   }
 
-  button.addEventListener('click', renderUser);
+  socket.on('message', (item) => {
+    const li = document.createElement("li");
+
+    li.setAttribute('dataTestid', 'message')
+    li.innerHTML = item;
+
+    message.appendChild(li);
+  });
+
+  messageButton.addEventListener('click', renderMessage);
+
 </script>
 
 </html>

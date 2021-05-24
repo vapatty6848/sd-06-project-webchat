@@ -21,21 +21,24 @@ const io = require('socket.io')(server, {
   },
 });
 
-const { date, randomNickName } = require('./utils/index');
+const { date } = require('./utils/index');
+const { addMessage, getMessages } = require('./models/index');
 
 io.on('connection', (socket) => {
   socket.on('connected', ({ nickname }) => {
     users.push({ nickname, socketId: socket.id });
   });
 
-  socket.on('message', ({ nickname, chatMessage }) => {
+  socket.on('message', async ({ nickname, chatMessage }) => {
+    await addMessage({ date, nickname, chatMessage });
     io.emit('message', `${date} - ${nickname}: ${chatMessage}`);
     console.log({ nickname, chatMessage }, users);
   });
 });
 
-app.use('/', (_req, res) => {
-  res.render('index.ejs', { nickname: randomNickName(), users });
+app.use('/', async (_req, res) => {
+  const messages = await getMessages();
+  res.render('index.ejs', { users, messages });
 });
 
 server.listen(3000);
