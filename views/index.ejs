@@ -111,7 +111,7 @@
     
     socket.on('message', (message) => createMessage(message));
     
-    socket.on('updateNickname', (user) => updateNickname(user));
+    socket.on('modifyNickname', (user) => modifyNickname(user));
 
     socket.on('updateOnlineUsers', (id) => removeUser(id));
 
