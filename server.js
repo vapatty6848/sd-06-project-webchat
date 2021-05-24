@@ -76,6 +76,8 @@ io.on('connection', (socket) => {
     nicknameHandler(updatedNickname, socket);
     const userChanged = usersList.find((user) => user.id === socket.id);
     io.emit('modifyNickname', userChanged);
+    console.log(userChanged.id)
+
   });
 
   socket.on('disconnect', () => { 
