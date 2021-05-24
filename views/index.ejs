@@ -43,8 +43,8 @@
     </form>
     <ul id="allUsers"></ul>
     <ul id="allMessages">
-      <% allMessages.forEach((message) => { %>
-        <li data-testid="message"><%= `${message.timeMessage} ${message.nickname} ${message.chatMessage}` %></li>
+      <% displayMsg.forEach((message) => { %>
+        <li data-testid="message"><%= message %></li>
       <% }); %>
     </ul>
   </body>

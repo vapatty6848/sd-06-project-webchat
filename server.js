@@ -27,7 +27,9 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.get('/', async (_req, res) => {
   const allMessages = await getAllMessages();
-  res.render('index', { allMessages });
+  const displayMsg = allMessages
+    .map((message) => `${message.timeMessage} ${message.nickname} ${message.chatMessage}`);
+  res.render('index', { displayMsg });
 });
 
 const usersList = [];
