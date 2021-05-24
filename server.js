@@ -30,7 +30,7 @@ io.on('connection', async (socket) => {
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const messageFormat = moment().format('DD-MM-yyyy HH:mm:ss A');
-    addMessages({ chatMessage, nickname, messageFormat })
+    addMessages({ chatMessage, nickname, messageFormat });
     const result = `${messageFormat} - ${nickname}: ${chatMessage}`;
     io.emit('message', result);
   });

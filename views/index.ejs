@@ -12,15 +12,15 @@
   <h1>Web chat</h1>
   <h4 data-testid="online-user" id="randomNickName"></h4>
   <label>Change you Nickname</label>
-  <input data-testid="nickname-box" id="nick"></input>
-  <button data-testid="nickname-button" id="changeNick">Change Nickname</button>
+  <input data-testid="nickname-box" id="nickname"></input>
+  <button data-testid="nickname-button" id="changeNickname">Change Nickname</button>
   <ul id="list">
     <% messageList.forEach(({ chatMessage }) => {%>
       <li data-testid="message"><%= chatMessage %></li><%}); %>
     </ul>
-    <input data-testid="message-box" id="inputMsg"></input>
+    <input data-testid="message-box" id="inputMessage"></input>
     <button data-testid="send-button" id="sendButton">Send Message</button>
-    
+
   <script defer>
     const socket = io('http://localhost:3000');
   
@@ -28,7 +28,7 @@
     console.log(document.querySelector('#randomNickName'));
     document.getElementById('randomNickName').innerHTML = nickname;
     document.getElementById('sendButton').addEventListener('click', () => {
-      let chatMessage =  document.getElementById('inputMsg').value;
+      let chatMessage =  document.getElementById('inputMessage').value;
       let currentNickname = document.getElementById('randomNickName').innerHTML
       socket.emit('message', { chatMessage, nickname:currentNickname });
     })
@@ -40,8 +40,8 @@
       list.appendChild(listItem)
       console.log(result)
     })
-    document.getElementById('changeNick').addEventListener('click', () => {
-      document.getElementById('randomNickName').innerHTML = document.getElementById('nick').value
+    document.getElementById('changeNickname').addEventListener('click', () => {
+      document.getElementById('randomNickName').innerHTML = document.getElementById('nickname').value
     })
   </script>
 </body>
