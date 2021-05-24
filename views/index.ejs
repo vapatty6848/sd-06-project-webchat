@@ -25,7 +25,6 @@
     const socket = io('http://localhost:3000');
   
     let nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-    console.log(document.querySelector('#randomNickName'));
     document.getElementById('randomNickName').innerHTML = nickname;
     document.getElementById('sendButton').addEventListener('click', () => {
       let chatMessage =  document.getElementById('inputMessage').value;
@@ -38,7 +37,6 @@
       listItem.appendChild(document.createTextNode(result))
       listItem.setAttribute('data-testid', 'message');
       list.appendChild(listItem)
-      console.log(result)
     })
     document.getElementById('changeNickname').addEventListener('click', () => {
       document.getElementById('randomNickName').innerHTML = document.getElementById('nickname').value
