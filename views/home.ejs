@@ -63,9 +63,12 @@
       socket.emit('updateNickname', nickname)
     });
 
+    
     socket.on('updateUsers', (users) => {
       usersUl.innerHTML = '';
-      users.forEach((user) => {
+      const firstUser = users.find((user) => user.socketId === socket.id);
+      const lastUsers = users.filter((user) => user.socketId !== socket.id);
+      [firstUser, ...lastUsers].forEach((user) => {
         const userLi = document.createElement('li');
         userLi.setAttribute('data-testid', 'online-user');
         userLi.innerHTML = user.nickname;
