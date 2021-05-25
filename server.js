@@ -25,15 +25,19 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'view'));
 app.engine('ejs', require('ejs').renderFile);
 
+const connected = (nickname, socket) => {
+  users.unshift({ nickname, socketId: socket.id });
+  socket.broadcast.emit('connected', [{ nickname, id: socket.id }]);
+  socket.emit('connected', users);
+};
+
 io.on('connection', (socket) => {
   socket.on('connected', ({ nickname }) => {
-    users.unshift({ nickname, socketId: socket.id });
-    socket.broadcast.emit('connected', [{ nickname, id: socket.id }]);
-    socket.emit('connected', users);
+    connected(nickname, socket);
   });
   socket.on('nickChange', ({ nickname, id }) => {
-    users = users.filter((user) => user.socketId !== id);
-    users.push({ nickname, socketId: id });
+    const userIndex = users.findIndex((user) => user.socketId === id);
+    users.splice(userIndex, 1, { nickname, socketId: id });
     io.emit('nickChange', nickname, id);
   });
   socket.on('message', ({ nickname, chatMessage, userId }) => {
@@ -41,7 +45,8 @@ io.on('connection', (socket) => {
     io.emit('message', `${date} - ${nickname}: ${chatMessage}`);
   });
   socket.on('disconnect', () => {
-    users = users.filter((user) => user.socketId !== socket.id);
+    const userIndex = users.findIndex((user) => user.socketId === socket.id);
+    users.splice(userIndex, 1);
     io.emit('user-off', { id: socket.id });
   });
 });
