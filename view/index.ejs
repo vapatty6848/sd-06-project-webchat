@@ -120,7 +120,7 @@
     item.forEach((user => {
       const li = document.createElement("li");
       li.setAttribute('data-testid', 'online-user')
-      li.setAttribute('id', user.sockedId)
+      li.setAttribute('id', user.socketId)
       li.innerHTML = user.nickname;
       userList.appendChild(li);
     }));
