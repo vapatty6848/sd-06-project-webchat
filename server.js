@@ -7,7 +7,8 @@ const path = require('path');
 const app = express();
 const server = require('http').createServer(app);
 
-let users = [];
+const users = [];
+
 const config = {
   cors: {
     origin: 'http://localhost:3000/',
@@ -37,7 +38,7 @@ io.on('connection', (socket) => {
   });
   socket.on('nickChange', ({ nickname, id }) => {
     const userIndex = users.findIndex((user) => user.socketId === id);
-    users.splice(userIndex, 1, { nickname, socketId: id });
+     users.splice(userIndex, 1, { nickname, socketId: id });
     io.emit('nickChange', nickname, id);
   });
   socket.on('message', ({ nickname, chatMessage, userId }) => {
