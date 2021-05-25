@@ -43,9 +43,11 @@
     </form>
     <ul id="allUsers"></ul>
     <ul id="allMessages">
-      <% displayMsg.forEach((message) => { %>
-        <li data-testid="message"><%= message %></li>
+
+      <% allMessages.forEach((message) => { %>
+        <li data-testid="message"><%= `${message.timeMessage} ${message.nickname} ${message.chatMessage}` %></li>
       <% }); %>
+      
     </ul>
   </body>
   <script>
@@ -87,7 +89,7 @@
       editedUser.innerHTML = userChanged.nickname;
     }
 
-    const removeUser = (id) => {
+    const deleteUser = (id) => {
       const listUsers = document.querySelector('#allUsers');
       const userDisconnected = document.getElementById(id);
       listUsers.removeChild(userDisconnected);
@@ -105,15 +107,13 @@
       addUser(newUser); 
     });
 
-    socket.on('usersOnline', (onlineUsers) => {
-      addUser(onlineUsers);
-    });
+    socket.on('usersOnline', (onlineUsers) => addUser(onlineUsers));
     
     socket.on('message', (message) => createMessage(message));
     
     socket.on('modifyNickname', (user) => modifyNickname(user));
 
-    socket.on('updateOnlineUsers', (id) => removeUser(id));
+    socket.on('updateOnlineUsers', (id) => deleteUser(id));
 
       
   </script>

@@ -27,9 +27,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.get('/', async (_req, res) => {
   const allMessages = await getAllMessages();
-  const displayMsg = allMessages
-    .map((message) => `${message.timeMessage} ${message.nickname} ${message.chatMessage}`);
-  res.render('index', { displayMsg });
+  res.render('index', { allMessages });
 });
 
 const usersList = [];
@@ -48,10 +46,7 @@ const nicknameHandler = (updatedNickname, socket) => {
   usersList[index].nickname = updatedNickname;
 };
 
-const timestamp = () => {
-  const time = moment().format('DD-MM-yyyy HH:mm:ss');
-  return time;
-};
+const timestamp = () => moment().format('DD-MM-yyyy HH:mm:ss');
 
 const messageFormatter = ({ nickname, chatMessage }) => {
   const timeMessage = timestamp();
