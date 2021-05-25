@@ -150,6 +150,10 @@
   });
 
   messageButton.addEventListener('click', renderMessageSocketTrigger);
+
+  window.onbeforeunload = (error) => {
+    socket.disconnect();
+  };
 </script>
 
 </html>
