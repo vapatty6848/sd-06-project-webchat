@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,39 +8,73 @@
 </head>
 <script src="socket.io/socket.io.js"></script>
 <body>
-  <h1>Web chat</h1>
-  <h4 data-testid="online-user" id="randomNickName"></h4>
-  <label>Change you Nickname</label>
-  <input data-testid="nickname-box" id="nickname"></input>
-  <button data-testid="nickname-button" id="changeNickname">Change Nickname</button>
-  <ul id="list">
-    <% messageList.forEach(({ chatMessage }) => {%>
-      <li data-testid="message"><%= chatMessage %></li><%}); %>
-    </ul>
-    <input data-testid="message-box" id="inputMessage"></input>
-    <button data-testid="send-button" id="sendButton">Send Message</button>
+  <h1>WebChat</h1>
+  <h1 id="randomNickName"></h1>
+  <ul id="user-list">
+  </ul>
+  <label>Change Nickname</label>
+  <input data-testid="nickname-box" id="nick"></input>
+  <button data-testid="nickname-button" id="changeNick">Change Nickname</button>
+  <ul id="list"> 
+    <% messageList.forEach(( msg ) => {%>
+      <li data-testid="message"><%= msg %></li>
+    <%}); %>
+  </ul>
+  <input data-testid="message-box" id="inputMsg"></input>
+  <button data-testid="send-button" id="sendButton">Send Message</button>
 
   <script defer>
     const socket = io('http://localhost:3000');
+    let nickname = '';
   
-    let nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-    document.getElementById('randomNickName').innerHTML = nickname;
-    document.getElementById('sendButton').addEventListener('click', () => {
-      let chatMessage =  document.getElementById('inputMessage').value;
-      let currentNickname = document.getElementById('randomNickName').innerHTML
-      socket.emit('message', { chatMessage, nickname:currentNickname });
-    })
-    socket.on('message', (result) => {
-      let list = document.getElementById("list");
-      let listItem = document.createElement("li");
-      listItem.appendChild(document.createTextNode(result))
-      listItem.setAttribute('data-testid', 'message');
-      list.appendChild(listItem)
-    })
-    document.getElementById('changeNickname').addEventListener('click', () => {
-      document.getElementById('randomNickName').innerHTML = document.getElementById('nickname').value
-    })
+    socket.on('connect', () => {
+    nickname = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+    document.getElementById('randomNickName').innerHTML = nickname
+    socket.emit('newUser', { nickname });
+  });
+  
+  document.getElementById('sendButton').addEventListener('click', () => {
+    let chatMessage =  document.getElementById('inputMsg').value;
+    let currentNickname = document.getElementById('randomNickName').innerHTML
+    socket.emit('message', { chatMessage, nickname:currentNickname });
+    chatMessage.value = '';
+  })
+  
+  document.getElementById('changeNick').addEventListener('click', () => {
+    let newNick = document.getElementById('nick');
+    document.getElementById('randomNickName').innerHTML = newNick.value
+    nickname = newNick.value
+    socket.emit('handleNickname', nickname)
+  })
+  socket.on('updateUsers', (allUsers) => {
+    const thisUser = allUsers.find((user) => user.id === socket.id);
+    const indexUser = allUsers.findIndex((user) => user === thisUser);
+    
+    allUsers.splice(indexUser, 1);
+    allUsers.unshift(thisUser)
+    
+    const elements = document.getElementsByClassName('online-user');
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+
+    }
+    allUsers.forEach(user => {
+        const userList = document.getElementById('user-list');
+        const userLi = document.createElement('li');
+        userLi.appendChild(document.createTextNode(user.nickname));
+        userLi.setAttribute('data-testid', 'online-user');
+        userLi.setAttribute('class', 'online-user');
+        userList.appendChild(userLi);
+    });
+  });
+
+  socket.on('message', (result) => {
+    const list = document.getElementById('list');
+    const listItem = document.createElement('li');
+    listItem.appendChild(document.createTextNode(result));
+    listItem.setAttribute('data-testid', 'message');
+    list.appendChild(listItem);
+  });
   </script>
 </body>
-
 </html>

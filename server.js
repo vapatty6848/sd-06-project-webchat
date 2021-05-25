@@ -12,34 +12,53 @@ const io = require('socket.io')(http, {
     methods: ['GET', 'POST'],
   },
 });
-const { addMessages, allMessages } = require('./models/messageModel');
+const { newMessages, allMessages } = require('./models/messageModel');
 
 app.use(cors());
-app.use(express.urlencoded({
-  extended: true }));
-app.use(express.static(path.join(__dirname, 'views ')));
 
 app.set('view engine', 'ejs');
 
 app.set('views', './views');
 
+app.get('/', async (_req, res) => {
+  const messageObject = await allMessages();
+  const messageList = messageObject
+  .map((msg) => `${msg.date} ${msg.nickname} ${msg.chatMessage}`);
+  res.render('../views/', { messageList });
+});
+
+let allUsers = [];
+
+const newUser = ({ nickname, socket }) => {
+  allUsers.push({ id: socket.id, nickname });
+  io.emit('updateUsers', allUsers);
+};
+
+const handleNickname = ({ newNick, socket }) => {
+  const indexUser = allUsers.findIndex((user) => user.id === socket.id);
+  allUsers[indexUser].nickname = newNick;
+  io.emit('updateUsers', allUsers);
+};
+
 io.on('connection', async (socket) => {
-  socket.on('disconnect', () => {
-    console.log('o Lendário desconectou!');
-  });
+  socket.on('newUser', ({ nickname }) => newUser({ nickname, socket }));
+
+  socket.on('handleNickname', (newNick) => handleNickname({ newNick, socket }));
 
   socket.on('message', async ({ chatMessage, nickname }) => {
-    const messageFormat = moment().format('DD-MM-yyyy HH:mm:ss A');
-    addMessages({ chatMessage, nickname, messageFormat });
-    const result = `${messageFormat} - ${nickname}: ${chatMessage}`;
+    const formatMessage = moment().format('DD-MM-yyyy HH:mm:ss A'); 
+    newMessages({ nickname, chatMessage, date: formatMessage});
+    const result = `${formatMessage} - ${nickname} - ${chatMessage}`;
     io.emit('message', result);
+  });
+
+  socket.on('disconnect', () => {
+    const onUser = allUsers.filter((e) => e.id !== socket.id);
+    allUsers = onUser;
+    io.emit('updateUsers', allUsers);
   });
 });
 
-app.get('/', async (_req, res) => {
-  const messageList = await allMessages();
-  res.render('../views', { messageList });
-});
 
 const PORT = process.env.PORT || 3000;
 

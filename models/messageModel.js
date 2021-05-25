@@ -1,6 +1,6 @@
 const connection = require('./connection');
 
-const addMessages = async ({ chatMessage, nickname, messageFormat }) => connection()
+const newMessages = async ({ chatMessage, nickname, messageFormat }) => connection()
   .then(async (db) => {
     const addMessage = await db.collection('messages')
     .insertOne({ chatMessage, nickname, messageFormat });
@@ -15,6 +15,6 @@ const allMessages = async () => connection()
   });
 
 module.exports = {
-  addMessages,
+  newMessages,
   allMessages,
 };
