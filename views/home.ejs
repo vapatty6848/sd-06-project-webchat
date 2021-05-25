@@ -10,9 +10,11 @@
 <body>
   <h1>Chat</h1>
   <div>
-    <p id="online-user" data-testid="online-user"></p>
+    <p id="online-user"></p>
     <input type="text" data-testid="nickname-box" id="nickname-box">
-    <button type="button" data-testid="nickname-button">Alterar Nome</button>
+    <button type="button" data-testid="nickname-button" id="nickname-button">
+      Alterar Nome
+    </button>
   </div>
   <div>
     <h1>Online Users</h1>
@@ -25,7 +27,7 @@
     <ul id="messagesContainer"></ul>
   </div>
   <script>
-    const nickname = Math.random().toFixed(14).toString();
+    let nickname = Math.random().toFixed(14).toString().replace('.', '0');
     const p = document.querySelector("#online-user");
     p.innerHTML = nickname;
     const socket = io('http://localhost:3000');
@@ -36,17 +38,19 @@
       socket.emit('message', { chatMessage, nickname });
     });
 
-    document.querySelector("#sendMessage").addEventListener('click', (e) => {
+    document.querySelector("#nickname-button").addEventListener('click', (e) => {
       const newNickname = document.querySelector("#nickname-box").value;
-      socket.emit('newNickname', newNickname);
+      socket.emit('newNickname', { oldNickname: nickname, newNickname });
+      nickname = newNickname;
+      p.innerHTML = nickname;
     });
 
     socket.emit('createNickname', nickname);
 
-    socket.on('message', (message) => {
+    socket.on('message', (chatMessage) => {
       const messageLi = document.createElement('li');
       messageLi.setAttribute('data-testid', 'message');
-      messageLi.innerHTML = message;
+      messageLi.innerHTML = chatMessage;
       const messageContainer = document.querySelector('#messagesContainer');
       messageContainer.appendChild(messageLi);
     });

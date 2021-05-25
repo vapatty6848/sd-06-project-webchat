@@ -16,8 +16,14 @@ io.on('connection', (socket) => {
 		io.emit('message', message)
 		sockets.push({ nickname, userId: socket.id });
 	});
-	socket.on('newNickname', (nickname) => {
-		socket.nickname = nickname;
+	socket.on('newNickname', ({ newNickname, oldNickname }) => {
+		const newUserList = sockets.map((item) => {
+			if (item.nickname === oldNickname) {
+				item.nickname = newNickname;
+			}
+			return item;
+		});
+		io.emit('newUserList', sockets);
 	});
 	socket.on('createNickname', (nickname) => {
 		sockets.push({ nickname, userId: socket.id });
@@ -25,7 +31,7 @@ io.on('connection', (socket) => {
 	});
 	socket.on('disconnect', () => {
 		sockets = sockets.filter((item) => item.userId !== socket.id);
-		io.emit('newUserList', sockets)
+		io.emit('newUserList', sockets);
 	})
 });
 
@@ -33,7 +39,7 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 
 app.get('/', (_req, res) => {
-	res.render('home', { sockets });
+	res.render('home');
 });
 
 httpServer.listen(port);
