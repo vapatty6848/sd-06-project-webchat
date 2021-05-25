@@ -1,7 +1,6 @@
 const express = require('express');
 
 const cors = require('cors');
-const path = require('path');
 const moment = require('moment');
 
 const app = express();
@@ -47,7 +46,7 @@ io.on('connection', async (socket) => {
 
   socket.on('message', async ({ chatMessage, nickname }) => {
     const formatMessage = moment().format('DD-MM-yyyy HH:mm:ss A'); 
-    newMessages({ nickname, chatMessage, date: formatMessage});
+    newMessages({ nickname, chatMessage, date: formatMessage });
     const result = `${formatMessage} - ${nickname} - ${chatMessage}`;
     io.emit('message', result);
   });
@@ -58,7 +57,6 @@ io.on('connection', async (socket) => {
     io.emit('updateUsers', allUsers);
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 
