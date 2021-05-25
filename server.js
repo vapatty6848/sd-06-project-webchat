@@ -28,8 +28,8 @@ app.engine('ejs', require('ejs').renderFile);
 
 const connected = (nickname, socket) => {
   users.unshift({ nickname, socketId: socket.id });
-  socket.broadcast.emit('connected', [{ nickname, id: socket.id }]);
   socket.emit('connected', users);
+  socket.broadcast.emit('connected', [{ nickname, id: socket.id }]);
 };
 
 io.on('connection', (socket) => {
@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
   });
   socket.on('nickChange', ({ nickname, id }) => {
     const userIndex = users.findIndex((user) => user.socketId === id);
-     users.splice(userIndex, 1, { nickname, socketId: id });
+    users.splice(userIndex, 1, { nickname, socketId: id });
     io.emit('nickChange', nickname, id);
   });
   socket.on('message', ({ nickname, chatMessage, userId }) => {
