@@ -144,10 +144,8 @@
   })
 
   socket.on('user-off', ({ socketId }) => {
-    console.log('teste')
     const user = document.getElementById(socketId);
     user.remove();
-    socket.disconnect();
   });
   messageButton.addEventListener('click', renderMessageSocketTrigger);
 

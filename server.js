@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     const userIndex = users.findIndex((user) => user.socketId === socket.id);
     users.splice(userIndex, 1);
-    io.emit('user-off', { id: socket.id });
+    io.emit('user-off', { socketId: socket.id });
   });
 });
 
