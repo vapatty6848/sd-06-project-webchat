@@ -147,13 +147,14 @@
     console.log('teste')
     const user = document.getElementById(id);
     user.remove();
+    socket.disconnect()
   });
 
   messageButton.addEventListener('click', renderMessageSocketTrigger);
 
-  window.onbeforeunload = (error) => {
-    socket.disconnect();
-  };
+  // window.onbeforeunload = (error) => {
+  //   socket.disconnect();
+  // };
 </script>
 
 </html>
