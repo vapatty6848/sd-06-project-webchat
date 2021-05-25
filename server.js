@@ -68,8 +68,8 @@ io.on('connection', (socket) => {
 
   socket.on('modifyNickname', ({ updatedNickname }) => {
     nicknameHandler(updatedNickname, socket);
-    const userChanged = usersList.find((user) => user.id === socket.id);
-    io.emit('modifyNickname', userChanged);
+    const nicknameChanged = usersList.find((user) => user.id === socket.id);
+    io.emit('modifyNickname', nicknameChanged);
   });
 
   socket.on('disconnect', () => { 

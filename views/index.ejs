@@ -47,17 +47,19 @@
       <% allMessages.forEach((message) => { %>
         <li data-testid="message"><%= `${message.timeMessage} ${message.nickname} ${message.chatMessage}` %></li>
       <% }); %>
-      
+
     </ul>
   </body>
+  
   <script>
+
     const socket = io();
     let nickname = '';
     const dataTestId = 'data-testid';
     const sendBtn = document.querySelector('#send-button');
     const nickBtn = document.querySelector('#nickname-save');
 
-    const addUser = (users) => {
+    function addNewUser(users) {
       users.forEach((user) => {
         const listUsers = document.querySelector('#allUsers');
         const li = document.createElement('li');
@@ -68,7 +70,7 @@
       });
     }
 
-    const createMessage = (response) => {
+    function newMessage(response) {
       const allMessages = document.querySelector('#allMessages');
       const li = document.createElement('li');
       li.setAttribute(dataTestId, 'message');
@@ -77,19 +79,19 @@
     }
 
     sendBtn.addEventListener('click', () => {
-      const inputMessage = document.querySelector('#message-box');
-      socket.emit('message', { chatMessage: inputMessage.value, nickname });
-      inputMessage.value = '';
+      const sentMessage = document.querySelector('#message-box');
+      socket.emit('message', { chatMessage: sentMessage.value, nickname });
+      sentMessage.value = '';
       return false;
     });
 
-    const modifyNickname = (userChanged) => {
+    function modifyNickname(nicknameChanged) {
       const listUsers = document.querySelector('#allUsers');
-      const editedUser = document.getElementById(userChanged.id);
-      editedUser.innerHTML = userChanged.nickname;
+      const updatedUser = document.getElementById(nicknameChanged.id);
+      updatedUser.innerHTML = nicknameChanged.nickname;
     }
 
-    const deleteUser = (id) => {
+    function deleteUser(id) {
       const listUsers = document.querySelector('#allUsers');
       const userDisconnected = document.getElementById(id);
       listUsers.removeChild(userDisconnected);
@@ -104,18 +106,17 @@
 
     socket.on('connected', (newUser) => {
       nickname = newUser[0].nickname;
-      addUser(newUser); 
+      addNewUser(newUser); 
     });
 
-    socket.on('usersOnline', (onlineUsers) => addUser(onlineUsers));
+    socket.on('usersOnline', (onlineUsers) => addNewUser(onlineUsers));
     
-    socket.on('message', (message) => createMessage(message));
+    socket.on('message', (message) => newMessage(message));
     
     socket.on('modifyNickname', (user) => modifyNickname(user));
 
     socket.on('updateOnlineUsers', (id) => deleteUser(id));
 
-      
   </script>
 
 </html>
