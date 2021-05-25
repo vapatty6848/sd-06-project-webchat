@@ -135,17 +135,17 @@
 
   nicknameButton.addEventListener('click', () => {
     nick = nicknameBox.value;
-    socket.emit('nickChange', { nickname: nick, id: socket.id });
+    socket.emit('nickChange', { nickname: nick, socketId: socket.id });
   });
 
-  socket.on('nickChange', (nickname, id) => {
-    const user = document.getElementById(id);
+  socket.on('nickChange', (nickname, socketId) => {
+    const user = document.getElementById(socketId);
     user.innerHTML = nickname;
   })
 
-  socket.on('user-off', ({ id }) => {
+  socket.on('user-off', ({ socketId }) => {
     console.log('teste')
-    const user = document.getElementById(id);
+    const user = document.getElementById(socketId);
     user.remove();
     socket.disconnect();
   });

@@ -36,10 +36,10 @@ io.on('connection', (socket) => {
   socket.on('connected', ({ nickname }) => {
     connected(nickname, socket);
   });
-  socket.on('nickChange', ({ nickname, id }) => {
-    const userIndex = users.findIndex((user) => user.socketId === id);
-    users.splice(userIndex, 1, { nickname, socketId: id });
-    io.emit('nickChange', nickname, id);
+  socket.on('nickChange', ({ nickname, socketId }) => {
+    const userIndex = users.findIndex((user) => user.socketId === socketId);
+    users.splice(userIndex, 1, { nickname, socketId });
+    io.emit('nickChange', nickname, socketId);
   });
   socket.on('message', ({ nickname, chatMessage, userId }) => {
     addMessage({ date, nickname, chatMessage, userId });
