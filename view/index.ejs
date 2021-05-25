@@ -67,8 +67,7 @@
   <div>
     <ul id="users">
       <% users.forEach(({ nickname, socketId })=> { %>
-        <li class="online-user2" data-testid="online-user" id=<%=socketId %> >
-          <%= nickname %>
+        <li data-testid="online-user" id=<%=socketId %> > <%= nickname %>
         </li>
         <% }) %>
     </ul>
@@ -77,7 +76,7 @@
     <h2>Mensagens</h2>
     <ul id="message">
       <% messages.forEach((msg)=> { %>
-        <li dataTestid="message">
+        <li data-testid="message">
           <%= msg.date %> - <%= msg.nickname %>: <%= msg.chatMessage%>
         </li>
         <% }) %>
@@ -88,11 +87,14 @@
 <script>
   const socket = io('http://localhost:3000');
 
-  const nickButton = document.querySelector('#nickname-button');
+  const nicknameButton = document.querySelector('#nickname-button');
   const messageButton = document.querySelector('#send-button');
-  const message = document.querySelector('#message');
   const messageBox = document.querySelector('#message-box')
-  const nickname = document.querySelector('#nickname-box');
+  const nicknameBox = document.querySelector('#nickname-box');
+  const userMessage = document.querySelector('#message');
+
+  let nick;
+  let userId;
 
   const randomNickName = () => {
     const length = 16;
@@ -105,33 +107,39 @@
     return result;
   };
 
-  const renderUser = () => {
-    if (nickname.value === '') nickname.value = randomNickName();
-    socket.emit('connected', { nickname: nickname.value });
-  }
-
-  nickButton.addEventListener('click', renderUser);
-
-  const renderMessage = () => {
-    if (nickname.value === '') nickname.value = randomNickName();
-    socket.emit('connected', { nickname: nickname.value });
-    console.log(nickname);
-    socket.emit('message', { nickname: nickname.value, chatMessage: messageBox.value });
+  const renderMessageSocketTrigger = () => {
+    socket.emit('message', { nickname: nick, chatMessage: messageBox.value, userId });
     messageBox.value = '';
     return false;
   }
 
-  socket.on('message', (item) => {
-    const li = document.createElement("li");
-
-    li.setAttribute('dataTestid', 'message')
-    li.innerHTML = item;
-
-    message.appendChild(li);
+  socket.on('connect', () => {
+    nick = randomNickName()
+    socket.emit('connected', { nickname: nick });
   });
 
-  messageButton.addEventListener('click', renderMessage);
+  socket.on('connected', (item) => {
+    console.log(item)
+    userId = item.id
+  });
 
+  socket.on('message', (item) => {
+    const li = document.createElement("li");
+    li.setAttribute('data-testid', 'message')
+    li.innerHTML = item;
+    userMessage.appendChild(li);
+  });
+
+  socket.on('nickChange', ({ nickname, id }) => {
+    const user = document.querySelector(id);
+  });
+
+  nicknameButton.addEventListener('click', () => {
+    nick = nicknameBox.value;
+    socket.emit('nickChange', { nickname: nick, id: userId });
+  });
+
+  messageButton.addEventListener('click', renderMessageSocketTrigger);
 </script>
 
 </html>
