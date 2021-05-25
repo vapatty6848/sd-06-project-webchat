@@ -28,8 +28,8 @@ app.engine('ejs', require('ejs').renderFile);
 
 const connected = (nickname, socket) => {
   users.unshift({ nickname, socketId: socket.id });
+  socket.broadcast.emit('connected', [{ nickname, sockedId: socket.id }]);
   socket.emit('connected', users);
-  socket.broadcast.emit('connected', [{ nickname, id: socket.id }]);
 };
 
 io.on('connection', (socket) => {
