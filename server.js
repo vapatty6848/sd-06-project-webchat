@@ -4,11 +4,11 @@ const express = require('express');
 
 const app = express();
 const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer);
+
 const { createMessage, getAllMessages } = require('./models/messageModel');
 
 const port = 3000;
-
-const io = require('socket.io')(httpServer);
 
 const date = () => moment().format('DD-MM-YYYY hh:mm:ss A');
 let sockets = [];

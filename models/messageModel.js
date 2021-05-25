@@ -14,5 +14,5 @@ const getAllMessages = () => (
 
 module.exports = { 
   createMessage,
-  getAllMessages
+  getAllMessages,
 };
