@@ -27,26 +27,29 @@ app.engine('ejs', require('ejs').renderFile);
 
 io.on('connection', (socket) => {
   socket.on('connected', ({ nickname }) => {
-    users.push({ nickname, socketId: socket.id });
-    io.emit('connected', { nickname, id: socket.id });
+    users.unshift({ nickname, socketId: socket.id });
+    socket.broadcast.emit('connected', [{ nickname, id: socket.id }]);
+    socket.emit('connected', users);
   });
-
-  socket.on('nickChange', async ({ nickname, id }) => {
+  socket.on('nickChange', ({ nickname, id }) => {
     users = users.filter((user) => user.socketId !== id);
     users.push({ nickname, socketId: id });
-    await updtadeNickname(id, nickname);
+    // updtadeNickname(id, nickname);
     io.emit('nickChange', nickname, id);
   });
-
-  socket.on('message', async ({ nickname, chatMessage, userId }) => {
+  socket.on('message', ({ nickname, chatMessage, userId }) => {
     addMessage({ date, nickname, chatMessage, userId });
     io.emit('message', `${date} - ${nickname}: ${chatMessage}`);
+  });
+  socket.on('disconnect', () => {
+    users = users.filter((user) => user.socketId !== socket.id);
+    io.emit('user-off', { id: socket.id });
   });
 });
 
 app.use('/', async (_req, res) => {
   const messages = await getMessages();
-  res.render('index.ejs', { users, messages });
+  res.render('index.ejs', { messages });
 });
 
 server.listen(3000);

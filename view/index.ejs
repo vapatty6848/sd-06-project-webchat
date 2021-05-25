@@ -66,10 +66,6 @@
   <h2>Usuários</h2>
   <div>
     <ul id="users">
-      <% users.forEach(({ nickname, socketId })=> { %>
-        <li data-testid="online-user" id=<%=socketId %> > <%= nickname %>
-        </li>
-        <% }) %>
     </ul>
   </div>
   <div>
@@ -92,6 +88,7 @@
   const messageBox = document.querySelector('#message-box')
   const nicknameBox = document.querySelector('#nickname-box');
   const userMessage = document.querySelector('#message');
+  const userList = document.querySelector('#users');
 
   let nick;
   let userId;
@@ -108,7 +105,7 @@
   };
 
   const renderMessageSocketTrigger = () => {
-    socket.emit('message', { nickname: nick, chatMessage: messageBox.value, userId });
+    socket.emit('message', { nickname: nick, chatMessage: messageBox.value, userId: socket.id });
     messageBox.value = '';
     return false;
   }
@@ -120,7 +117,13 @@
 
   socket.on('connected', (item) => {
     console.log(item)
-    userId = item.id
+    item.forEach((user => {
+      const li = document.createElement("li");
+      li.setAttribute('data-testid', 'online-user')
+      li.setAttribute('id', user.socketId)
+      li.innerHTML = user.nickname;
+      userList.appendChild(li);
+    }));
   });
 
   socket.on('message', (item) => {
@@ -130,13 +133,20 @@
     userMessage.appendChild(li);
   });
 
-  socket.on('nickChange', ({ nickname, id }) => {
-    const user = document.querySelector(id);
-  });
-
   nicknameButton.addEventListener('click', () => {
     nick = nicknameBox.value;
-    socket.emit('nickChange', { nickname: nick, id: userId });
+    socket.emit('nickChange', { nickname: nick, id: socket.id });
+  });
+
+  socket.on('nickChange', (nickname, id) => {
+    const user = document.getElementById(id);
+    user.innerHTML = nickname;
+  })
+
+  socket.on('user-off', ({ id }) => {
+    console.log('teste')
+    const user = document.getElementById(id);
+    user.remove();
   });
 
   messageButton.addEventListener('click', renderMessageSocketTrigger);
