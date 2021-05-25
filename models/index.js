@@ -12,19 +12,7 @@ const getMessages = async () => {
   return messages;
 };
 
-const updtadeNickname = async (id, nick) => {
-  const db = await connection();
-  await db.collection('messages')
-    .updateMany({ userId: id }, { $set: { nickname: nick } });
-};
-
-// const deleteUserOff = async (id) => {
-//   const db = await connection();
-//   await db.deleteOne(ObjectId(id));
-// };
-
 module.exports = {
   addMessage,
   getMessages,
-  updtadeNickname,
 };

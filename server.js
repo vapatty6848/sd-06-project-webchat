@@ -17,7 +17,7 @@ const config = {
 
 const io = require('socket.io')(server, config);
 
-const { addMessage, getMessages, updtadeNickname } = require('./models/index');
+const { addMessage, getMessages } = require('./models/index');
 const { date } = require('./utils/index');
 
 app.use(cors());
@@ -34,7 +34,6 @@ io.on('connection', (socket) => {
   socket.on('nickChange', ({ nickname, id }) => {
     users = users.filter((user) => user.socketId !== id);
     users.push({ nickname, socketId: id });
-    // updtadeNickname(id, nickname);
     io.emit('nickChange', nickname, id);
   });
   socket.on('message', ({ nickname, chatMessage, userId }) => {
