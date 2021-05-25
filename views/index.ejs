@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>WebChat</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+    * {
+      box-sizing: border-box;
+      margin: 10;
+      padding: 0;
+    }
+    body {
+      background-color: rgba(51, 100, 66, 0.692);
+      font-family: "OpenSans", sans-serif;
+    }
+    form {
+      background: rgba(0, 0, 0, 0.616);
+      bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 3px;
+      position: fixed;
+      width: 50%;
+    }
+    form input {
+      border: 0;
+      margin-right: 0.5%;
+      padding: 10px;
+      width: 80%;
+    }
+    form button {
+      background: rgb(0, 36, 5);
+      border: none;
+      cursor: pointer;
+      font-weight: 900;
+      padding: 10px;
+      width: 15%;
+    }
+    #mensagens {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #mensagens li {
+      padding: 5px 10px;
+    }
+    #mensagens li:nth-child(odd) {
+      background: rgb(196, 219, 241);
+    }
+    #user-wrapper {
+      background-color: rgba(0, 0, 0, 0.336);
+      display: flex;
+      font-weight: 700;
+      margin-bottom: 30px;
+      justify-content: space-around;
+      padding: 10px;
+    }
+    #users {
+      font-size: 18px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+</head>
+
+<body>
+  <div id="user-wrapper">
+    <span>
+      Seu nick:
+      <ul id="users">
+      </ul>
+    </span>
+    <span>
+      <input data-testid="nickname-box" id="nickname-box" autocomplete="off" />
+      <button data-testid="nickname-button" id="nickname-button">Trocar apelido</button>
+    </span>
+  </div>
+  <ul id="mensagens">
+    <% messages.forEach((message)=> { %>
+      <li id="testando" data-testid="message">
+        <%= message.timestamp %> - <%= message.nickname %>: <%= message.message %>
+      </li>
+      <% }) %>
+  </ul>
+  <form action="">
+    <input data-testid="message-box" id="message-box" autocomplete="off" />
+    <button data-testid="send-button">Send</button>
+  </form>
+  <script>
+    const socket = io();
+    const form = document.querySelector('form')
+    const inputMessage = document.querySelector('#message-box')
+    const generateNick = (tamanho) => {
+      var letras = 'abcdefghiklmnopqrstuvwxyz';
+      var aleatorio = '';
+      for (var i = 0; i < tamanho; i++) {
+        var rnum = Math.floor(Math.random() * letras.length);
+        aleatorio += letras.substring(rnum, rnum + 1);
+      }
+      return aleatorio;
+    }
+    const listUser = (nicks) => {
+      const usersUl = document.querySelector('#users');
+      usersUl.innerText = "";
+      nicks.forEach(nick => {
+        const usersLi = document.createElement('li');
+        usersLi.setAttribute('data-testid', 'online-user');
+        usersLi.innerText = nick;
+        usersUl.appendChild(usersLi);
+      });
+    }
+    let nickname = generateNick(16);
+    socket.emit('user', nickname);
+    socket.on('user', (nicks) => listUser(nicks));
+    const nickButton = document.querySelector('#nickname-button');
+    const nickBox = document.querySelector('#nickname-box');
+    nickButton.addEventListener('click', (e) => {
+      socket.emit('changeUser', nickBox.value);
+      nickname = nickBox.value;
+      nickBox.value = '';
+    })
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = document.querySelector('#usuario');
+      socket.emit('message', { chatMessage: inputMessage.value, nickname });
+      inputMessage.value = ''
+      return false;
+    })
+    const createMessage = (message) => {
+      const messagesUl = document.querySelector('#mensagens');
+      const li = document.createElement('li');
+      li.innerText = message;
+      li.setAttribute('data-testid', 'message');
+      messagesUl.appendChild(li);
+    }
+    socket.on('message', (mensagem) => createMessage(mensagem));
+  </script>
+</body>
+
+</html>
